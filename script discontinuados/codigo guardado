@@ -1,0 +1,53 @@
+SELECT MP.idmediapension, H.Titular 'Titular', MP.qtdedepax 'Q', A.Nombre 'Agencia', P.Nombre 'Posada', P.idposadas 'idposadas', MP.DataIN 'DataIN', MP.DataOUT 'DataOUT', MP.numeroexterno, DATEDIFF(MP.DataOUT, MP.DataIN) 'N', (MP.qtdedepax*DATEDIFF(MP.DataOUT, MP.DataIN)) 'M', S.Nombre 'Servicio', S.idservicios 'idservicios' 
+FROM `mediapension` MP 
+LEFT JOIN huespedes H ON MP.idhuespedes = H.idhuespedes 
+LEFT JOIN agencias A ON MP.idagencias = A.idagencias 
+LEFT JOIN posadas P ON MP.idposadas = P.idposadas 
+LEFT JOIN servicios S ON MP.idservicios = S.idservicios 
+WHERE 1 
+AND MP.DataIN >= '2013-06-01' 
+AND MP.DataIN <= '2013-06-18' 
+AND MP.idoperadoresturisticos = 3
+AND MP.idresponsablesDePago = 1
+ 
+	<br/>
+	<div class="row-fluid">
+		<div class="container-fluid">
+			<h4>Posadas</h4>
+			<div class="widget-box">
+				<div class="widget-content nopadding">
+					<form id="formBuscar" name="formBuscar" method="get">
+						<div class="control-group span3">
+							Posada
+							<?php
+								$sqlQuery = " SELECT idposadas, nombre FROM posadas ";
+								$resultado = resultFromQuery($sqlQuery);
+								echo comboFromArray('idposadas', $resultado, $_SESSION["idposadas"], '', '');
+							?>
+						</div>
+						<div class="control-group span1">
+							Mes
+							<select id="mes" name="mes">
+								<?php for ($i=1; $i<=12; $i++){?>
+								<option value="<?php echo $i;?>" <?php if($i==$_SESSION["visualizarMes"]){echo 'selected';}?>><?php echo $i;?></option>
+								<?php }?>
+							</select>
+						</div>
+						<div class="control-group span2">
+							Ano
+							<select id="ano" name="ano">
+								<?php for ($i=2013; $i<=2016; $i++){?>
+								<option value="<?php echo $i;?>" <?php if($i==$_SESSION["visualizarAno"]){echo 'selected';}?>><?php echo $i;?></option>
+								<?php }?>
+							</select>
+						</div>
+						<div class="control-group span2"><br>
+							<button class="btn btn-success" type="submit">Ver</button>
+						</div>
+					</form>				
+				</div>
+			</div>
+		</div>
+	</div>
+	<br/>
+	<div class="row-fluid">
