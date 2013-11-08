@@ -24,7 +24,7 @@
 					$sqlQuery = " SELECT idoperadoresturisticos, nombre, telefono  ";
 					$sqlQuery .= " FROM `operadoresturisticos`  ";
 					$sqlQuery .= " WHERE 1 ";
-					echo tableFromResult(resultFromQuery($sqlQuery), 'Operadoresturisticos', false, true, 'posts.php', true);
+					echo tableFromResult(resultFromQuery($sqlQuery), 'Operadoresturisticos', true, true, 'posts.php', true);
 				?>		  
 			</div>
 			</form>
