@@ -1,5 +1,21 @@
 DaVinci MAP
 ======================================
 
+Changes v0.2 16/11/2013
++Se ha añadido la posibilidad de cambiar la contraseña de los usuarios.
++Las contraseñas ahora se almacenan en formato MD5 para mejorar la seguridad.
++Se han implementado métodos para evitar las inyecciones SQL en los logins.
++Se ha modificado el archivo start.php para que redireccione a la pantalla de login en caso de encontrarse en modo terminal. 
++Se ha implementado un archivo de configuración en el cual es posible establecer los modos y configuraciones del server y/o terminales.
++Se han corregido fallos en el muestreo y manejo de admisiones.
++Se ha añadido la posibilidad de eliminar operadores turisticos, agencias y posadas (permisos administrativos).
++Se ha añadido la sección de estadísticas en el grupo mediapension.
++Añadida posibilidad de eliminar vouchers (permisos administrativos)
++Se han añadido campos a mostrar en mediapension->vouchers.
++Añadidos detalles sobre vouchers en mediapension->ver lista->ver detalles
+
+
+
+
 01/11/2013 - Añadido sistema de control de versiones git
 01/11/2013 - Inicio de traspaso de proyecto a Fabián Gonzalo Artur de la Villarmois
