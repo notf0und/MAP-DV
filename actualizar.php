@@ -8,8 +8,11 @@ echo "Inicio actualizacion...<br>";
 
 function actualizarLocales($idlocales){
 	
-//	$actualizar = actualizarEnServer($idlocales);
-	//$actualizarManual = actualizacionDeDatosManual($idlocales);
+	if ($idlocales == 1 or $idlocales == 2)
+	{
+		$actualizar = actualizarEnServer($idlocales);
+		$actualizarManual = actualizacionDeDatosManual($idlocales);
+	}
 	
 	// $crear = crearTablesDeLocalesConInfo($idlocales);
 	/*
@@ -69,14 +72,14 @@ function actualizarEnServer($idlocales){
 		$sql = " select * from ".$db_database_local.".mediapension MP "; // MP sin actualizar
 		$sql .= " inner join ".$db_database_local.".huespedes H on MP.idhuespedes = H.idhuespedes ";
 		$sql .= " where MP.actualizado = 0; ";
-	echo $sql.'<br>';	
+		echo $sql.'<br>';	
 		
 
 		$resultadoMP = resultFromQuery($sql);	
 
 		while ($rowMP = mysql_fetch_object($resultadoMP)) {
 			
-			echo 'entro !!!';
+			echo 'entro !!!<br>';
 
 			$idmediapension = $rowMP->idmediapension;
 			$idmediapension_local = $rowMP->idmediapension;
@@ -176,7 +179,7 @@ function actualizarEnServer($idlocales){
 						$idtickets = mysql_insert_id();
 					}
 					
-					$sql = " update ".$db_database_local.".mediapension_admisiones set actualizado = 1 where idmediapension = 0".$idmediapension_local;
+					$sql = " update ".$db_database_local.".mediapension_admisiones set actualizado = 1 where idmediapension = ".$idmediapension_local;
 					$resultado = resultFromQuery($sql);									
 
 
