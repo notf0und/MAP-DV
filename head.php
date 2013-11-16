@@ -47,13 +47,11 @@ if($_SESSION["NombreCompleto"]=="") {
 <div id="user-nav" class="navbar navbar-inverse">
   <ul class="nav">
     <li  class="dropdown" id="profile-messages" ><a title="" href="#" data-toggle="dropdown" data-target="#profile-messages" class="dropdown-toggle"><i class="icon icon-user"></i>  <span class="text">Oi <?php echo $_SESSION["NombreCompleto"]; ?></span><b class="caret"></b></a>
-		<!--
       <ul class="dropdown-menu">
-        <li><a href="#"><i class="icon-key"></i> Trocar senha</a></li>
+        <li><a href="user.changepassword.php"><i class="icon-key"></i>Alterar senha</a></li>
         <li class="divider"></li>
         <li><a href="login.php"><i class="icon-share-alt"></i> Sair</a></li>
       </ul>
-        -->
     </li>
     <li class=""><a title="" href="logOut.php"><i class="icon icon-share-alt"></i> <span class="text">Logout</span></a></li>
   </ul>

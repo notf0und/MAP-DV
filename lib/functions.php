@@ -413,13 +413,61 @@ function insertoBloqueDeHoteleria($idresponsablesDePago, $id, $dataIN, $dataOUT)
 
 }
 
-function voucherCancelar($ID){
-	$_SESSION['voucher'] = $ID;
-
-	$sql = " UPDATE mediapension SET habilitado = 0 WHERE idmediapension = ".$_SESSION['voucher'];
+//---------------------------------------------------------------
+//Cancelar Posadas
+function posadasCancelar($ID){
+	$_SESSION['idposadas'] = $ID;
+		
+	//Delete posadas row
+	$sql = " DELETE FROM posadas WHERE idposadas = ".$_SESSION['idposadas'];
 	$resultadoStringSQL = resultFromQuery($sql);		
+	
+	//Update posadas on table habitaciones to 0 -> Posada inexistente
+	$sql = " UPDATE habitaciones SET idposadas = 0 WHERE idposadas= ".$_SESSION['idposadas'];
+	$resultadoStringSQL = resultFromQuery($sql);	
+	
+	//Update posadas on table hoteleria to 0 -> Posada inexistente
+	$sql = " UPDATE hoteleria SET idposadas = 0 WHERE idposadas = ".$_SESSION['idposadas'];
+	$resultadoStringSQL = resultFromQuery($sql);		
+
+	//Update posadas on table mediapension to 0 -> Posada inexistente
+	$sql = " UPDATE mediapension SET idposadas = 0 WHERE idposadas = ".$_SESSION['idposadas'];
+	$resultadoStringSQL = resultFromQuery($sql);
+	
+	//Update posadas on table posadas_listasdeprecios to 0 -> Posada inexistente
+	$sql = " UPDATE posadas_listasdeprecios SET idposadas = 0 WHERE idposadas = ".$_SESSION['idposadas'];
+	$resultadoStringSQL = resultFromQuery($sql);
+	
+	//Update posadas on table reservas to 0 -> Posada inexistente
+	$sql = " UPDATE reservas SET idposadas = 0 WHERE idposadas = ".$_SESSION['idposadas'];
+	$resultadoStringSQL = resultFromQuery($sql);
+	
+	//Update posadas on table reservas_admisiones to 0 -> Posada inexistente
+	$sql = " UPDATE reservas_admisiones SET idposadas = 0 WHERE idposadas = ".$_SESSION['idposadas'];
+	$resultadoStringSQL = resultFromQuery($sql);
+	
 }
 
+//Cancelar operadores turisticos
+function operadoresturisticosCancelar($ID){
+	$_SESSION['idoperadoresturisticos'] = $ID;
+		
+	//Delete operadoresturisticos row
+	$sql = " DELETE FROM operadoresturisticos WHERE idoperadoresturisticos = ".$_SESSION['idoperadoresturisticos'];
+	$resultadoStringSQL = resultFromQuery($sql);		
+	
+	//Update idoperadoresturisticos on table hoteleria to 0 -> Operador inexistente
+	$sql = " UPDATE hoteleria SET idoperadoresturisticos = 0 WHERE idoperadoresturisticos = ".$_SESSION['idoperadoresturisticos'];
+	$resultadoStringSQL = resultFromQuery($sql);		
+
+	//Update idoperadoresturisticos on table mediapension to 0 -> Operador inexistente
+	$sql = " UPDATE mediapension SET idoperadoresturisticos = 0 WHERE idoperadoresturisticos = ".$_SESSION['idoperadoresturisticos'];
+	$resultadoStringSQL = resultFromQuery($sql);
+	
+	//Update idoperadoresturisticos on table reservas to 0 -> Operador inexistente
+	$sql = " UPDATE reservas SET idoperadoresturisticos = 0 WHERE idoperadoresturisticos = ".$_SESSION['idoperadoresturisticos'];
+	$resultadoStringSQL = resultFromQuery($sql);
+}
 
 
 // ----------------------------------------------------------------------------------------------------
@@ -756,7 +804,7 @@ function valordiaria($data, $idresponsablesDePago, $id, $idservicios, $idposadas
 	$sql .= " AND LDP.idresponsablesDePago = ".$idresponsablesDePago;
 	$sql .= " AND LDP.iditem = ".$id;
 	$sql .= " AND SLDP.idservicios = ".$idservicios;
-	$sql .= " AND  '".$data."'  BETWEEN LDP.VigenciaIN AND LDP.VigenciaOUT ";
+	$sql .= " AND  '".$data."' BETWEEN LDP.VigenciaIN AND LDP.VigenciaOUT ";
 	/*
 	echo "<hr><font color='white'>";
 	echo $sql;
@@ -791,20 +839,32 @@ function valordiaria($data, $idresponsablesDePago, $id, $idservicios, $idposadas
 }
 
 function calcularDias($idmediapension, $qtycomidas, $dataIN, $dataOUT, $admisiones){
-	$daysToShow = $qtycomidas;
+	
+	
+	$totalComidas = $qtycomidas;
 	$qtyadmisiones = $admisiones;
 	$table = '<TABLE name="Dias" >';
 	$table .= '<thead>';
 	$table = $table . '<TR>';
-
-	for ($i = 1; $i <= $daysToShow; $i++)
+	
+	$bloqueActual = floor($qtyadmisiones / 7);
+	
+	for ($i = 1; $i <= 7; $i++)
 	{
-		if ($i <= $qtyadmisiones){
-			$table = $table . '<TH>X</TH>';
-		}else{
-			$table = $table . '<TH>'. $i .'</TH>';
+		
+		if (((($bloqueActual) * 7) + $i) <= $totalComidas){
+			
+			if ((($bloqueActual) * 7) + $i <= $qtyadmisiones)
+			{
+				$table = $table . '<TH>X</TH>';
+			}
+			else
+			{
+			$table = $table . '<TH>'. ((($bloqueActual) * 7) + $i) .'</TH>';
+			}
 		}
 	}
+	
 	$table = $table . '<TH>';
 	$comidasrestantes = $qtycomidas-$admisiones;
 	$table .= ' < '.$comidasrestantes.' servicios restantes | <a href="#myModal" data-toggle="modal" class="" onclick="document.getElementById(\'modal-body\').innerHTML=\'<object id=foo name=foo type=text/html width=530 height=350 data=mediapension.admisiones.php?idmediapension='.$idmediapension.'></object>\'">ver detalle</a>'.' ';
@@ -818,6 +878,14 @@ function calcularDias($idmediapension, $qtycomidas, $dataIN, $dataOUT, $admision
 	return $table;
 }
 
+function voucherCancelar($ID){
+	$_SESSION['voucher'] = $ID;
+
+	$sql = " UPDATE mediapension SET habilitado = 0 WHERE idmediapension = ".$_SESSION['voucher'];
+	$resultadoStringSQL = resultFromQuery($sql);
+	
+	bitacoras($_SESSION["idusuarios"], 'Apagado o Voucher MP: ID '.$_SESSION['voucher']);	
+}
 
 // Funciones Genericas
 
@@ -850,7 +918,7 @@ function mysql_tableFromResultGDA($result, $name = '', $deletableRows = false, $
 					if (!(($colname == 'admisiones') || ($colname == 'idmediapension') || ($colname == 'idhabitaciones'))){
 						switch ($colname) {
 							case 'Dias':
-								$table = $table . '<TD class="span9">' . calcularDias($row->idmediapension, $row->Dias, $row->dataIN, $row->dataOUT, $row->admisiones) . '</TD>';
+								$table = $table . '<TD class="span9">' . calcularDias($row->idmediapension, $row->Dias, $row->dataIN, $row->dataOUT, $row->admisiones). '</TD>';
 								break;
 							case 'calendario':
 								$table = $table . '<TD class="span9"> ' . reservasVector($row->calendario.','.$row->idhabitaciones) . ' </TD>';
@@ -864,7 +932,7 @@ function mysql_tableFromResultGDA($result, $name = '', $deletableRows = false, $
 			if ($deletableRows) {
 				$colname = dbFieldName($result, 0);
 				$id = $row->$colname;
-				$table .= '<TD class="controls"><input type="submit" name="deleteRow['.$colname.']['.$id.']" onclick="javascript:deleteRowEvent('."'".$name."','".$colname."','".$id."'".');" value="Eliminars"></TD>';
+				$table .= '<TD class="controls"><input type="submit" name="deleteRow['.$colname.']['.$id.']" onclick="javascript:deleteRowEvent('."'".$name."','".$colname."','".$id."'".');" value="Apagar"></TD>';
 			}
 			if ($modifiableRows) {
 				$colname = dbFieldName($result, 0);

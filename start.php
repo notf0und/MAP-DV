@@ -18,10 +18,29 @@ $_SESSION["login"] = 0;
 	</head>
     <body>
 		<h1>Local</h1>
-<a href="login.php?idlocales=0"> <i class="icon-plus"></i> Escritorio </a> <br><br>
-<a href="login.php?idlocales=1"> <i class="icon-plus"></i> Centro </a> <br><br>
-<a href="login.php?idlocales=2"> <i class="icon-plus"></i> Joao Fernandes </a> 
-        
+		<?php
+		
+		//Muestra opciones segun configuración de la terminal
+		$configfile = parse_ini_file("./local-config.ini", true)[config];
+		?>
+		
+		<?php if (!$configfile[terminal_mode]): ?>
+		<a href="login.php?idlocales=0"> <i class="icon-plus"></i> Escritorio </a><br><br>
+		<a href="login.php?idlocales=1"> <i class="icon-plus"></i> Centro </a> <br><br>
+		<a href="login.php?idlocales=2"> <i class="icon-plus"></i> Joao Fernandes </a> 
+
+		<?php elseif ($configfile[terminal_mode]): ?>
+			
+			<?php
+			if($configfile[terminal_name] == "Centro") {
+				echo "<meta http-equiv=\"refresh\" content=\"0;URL=login.php?idlocales=1\">";
+			} 
+			elseif ($configfile[terminal_name] == "João Fernandez"){
+				echo "<meta http-equiv=\"refresh\" content=\"0;URL=login.php?idlocales=2\">";
+			}				
+			?>
+		<?php endif ?>
+		        
         <script src="js/jquery.min.js"></script>  
         <script src="js/matrix.login.js"></script> 
     </body>

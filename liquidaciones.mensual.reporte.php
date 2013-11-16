@@ -13,7 +13,7 @@ $filename_name =  str_replace(" ", "_", $_GET['filename']);
  
 //DEFINE SQL QUERY:
 //edit this to suit your needs
-$sql = "Select Titular, Q, Agencia, Posada, DataIN, DataOUT, numeroexterno, N, M, Servicio, USD, Tarifa from $DB_TBLName";
+$sql = "Select numeroexterno '# Voucher', Titular, Q, Agencia, Posada, DataIN, DataOUT, N, M, Servicio, USD, Tarifa from $DB_TBLName";
  
 //Optional: print out title to top of Excel or Word file with Timestamp
 //for when file was generated:

@@ -21,11 +21,12 @@
         <li class="bg_ly span2"> <a href="mediapension.lista.php"> <i class="icon-list-ul"></i> Veja a lista</a> </li>
 			<?php if (($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 3)) {?>
         <li class="bg_lb span2"> <a href="mediapension.vouchers.php"> <i class="icon-list-ul"></i> Vouchers</a> </li>
+        <li class="bg_lg span2"> <a href="mediapension.statisticas.php"> <i class="icon-signal"></i> Statísticas</a> </li>
 			<?php } ?>
   		<?php } ?>
       </ul>
     </div>
-<!--End-Action boxes-->    
+<!--End-Action boxes--> 
 
 
     <hr/>

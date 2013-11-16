@@ -27,21 +27,66 @@ $script_name = $_SERVER['SCRIPT_NAME'];
 	<div class="row-fluid">
 		<div class="span6">
 			<div class="widget-box">
-			<?php
+				<?php
 				$sqlQuery = " SELECT ";
+				$sqlQuery .= " MPA.idmediapension, ";				
 				$sqlQuery .= " MPA.data 'Data de admision', ";
-				$sqlQuery .= " L.nombre 'Resto', ";
-				$sqlQuery .= " MPA.qtdedepax 'Pax do Serviço' "; 
+				$sqlQuery .= " MPA.qtdedepax 'Quantidade de pessoas', ";
+				$sqlQuery .= " L.nombre 'Resto' ";
 				$sqlQuery .= " FROM mediapension_admisiones MPA ";
 				$sqlQuery .= " INNER JOIN mediapension MP ON MPA.idmediapension = MP.idmediapension ";
 				$sqlQuery .= " INNER JOIN locales L ON MP.idlocales = L.idlocales ";
 				$sqlQuery .= " WHERE MP.idmediapension = ".$_GET["idmediapension"];
 				echo tableFromResult(resultFromQuery($sqlQuery), 'mediapension', false, false, 'posts.php', true);
-			?>			
+				?>
+				
+						
 				<b>Resumen:</b><br>
-				Total de servicios: xx<br>
-				DataIN :<br>
-				DataOUT :<br>
+				
+				Total de servicios: 
+				<?php
+				$sqlQuery = " SELECT ";
+				$sqlQuery .= " qtdedecomidas";				
+				$sqlQuery .= " FROM mediapension ";
+				$sqlQuery .= " WHERE idmediapension = ".$_GET["idmediapension"];
+				$sqlResult = resultFromQuery($sqlQuery);
+              
+				while ($row = mysql_fetch_row($sqlResult)){
+					echo "$row[0]"; 
+				} 
+				?>				
+				<br>
+				
+				
+				
+				DataIN :
+				<?php
+				$sqlQuery = " SELECT ";
+				$sqlQuery .= " dataIN";				
+				$sqlQuery .= " FROM mediapension ";
+				$sqlQuery .= " WHERE idmediapension = ".$_GET["idmediapension"];
+				$sqlResult = resultFromQuery($sqlQuery);
+              
+				while ($row = mysql_fetch_row($sqlResult)){
+					echo "$row[0]"; 
+				} 
+				?>
+				
+				
+				<br>
+				DataOUT :
+				<?php
+				$sqlQuery = " SELECT ";
+				$sqlQuery .= " dataOUT";				
+				$sqlQuery .= " FROM mediapension ";
+				$sqlQuery .= " WHERE idmediapension = ".$_GET["idmediapension"];
+				$sqlResult = resultFromQuery($sqlQuery);
+              
+				while ($row = mysql_fetch_row($sqlResult)){
+					echo "$row[0]"; 
+				} 
+				?>
+				<br>
 
 			</div>
 			

@@ -38,7 +38,7 @@ $idmediapension = -1;
 									<?php
 										$sqlQuery = " SELECT idpaises, nombre FROM paises ";
 										$resultado = resultFromQuery($sqlQuery);
-										echo comboFromArray('idpaises', $resultado, $idpaises, '', '', 'true');
+										echo comboFromArray('idpaises', $resultado, $idpaises, '', '');
 									?>								
 								</div>
 							</div>
@@ -62,7 +62,7 @@ $idmediapension = -1;
 									<?php
 										$sqlQuery = " SELECT idservicios, nombre FROM  servicios WHERE idservicios < 6 ";
 										$resultado = resultFromQuery($sqlQuery);
-										echo comboFromArray('idservicios', $resultado, $idservicios, '', '', 'true');
+										echo comboFromArray('idservicios', $resultado, $idservicios, '', '', true);
 									?>								
 								</div>
 							</div>
@@ -82,7 +82,7 @@ $idmediapension = -1;
 									<?php
 										$sqlQuery = " SELECT idposadas, nombre FROM posadas";
 										$resultado = resultFromQuery($sqlQuery);
-										echo comboFromArray('idposadas', $resultado, $idposadas, '', '');
+										echo comboFromArray('idposadas', $resultado, $idposadas, '', '', false);
 									?>								
 								</div>
 							</div>
@@ -138,7 +138,7 @@ $idmediapension = -1;
 								</div>
 							</div>
 							<div class="control-group">
-								<label class="control-label">Qtde de Serviços</label>
+								<label class="control-label">Total de Serviços</label>
 								<div class="controls">
 									<input id="qtdedecomidas" name="qtdedecomidas" type="text" id="comidas" value="" class="span2"  required="true" />
 								</div>

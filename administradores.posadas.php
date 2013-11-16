@@ -24,7 +24,7 @@
 					$sqlQuery = " SELECT *  ";
 					$sqlQuery .= " FROM `posadas`  ";
 					$sqlQuery .= " WHERE 1 ";
-					echo tableFromResult(resultFromQuery($sqlQuery), 'Posadas', false, true, 'posts.php', true);
+					echo tableFromResult(resultFromQuery($sqlQuery), 'Posadas', true, true, 'posts.php', true);
 				?>		  
 			</div>
 			</form>

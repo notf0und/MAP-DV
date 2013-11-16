@@ -1,6 +1,6 @@
 <?php 
 include "lib/sessionLib.php";
-$idlocales = 2;
+$idlocales = $_SESSION["idlocales"];
 
 echo "Inicio actualizacion...<br>";
 
@@ -152,11 +152,11 @@ function actualizarEnServer($idlocales){
 					$datadiaria = date("Y-m-d");
 					//$precio = valordiaria($datadiaria, $idposadas, $idservicios);
 					$precio = 0;
-					$sql = "insert ".$db_database_server.".mediapension_admisiones (data, idmediapension, qtdedepax, tarifa) values (";
+					$sql = "insert ".$db_database_server.".mediapension_admisiones (data, idmediapension, qtdedepax, tarifa, actualizado) values (";
 					$sql .= "'".$row_admision->data."',";
 					$sql .= "".$idmediapension.",";
 					$sql .= "".$row_admision->qtdedepax.",";
-					$sql .= "".$precio.") ";
+					$sql .= "".$precio.", 1) ";
 					$resultadoStringSQL = mysql_resultFromQuery($sql, $dbConnection_server);		
 					$idadmision = mysql_insert_id();
 
@@ -176,7 +176,7 @@ function actualizarEnServer($idlocales){
 						$idtickets = mysql_insert_id();
 					}
 					
-					$sql = " update ".$db_database_local.".mediapension_admisiones set actualizado = 1 where idmediapension = ".$idmediapension_local;
+					$sql = " update ".$db_database_local.".mediapension_admisiones set actualizado = 1 where idmediapension = 0".$idmediapension_local;
 					$resultado = resultFromQuery($sql);									
 
 
@@ -220,16 +220,23 @@ function actualizarEnServer($idlocales){
 
 function actualizacionDeDatosManual($idlocales){
 	
-	$dbOrigen = 'dasamericas';
-	$dbOrigenHost = 'davincimp.no-ip.info';
-	$dbOrigenUser = 'root';
-	$dbOrigenPass = 'password';
-	$remotePath = '/tmp/dasamericasBackup.sql';
-
-	$dbDestino = 'DA_JF';
-	$dbDestinoUser = 'root';
-	$dbDestinoPass = 'password';
-	$localPath = '/tmp/dasamericasBackup.sql';
+	$db = parse_ini_file("./local-config.ini", true)[local_database];
+	
+	//----------------------------------------------
+	$dbDestino = $db[name];
+	$dbDestinoUser = $db[user];
+	$dbDestinoPass = $db[password];
+	$localPath = $db[localpath];
+	
+	
+	$db = parse_ini_file("./local-config.ini", true)[remote_database];
+	
+	$dbOrigenHost = $db[dbhost];
+	$dbOrigen = $db[name];
+	$dbOrigenUser =  $db[user];
+	$dbOrigenPass = $db[password];
+	$remotePath = $db[localpath];
+	//----------------------------------------------
 	
 	if (!function_exists("ssh2_connect")) die("function ssh2_connect doesn't exist");
 	// log in at server1.example.com on port 22

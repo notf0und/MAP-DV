@@ -36,11 +36,17 @@ if (isset( $_POST['accion'] )) {
 		$username = $_POST['username'];
 		$password = $_POST['password'];
 		$idlocales = $_POST['idlocales'];
+		
+		//Protect for MySQL injection
+		$username = stripslashes($username);
+		$password = stripslashes($password);
+		$username = mysql_real_escape_string($username);
+		$password = mysql_real_escape_string($password);
 
 		$sql = "SELECT * FROM usuarios  ";
 		$sql .= " WHERE 1 ";
 		$sql .= " AND username = '".$username."'";
-		$sql .= " AND password = '".$password."'";
+		$sql .= " AND password = '".md5($password)."'";
 
 		$resultadoStringSQL = resultFromQuery($sql);		
 		
@@ -52,19 +58,11 @@ if (isset( $_POST['accion'] )) {
 			$_SESSION["login"] = 1;	
 			$_SESSION["idlocales"] = $idlocales;	
 			/* BEGIN Chanchuyo | A continuacion se hara cun chanchuyo rapido para identificar a los locales ... ARREGLAR CON PRIORIDAD*/
-			if($_SESSION["idlocales"] == 0){
-				$_SESSION["idlocales_PRN_USER"] = 'sistemas';
-				$_SESSION["idlocales_PRN_PASS"] = 'Maxell';
-				$_SESSION["idlocales_PRN_TITULO"] = 'Sistemas';
-			}elseif($_SESSION["idlocales"] == 1){
-				$_SESSION["idlocales_PRN_USER"] = 'centro';
-				$_SESSION["idlocales_PRN_PASS"] = 'password';
-				$_SESSION["idlocales_PRN_TITULO"] = 'Ristorante Da Vinci Centro';
-			}elseif($_SESSION["idlocales"] == 2){
-				$_SESSION["idlocales_PRN_USER"] = 'jf';
-				$_SESSION["idlocales_PRN_PASS"] = 'password';
-				$_SESSION["idlocales_PRN_TITULO"] = 'Ristorante Da Vinci Joao Fernan';
-			}
+			$Sesion = parse_ini_file("./local-config.ini", true)[config];
+			
+			$_SESSION["idlocales_PRN_USER"] = $Sesion[terminal_user];
+			$_SESSION["idlocales_PRN_PASS"] = $Sesion[terminal_password];
+			$_SESSION["idlocales_PRN_TITULO"] = $Sesion[terminal_titulo];
 
 			bitacoras($_SESSION["idusuarios"], 'Login usuario: '.$_SESSION["username"]);
 			echo '<script languaje="javascript"> self.location="index.php"</script>';
@@ -74,6 +72,47 @@ if (isset( $_POST['accion'] )) {
 		}
 	}
 
+	if ($_POST['accion'] == 'userChangePassword') {
+		$username = $_SESSION["username"];
+		$oldpassword = $_POST['oldpassword'];
+		$password = $_POST['password'];
+		
+		//Protect for MySQL injection
+		$username = stripslashes($username);
+		$oldpassword = stripslashes($oldpassword);
+		$password = stripslashes($password);
+		$username = mysql_real_escape_string($username);
+		$oldpassword = mysql_real_escape_string($oldpassword);
+		$password = mysql_real_escape_string($password);
+		
+		$sql = "SELECT * FROM usuarios  ";
+		$sql .= " WHERE 1 ";
+		$sql .= " AND username = '".$username."'";
+		$sql .= " AND password = '".md5($oldpassword)."';";
+
+		$resultadoStringSQL = resultFromQuery($sql);		
+		
+		if ($row = siguienteResult($resultadoStringSQL))
+		{
+			$sql = "UPDATE usuarios SET";
+			$sql .= " password = '".md5($password)."'";
+			$sql .= " WHERE username = '".$username."'";
+			$sql .= " AND password = '".md5($oldpassword)."';";
+		
+			$update = resultFromQuery($sql);
+			echo 'Senha modificada';
+			bitacoras($_SESSION["idusuarios"], $_SESSION["username"].' altero sua senha por: '.$password);
+			echo '<script languaje="javascript"> self.location="index.php"</script>';
+		}
+		else 
+		{
+			echo 'Senha actual errada';
+			echo '<script languaje="javascript"> self.location="user.changepassword.php"</script>';
+		}
+		
+		
+		
+	}
 
 /* Administradores */
 
@@ -134,6 +173,10 @@ if (isset( $_POST['accion'] )) {
 		echo '<script languaje="javascript"> self.location="administradores.posadas.edit.php"</script>';
 	}
 
+	if ($_POST['accion'] == 'PosadasDelete') {
+		posadasCancelar($_POST['idposadas']);
+		echo '<script languaje="javascript"> self.location="administradores.posadas.php"</script>';
+	}
 
 	if ($_POST['accion'] == 'admitirAgencias') {
 
@@ -223,7 +266,15 @@ if (isset( $_POST['accion'] )) {
 		$_SESSION['idoperadoresturisticos'] = $_POST['idoperadoresturisticos'];
 		echo '<script languaje="javascript"> self.location="administradores.operadoresturisticos.edit.php"</script>';
 	}
+	
+	if ($_POST['accion'] == 'OperadoresturisticosDelete') {
+		$operador = operadoresturisticosCancelar($_POST['idoperadoresturisticos']);
+		
+		bitacoras($_SESSION["idusuarios"], 'Eliminado Operador Turistico ID:'.$_POST['idoperadoresturisticos'].' por el usuario '.$_POST['username']);
+		
+		echo '<script languaje="javascript"> self.location="administradores.operadoresturisticos.php"</script>';
 
+	}
 
 	if ($_POST['accion'] == 'admitirListasdeprecios') {
 
@@ -496,7 +547,11 @@ if (isset( $_POST['accion'] )) {
 
 		if ($rowLine = siguienteResult($resultadoResponsables)) {
 			$id = ${'id'.$rowLine->tabla};
-		}				
+		}
+		else
+		{
+			$id = 0;
+		}
 
 		$datadiaria = date("Y-m-d");
 		//$precio = valordiaria($datadiaria, $idposadas, $idservicios);
@@ -512,23 +567,30 @@ if (isset( $_POST['accion'] )) {
 	if ($_POST['accion'] == 'admitirMediapension') {
 
 		$idmediapension = $_POST['idmediapension'];
-		$numeroexterno = $_POST['numeroexterno'];
-		$nomedopax = $_POST['nomedopax'];
-		$idpaises = $_POST['idpaises'];
-		$idoperadoresturisticos = $_POST['idoperadoresturisticos'];
-		$idposadas = $_POST['idposadas'];
-		$idagencias = $_POST['idagencias'];
-		$idhuespedes = $_POST['idhuespedes'];
-		$idresponsablesDePago = $_POST['idresponsablesDePago'];
-		$qtdedepax = $_POST['qtdedepax'];
-		$qtdedepaxagora = $_POST['qtdedepaxagora'];
-		$dataIN = $_POST['dataIN'];
-		$dataOUT = $_POST['dataOUT'];
-		$qtdedecomidas = $_POST['qtdedecomidas'];
-		$idservicios = $_POST['idservicios'];
-		$mensajeinterno = $_POST['mensajeinterno'];
-		$mensajegarcon = $_POST['mensajegarcon'];
-		$idlocales = $_SESSION["idlocales"];
+		$numeroexterno = $_POST['numeroexterno'];//ok
+		$nomedopax = $_POST['nomedopax'];///WTF
+		$idpaises = $_POST['idpaises'];//ok
+		$idoperadoresturisticos = $_POST['idoperadoresturisticos'];//ok
+		$idposadas = $_POST['idposadas'];//ok
+		$idagencias = $_POST['idagencias'];//ok
+		$idhuespedes = $_POST['idhuespedes'];//ok
+		$idresponsablesDePago = $_POST['idresponsablesDePago'];//ok
+		$qtdedepax = $_POST['qtdedepax'];//ok
+		$qtdedepaxagora = $_POST['qtdedepaxagora'];///WTF
+		$dataIN = $_POST['dataIN'];//ok
+		$dataOUT = $_POST['dataOUT'];//ok
+		$qtdedecomidas = $_POST['qtdedecomidas'];//ok
+		$idservicios = $_POST['idservicios'];//ok
+		$mensajeinterno = $_POST['mensajeinterno'];//ok//1
+		$mensajegarcon = $_POST['mensajegarcon'];//ok//1
+		$idlocales = $_SESSION["idlocales"];//ok
+		
+		//Set default values for comboboxes
+		if ($idoperadoresturisticos === '') $idoperadoresturisticos = '0';
+		if ($idposadas === '') $idposadas = '0';
+		if ($idagencias === '') $idagencias = '0';
+		if ($idresponsablesDePago === '') $idresponsablesDePago = '0';
+		
 		if ($idlocales==0){
 			$actualizado = 1;
 			$hoteleria = $_POST['hoteleria'];
@@ -600,14 +662,21 @@ if (isset( $_POST['accion'] )) {
 			$idmediapension = mysql_insert_id();
 			bitacoras($_SESSION["idusuarios"], 'Insertar MP: ID '.$idmediapension);
 			echo $_SESSION["idlocales"];
+			
+			if ($qtdedepaxagora)
+			{ 
+			bitacoras($_SESSION["idusuarios"], 'Insertar $qtdedepaxagora: '.$qtdedepaxagora);
+			//INSERT MEDIAPENSION ADMICION
+			$datadiaria = date("Y-m-d");
+			//$precio = valordiaria($datadiaria, $idposadas, $idservicios);
+			$precio = 0;
+			$idadmision = admitirServicio($idmediapension, $qtdedepaxagora, $precio);
+			}
+			
 			if ($_SESSION["idlocales"]>0){
-				//INSERT MEDIAPENSION ADMICION
-				$datadiaria = date("Y-m-d");
-				//$precio = valordiaria($datadiaria, $idposadas, $idservicios);
-				$precio = 0;
-				$idadmision = admitirServicio($idmediapension, $qtdedepaxagora, $precio);
 				echo '<script languaje="javascript"> self.location="mediapension.print.php?id='.$idadmision.'"</script>';
 			}else{
+				
 				echo '<script languaje="javascript"> self.location="mediapension.vouchers.php"</script>';
 			}
 		}
@@ -699,9 +768,8 @@ if (isset( $_POST['accion'] )) {
 	}
 
 	if ($_POST['accion'] == 'VouchersMPDelete') {
-		$voucher = voucherCancelar($_POST['id']);
+		voucherCancelar($_POST['id']);
 		echo '<script languaje="javascript"> self.location="mediapension.vouchers.php"</script>';
-
 	}
 
 /* Liquidaciones */

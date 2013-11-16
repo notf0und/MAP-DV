@@ -40,7 +40,7 @@ $script_name = $_SERVER['SCRIPT_NAME'];
 							<select class="input" name="qtdedepaxagora" id="qtdedepaxagora" class="span2"> 
 								<option value="" selected> </option> 
 								<?php 
-								$sqlQuery = "SELECT qtdedepax FROM mediapension_admisiones ";
+								$sqlQuery = "SELECT qtdedepax FROM mediapension";
 								$sqlQuery .= " WHERE idmediapension = ".$_GET["idmediapension"];
 								$result = resultFromQuery($sqlQuery);
 								if ($row = siguienteResult($result)) {

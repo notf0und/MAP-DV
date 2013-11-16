@@ -20,17 +20,18 @@
 			<form id="VouchersMPForm" name="VouchersMPForm" action="posts.php" method="post">
 			<div class="widget-content nopadding">
 				<?php
-					$sqlQuery = " SELECT MP.idmediapension id, H.titular 'Nome PAX', MP.numeroexterno 'Vouchar #', ";
+					$sqlQuery = " SELECT MP.idmediapension id, H.titular 'Nome PAX', MP.numeroexterno '# Voucher', ";
 					//$sqlQuery .= " MP.idmediapension 'MEDIAPENSION', MP.actualizado 'act', ";
 					$sqlQuery .= " MP.qtdedepax 'Qtde de PAX', MP.dataIN, MP.dataOUT, ";
 					$sqlQuery .= " P.nombre 'Posada', O.nombre 'Operador', A.nombre 'Agencia'  ";
-					$sqlQuery .= " , RDP.nombre 'Responsable'  ";
+					$sqlQuery .= " , RDP.nombre 'Responsable', SS.nombre 'Serviço'  ";
 					$sqlQuery .= " FROM `mediapension` MP ";
 					$sqlQuery .= " LEFT JOIN huespedes H ON MP.idhuespedes = H.idhuespedes ";
 					$sqlQuery .= " LEFT JOIN posadas P ON MP.idposadas = P.idposadas ";
 					$sqlQuery .= " LEFT JOIN agencias A ON MP.idagencias = A.idagencias ";
 					$sqlQuery .= " LEFT JOIN operadoresturisticos O ON MP.idoperadoresturisticos = O.idoperadoresturisticos ";
 					$sqlQuery .= " LEFT JOIN responsablesDePago RDP ON MP.idresponsablesDePago = RDP.idresponsablesDePago ";
+					$sqlQuery .= " LEFT JOIN servicios SS ON MP.idservicios = SS.idservicios ";
 					$sqlQuery .= " WHERE 1 ";
 					$sqlQuery .= " AND MP.idliquidaciones = 0 ";
 					$sqlQuery .= " AND MP.habilitado = 1 ";

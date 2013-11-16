@@ -7,10 +7,18 @@
     }
 
     if (!$dbConnection) {
+		
       // Produccion
     	// $dbConnection = &mysql_dbConnect('davincimp.no-ip.info', 'dasamericas', 'root', '');
       // Desarrollo
-    	$dbConnection = &mysql_dbConnect('localhost', 'dasamericas', 'root', 'password');
+      
+
+		
+		//Muestra opciones segun configuración de la terminal
+		$ldb = parse_ini_file("./local-config.ini", true)[local_database];
+
+
+    	$dbConnection = &mysql_dbConnect($ldb[dbhost], $ldb[dbname], $ldb[user], $ldb[password]);
     }
     
     return $dbConnection;
@@ -166,7 +174,7 @@
   		$table .= '<form name="'.$name.'Form" method="POST">';
   	}
  		$table .= '<thead>';
-		for ($i = 0; $i < dbFieldCount($result); $i++) {
+		for ($i = 1; $i < dbFieldCount($result); $i++) {
 			$colname = dbFieldName($result,$i);
 			$table .= '<TH>' . dbFieldName($result,$i) . '</TH>';
 		}
@@ -180,14 +188,14 @@
  		$table .= '<tbody>';
 		while ($row = siguienteResult($result)) {
 			$table = $table . '<TR>';
-			for ($j = 0; $j < dbFieldCount($result); $j++) {
+			for ($j = 1; $j < dbFieldCount($result); $j++) {
 				$colname = dbFieldName($result, $j);
 				$table = $table . '<TD>' . $row->$colname . '</TD>';        
 				}
 			if ($deletableRows) {
 				$colname = dbFieldName($result, 0);
 				$id = $row->$colname;
-				$table .= '<TD><input type="submit" class="btn" name="deleteRow['.$colname.']['.$id.']" onclick="javascript:deleteRowEvent('."'".$name."','".$colname."','".$id."'".');" value="Eliminars"></TD>';
+				$table .= '<TD><input type="submit" class="btn" name="deleteRow['.$colname.']['.$id.']" onclick="javascript:deleteRowEvent('."'".$name."','".$colname."','".$id."'".');" value="Apagar"></TD>';
 
 			}
 			if ($modifiableRows) {
