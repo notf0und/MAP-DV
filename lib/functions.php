@@ -413,7 +413,28 @@ function insertoBloqueDeHoteleria($idresponsablesDePago, $id, $dataIN, $dataOUT)
 
 }
 
-//---------------------------------------------------------------
+// ----------------------------------------------------------------------------------------------------
+//Cancelar Agencias
+function agenciasCancelar($ID){
+	$_SESSION['idagencias'] = $ID;
+		
+	//Delete agencias row
+	$sql = " DELETE FROM agencias WHERE idagencias = ".$_SESSION['idagencias'];
+	$resultadoStringSQL = resultFromQuery($sql);		
+	
+	//Update agencias on table hoteleria to 0 -> Posada inexistente
+	$sql = " UPDATE hoteleria SET idagencias = 0 WHERE idagencias = ".$_SESSION['idagencias'];
+	$resultadoStringSQL = resultFromQuery($sql);		
+
+	//Update agencias on table mediapension to 0 -> Posada inexistente
+	$sql = " UPDATE mediapension SET idagencias = 0 WHERE idagencias = ".$_SESSION['idagencias'];
+	$resultadoStringSQL = resultFromQuery($sql);
+	
+	//Update agencias on table reservas to 0 -> Posada inexistente
+	$sql = " UPDATE reservas SET idagencias = 0 WHERE idagencias = ".$_SESSION['idagencias'];
+	$resultadoStringSQL = resultFromQuery($sql);
+}
+
 //Cancelar Posadas
 function posadasCancelar($ID){
 	$_SESSION['idposadas'] = $ID;

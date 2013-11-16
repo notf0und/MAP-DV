@@ -222,6 +222,10 @@ if (isset( $_POST['accion'] )) {
 		echo '<script languaje="javascript"> self.location="administradores.agencias.edit.php"</script>';
 	}
 
+	if ($_POST['accion'] == 'AgenciasDelete') {
+		posadasCancelar($_POST['idposadas']);
+		echo '<script languaje="javascript"> self.location="administradores.agencias.php"</script>';
+	}
 
 	if ($_POST['accion'] == 'admitirOperadoresturisticos') {
 
