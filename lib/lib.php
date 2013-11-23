@@ -31,27 +31,35 @@ function usuarioValido($user,$pass) {
 	}
 }
 
-function comboFromArray($nombre, $lista, $selectedId = -1, $onChangeFunction = '', $style = '', $required=false) {
+function comboFromArray($nombre, $lista, $selectedId = -1, $onChangeFunction = '', $style = '', $required=false, $class='', $firstOption='') {
 	// Devuelve el string del TAG para mostrar un combo con los items de la lista.
 	// La lista debe ser un array simple con los textos a mostrar.
 	$re = "";
 	if ($required){$re = "required ";}
 	
-	$combo = '<SELECT '.$re.'ID="'.$nombre.'" NAME="'.$nombre.'" SIZE="1" onchange="'.$onChangeFunction.'" STYLE="'.$style.'">';
-	$combo = $combo . '<OPTION STYLE="'."display:none".'" VALUE=""></OPTION>';
+	if ($firstOption != '')
+	{
+		$combo = '<SELECT '.$re.'ID="'.$nombre.'" NAME="'.$nombre.'" SIZE="1" onchange="'.$onChangeFunction.'" STYLE="'.$style.'" CLASS="'.$class.'">';
+		$combo .='<OPTION STYLE="'."display:none".'" VALUE="0">'.$firstOption.'</OPTION>';
+	}
+	else
+	{
+		$combo = '<SELECT '.$re.'ID="'.$nombre.'" NAME="'.$nombre.'" SIZE="1" onchange="'.$onChangeFunction.'" STYLE="'.$style.'" CLASS="'.$class.'">';
+		$combo .= '<OPTION STYLE="'."display:none".'" VALUE=""></OPTION>';
+	}
 	while ($row = mysql_fetch_array($lista, MYSQL_NUM)) {
 		if (strpos($row[1],'inexistente') == false) {
 			
-			$combo = $combo . '<OPTION VALUE="'.$row[0].'"';
+			$combo .= '<OPTION VALUE="'.$row[0].'"';
 			
 			if ($selectedId == $row[0]) {
-				$combo = $combo . ' SELECTED';
+				$combo .= ' SELECTED';
 			}
 			
-			$combo = $combo .'>'.$row[1].'</OPTION>';
+			$combo .= '>'.$row[1].'</OPTION>';
 		}
 	}
-	  $combo = $combo . '</SELECT>';
+	  $combo .= '</SELECT>';
 	  return $combo;
 	}
 

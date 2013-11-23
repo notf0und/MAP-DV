@@ -27,8 +27,10 @@
 				$sqlQuery = "SELECT COALESCE(SUM(MP.qtdedepax * SS.ComidasDiarias), 0) ";
 				$sqlQuery .= "FROM   mediapension MP ";
 				$sqlQuery .= "LEFT JOIN servicios SS on MP.idservicios = SS.idservicios ";
-				$sqlQuery .= "LEFT JOIN mediapension_admisiones MPA on  MP.idmediapension = MPA.idmediapension ";
-				$sqlQuery .= "WHERE MP.dataIN<=CURDATE() AND MP.dataOUT>=CURDATE() AND habilitado = 1;";
+				$sqlQuery .= "WHERE 1 ";
+				$sqlQuery .= "AND MP.dataIN<=CURDATE() ";
+				$sqlQuery .= "AND MP.dataOUT>=CURDATE() ";
+				$sqlQuery .= "AND MP.habilitado = 1;";
 				$sqlResult = resultFromQuery($sqlQuery);
 				
 				while ($row = mysql_fetch_row($sqlResult))
@@ -42,7 +44,12 @@
                 <!-- Cantidad de personas que ya comieron -->
                 <li class="bg_lb span2"><i class="icon-user"></i> <strong>
 				<?php
-				$sqlQuery = "SELECT COALESCE(SUM(qtdedepax), 0) FROM mediapension_admisiones where date(data) = curdate();";
+				$sqlQuery = "SELECT COALESCE(SUM(MPA.qtdedepax), 0) ";
+				$sqlQuery .= "FROM mediapension_admisiones MPA ";
+				$sqlQuery .= "LEFT JOIN mediapension MP ON MPA.idmediapension = MP.idmediapension ";
+				$sqlQuery .= "WHERE 1 ";
+				$sqlQuery .= "AND date(MPA.data) = curdate() ";
+				$sqlQuery .= "AND MP.habilitado = 1;";
 				$sqlResult = resultFromQuery($sqlQuery);
 				
 				while ($row = mysql_fetch_row($sqlResult))

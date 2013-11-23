@@ -433,6 +433,8 @@ function agenciasCancelar($ID){
 	//Update agencias on table reservas to 0 -> Posada inexistente
 	$sql = " UPDATE reservas SET idagencias = 0 WHERE idagencias = ".$_SESSION['idagencias'];
 	$resultadoStringSQL = resultFromQuery($sql);
+	
+	bitacoras($_SESSION["idusuarios"], $_SESSION["username"].' elimino la agencia: ID '.$_SESSION['idagencias']);
 }
 
 //Cancelar Posadas

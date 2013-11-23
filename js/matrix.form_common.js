@@ -29,8 +29,9 @@ $(document).ready(function() {
 	}
 
 	//------------- Masked input fields -------------//
-	$("#mask-phone").mask("(99) 9999-9999", {completed:function(){alert("Telefono correctamente insertado");}});
-	$("#mask-phoneExt").mask("(999) 999-9999? x99999");
+	$("#mask-phone").mask("(99) 9-9999-9999");
+	$("#mask-phone2").mask("(99) 9-9999-9999");
+	$("#mask-phoneExt").mask("(999) 999-9999? x99999", {completed:function(){alert("Telefono correctamente insertado");}});
 	$("#mask-phoneInt").mask("+40 999 999 999");
 	$("#mask-date").mask("99/99/9999");
 	$("#mask-ssn").mask("999-99-9999");

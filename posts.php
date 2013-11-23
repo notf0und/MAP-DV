@@ -223,7 +223,7 @@ if (isset( $_POST['accion'] )) {
 	}
 
 	if ($_POST['accion'] == 'AgenciasDelete') {
-		posadasCancelar($_POST['idposadas']);
+		agenciasCancelar($_POST['idagencias']);
 		echo '<script languaje="javascript"> self.location="administradores.agencias.php"</script>';
 	}
 

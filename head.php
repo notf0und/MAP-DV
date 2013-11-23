@@ -1,4 +1,6 @@
-<!DOCTYPE html>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="pt-br">
+
 <?php 
 include "lib/sessionLib.php";
 $script_name = $_SERVER['SCRIPT_NAME'];
@@ -9,10 +11,9 @@ if($_SESSION["NombreCompleto"]=="") {
 }
 
 ?>
-<html lang="en">
 <head>
 <title>DaVinci MAP</title>
-<meta charset="UTF-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="stylesheet" href="css/bootstrap.min.css" />
 <link rel="stylesheet" href="css/bootstrap-responsive.min.css" />

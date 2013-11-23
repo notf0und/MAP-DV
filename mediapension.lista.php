@@ -15,18 +15,7 @@
 	<div class="row-fluid">
         <div class="widget-box">
           <div class="widget-title"> <span class="icon"><i class="icon-th"></i></span>
-            <h5>Lista de Media pension - Previsão pra hoje: ≈
-            <?php
-            $sqlQuery = "SELECT SUM(qtdedepax) FROM mediapension WHERE dataIN<=DATE(NOW()) AND dataOUT>=DATE(NOW()); ";
-            $sqlResult = resultFromQuery($sqlQuery);
-              
-            while ($row = mysql_fetch_row($sqlResult)){ 
-				echo "$row[0]"; 
-			} 
-
-            ?>
-            
-            </h5>
+            <h5>Lista de Media pension</h5>
           </div>
           <div class="widget-content nopadding">
 			<?php

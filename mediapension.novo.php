@@ -1,6 +1,6 @@
 <?php 
 include "head.php"; 
-$idmediapension = -1;
+$idlocales = $_SESSION["idlocales"];
 ?>
 
 <!--main-container-part-->
