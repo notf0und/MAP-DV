@@ -1,6 +1,13 @@
 DaVinci MAP
 ======================================
 
+Changes v0.23 23/11/2013
++Implementada solucion visual para las actualizaciones.
++Mejorada la logica de las actualizaciones para disminuir el tiempo de descarga de la db.
++Corrección en mediapension.statisticas para mostrar valores mas exactos.
++Limpieza general del código para aumentar la seguridad.
++Cambios en las validaciones de mediapension.novo
+
 Changes v0.2 16/11/2013
 +Se ha añadido la posibilidad de cambiar la contraseña de los usuarios.
 +Las contraseñas ahora se almacenan en formato MD5 para mejorar la seguridad.
