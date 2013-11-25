@@ -66,7 +66,7 @@ if (isset($_SESSION['idhoteleria'])){
 								<?php
 									$sqlQuery = " SELECT idpaises, nombre FROM paises ";
 									$resultado = resultFromQuery($sqlQuery);
-									echo comboFromArray('idpaises', $resultado, $idpaises, '', '', 'true');
+									echo comboFromArray('idpaises', $resultado, $idpaises, '', '');
 								?>								
 							</div>
 						</div>

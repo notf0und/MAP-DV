@@ -6,9 +6,9 @@
   <div id="content-header">
     <div id="breadcrumb">
 		<a href="index.php" title="ir para Início" class="tip-bottom"><i class="icon-home"></i> Início</a>
-		<a href="#" class="current">Media pension</a>
+		<a href="#" class="current">Meia-pensão</a>
 	</div>
-	<h1>Mediapension - Menu de opções</h1><hr>
+	<h1>Meia-pensão - Menu de opções</h1><hr>
   </div>
 <!--End-breadcrumbs-->
 
@@ -25,7 +25,7 @@
         <li class="bg_lb span2"> <a href="mediapension.vouchers.php"> <i class="icon-list-ul"></i> Vouchers</a> </li>
 		<?php } ?>
         
-        <li class="bg_lg span2"> <a href="mediapension.statisticas.php"> <i class="icon-signal"></i> Statísticas</a> </li>
+        <li class="bg_lg span2"> <a href="mediapension.estatisticas.php"> <i class="icon-signal"></i> Estatísticas</a> </li>
   		<?php } ?>
       </ul>
     </div>

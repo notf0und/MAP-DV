@@ -16,12 +16,12 @@
     <div class="quick-actions_homepage">
       <ul class="quick-actions">
 		<?php if (($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 2) || ($_SESSION["idusuarios_tipos"] == 3)) {?>
-        <li class="bg_lb span2"> <a href="mediapension.php"> <i class="icon-glass"></i> Mediapension </a> </li>
-        <li class="bg_lb span2"> <a href="hoteleria.php"> <i class="icon-download-alt"></i> Hoteleria </a> </li>
+        <li class="bg_lb span2"> <a href="mediapension.php"> <i class="icon-glass"></i>Meia-pensão</a> </li>
+        <li class="bg_lb span2"> <a href="hoteleria.php"> <i class="icon-download-alt"></i>Hotelaria</a></li>
 		<?php } ?>
 		<?php if ($_SESSION["idusuarios_tipos"] == 1) {?>
-        <li class="bg_lb span2"> <a href="liquidaciones.php"> <i class="icon-list-ul"></i> Liquidaciones</a> </li>
-        <li class="bg_lb span2"> <a href="administradores.php"> <i class="icon-list-ul"></i> Adminitradores</a> </li>
+        <li class="bg_lb span2"> <a href="liquidaciones.php"> <i class="icon-list-ul"></i> Liquidações</a> </li>
+        <li class="bg_lb span2"> <a href="administradores.php"> <i class="icon-list-ul"></i> Administradores</a> </li>
 		<?php } ?>
       </ul>
     </div>
@@ -29,7 +29,7 @@
       <ul class="quick-actions">
 		<?php if ($_SESSION["idusuarios_tipos"] == 1) {?>
         <li class="bg_lg span2"> <a href="reservas.php"> <i class="icon-calendar"></i> Reservas</a> </li>
-        <li class="bg_ly span2"> <a href="salarios.php"> <i class="icon-money"></i> Salarios </a> </li>
+        <li class="bg_ly span2"> <a href="salarios.php"> <i class="icon-money"></i> Salários </a> </li>
   		<?php }?>
 
 
