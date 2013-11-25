@@ -6,10 +6,10 @@
   <div id="content-header">
     <div id="breadcrumb">
 		<a href="index.php" title="Home" class="tip-bottom"><i class="icon-home"></i> Home</a> 
-		<a href="mediapension.php" title="Media pension" class="tip-bottom">Media pension</a>
-		<a href="#" class="current">Statísticas</a>
+		<a href="mediapension.php" title="Media pension" class="tip-bottom">Meia-pensão</a>
+		<a href="#" class="current">Estatísticas</a>
 	</div>
-	<h1>Meia-pensão - Statísticas</h1><hr>
+	<h1>Meia-pensão - Estatísticas</h1><hr>
   </div>
 <!--End-breadcrumbs-->
 
@@ -22,7 +22,7 @@
               <ul class="site-stats">
 				
 				<!-- Cantidad de personas que van a comer hoy en el restaurante -->
-				<li class="bg_lg span2"><i class="icon-globe"></i> <strong>
+				<li class="bg_lg"><i class="icon-globe"></i> <strong>
 				<?php
 				$sqlQuery = "SELECT COALESCE(SUM(MP.qtdedepax * SS.ComidasDiarias), 0) ";
 				$sqlQuery .= "FROM   mediapension MP ";
@@ -39,10 +39,10 @@
 					$comeranentotal = $row[0];
 				}
 				?>
-				</strong> <small>Pessoas vão a comer hoje</small></li>
+				</strong> <small>Pessoas vão comer hoje</small></li>
 				
                 <!-- Cantidad de personas que ya comieron -->
-                <li class="bg_lb span2"><i class="icon-user"></i> <strong>
+                <li class="bg_lb"><i class="icon-user"></i> <strong>
 				<?php
 				$sqlQuery = "SELECT COALESCE(SUM(MPA.qtdedepax), 0) ";
 				$sqlQuery .= "FROM mediapension_admisiones MPA ";
@@ -61,17 +61,17 @@
                 </strong> <small>Pessoas já comeram</small></li>
                 
 				<!-- Cantidad de personas que faltan por comer -->
-				<li class="bg_ly span2"><i class="icon-plus"></i> <strong>
+				<li class="bg_ly"><i class="icon-plus"></i> <strong>
 				<?php
 				
 				$faltancomer = $comeranentotal - $yacomieron;
 				echo "$faltancomer";
 
 				?>
-				</strong> <small>Faltan por comer</small></li>
+				</strong> <small>Faltam comer</small></li>
 				
 				<!-- Cantidad de vouchers ingresados hoy -->
-                <li class="bg_lh span3"> <i class="icon-tag"></i> <strong>
+                <li class="bg_lh"> <i class="icon-tag"></i> <strong>
 				<?php
 				$sqlQuery = "SELECT COUNT(*) FROM mediapension WHERE DATE(data) = CURDATE() AND habilitado = 1;";
 				$sqlResult = resultFromQuery($sqlQuery);
@@ -81,7 +81,7 @@
 					echo "$row[0]";
 				}
 				?>
-                </strong> <small>Vouchers foram admitidos hoje</small></li></a>
+                </strong> <small>Vouchers foram ingressados hoje</small></li></a>
                 
               </ul>
           </div>
