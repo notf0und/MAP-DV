@@ -24,7 +24,7 @@
 					//$sqlQuery .= " MP.idmediapension 'MEDIAPENSION', MP.actualizado 'act', ";
 					$sqlQuery .= " MP.qtdedepax 'Qtde de PAX', MP.dataIN, MP.dataOUT, ";
 					$sqlQuery .= " P.nombre 'Posada', O.nombre 'Operador', A.nombre 'Agencia'  ";
-					$sqlQuery .= " , RDP.nombre 'Responsable', SS.nombre 'Serviço'  ";
+					$sqlQuery .= " , RDP.nombre 'Responsable', SS.nombre 'Serviço', NULL 'Detalles' ";
 					$sqlQuery .= " FROM `mediapension` MP ";
 					$sqlQuery .= " LEFT JOIN huespedes H ON MP.idhuespedes = H.idhuespedes ";
 					$sqlQuery .= " LEFT JOIN posadas P ON MP.idposadas = P.idposadas ";
@@ -37,6 +37,15 @@
 					$sqlQuery .= " AND MP.habilitado = 1 ";
 					echo tableFromResult(resultFromQuery($sqlQuery), 'VouchersMP', true, true, 'posts.php', true);
 				?>		  
+			</div>
+			<div id="myModal" class="modal hide">
+				<div class="modal-header">
+					<button data-dismiss="modal" class="close" type="button">×</button>
+					<h3>Detalle</h3>
+				</div>
+				<div class="modal-body" id="modal-body">
+					<p>Here is the text coming you can put also image if you want…</p>
+				</div>
 			</div>
 			</form>
         </div>

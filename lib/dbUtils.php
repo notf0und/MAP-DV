@@ -16,7 +16,7 @@
 		
 		//Muestra opciones segun configuración de la terminal
 		$ldb = parse_ini_file("./local-config.ini", true)[local_database];
-
+		
 
     	$dbConnection = &mysql_dbConnect($ldb[dbhost], $ldb[dbname], $ldb[user], $ldb[password]);
     }
@@ -195,7 +195,23 @@
 			$table = $table . '<TR>';
 			for ($j = 1; $j < dbFieldCount($result); $j++) {
 				$colname = dbFieldName($result, $j);
-				$table = $table . '<TD>' . $row->$colname . '</TD>';        
+				switch($colname){
+					case 'Detalles':
+						$table .= '<TD>';
+						$table .= '<a href="#myModal" data-toggle="modal" class="" onclick="document.getElementById(\'modal-body\').innerHTML=\'<object id=foo name=foo type=text/html width=530 height=350 data=mediapension.admisiones.php?idmediapension='.$row->id.'></object>\'">Ver</a>';
+						$table .= '</TD>';
+						break;
+					case 'Pagamentos':
+						$table .= '<TD>';
+						if ($_SESSION["idusuarios_tipos"] == 1 || $_SESSION["idusuarios_tipos"] == 4){
+							$table .= '<a href="funcionarios.pagamentos.php?employee_id='.$row->id.'">Balance de Salario</a>';
+						}
+						$table .= '</TD>';
+						break;
+					default:
+						$table = $table . '<TD>' . $row->$colname . '</TD>';
+						break;
+					}
 				}
 			if ($deletableRows) {
 				$colname = dbFieldName($result, 0);
@@ -214,7 +230,7 @@
   	if ($deletableRows || $modifiableRows) {
   		$table .= '</form>';
   	}
-		$table = $table . '</TABLE><BR>';
+		$table = $table . '</TABLE>';
     return $table;
   };
 

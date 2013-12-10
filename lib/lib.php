@@ -45,7 +45,7 @@ function comboFromArray($nombre, $lista, $selectedId = -1, $onChangeFunction = '
 	else
 	{
 		$combo = '<SELECT '.$re.'ID="'.$nombre.'" NAME="'.$nombre.'" SIZE="1" onchange="'.$onChangeFunction.'" STYLE="'.$style.'" CLASS="'.$class.'">';
-		$combo .= '<OPTION STYLE="'."display:none".'" VALUE=""></OPTION>';
+		$combo .= '<OPTION STYLE="'."display:none".'" VALUE="0"></OPTION>';
 	}
 	while ($row = mysql_fetch_array($lista, MYSQL_NUM)) {
 		if (strpos($row[1],'inexistente') == false) {

@@ -775,11 +775,20 @@ function guardarPrecio($idlistasdeprecios, $idservicios, $precio, $idposadas_int
 	return $result;
 }
 
-function admitirServicio($idmediapension, $qtdedepaxagora, $precio){
-	$sql = "insert mediapension_admisiones (data, idmediapension, qtdedepax, tarifa) values (NOW() ,";
+function admitirServicio($idmediapension, $qtdedepaxagora, $precio, $idlocales=0){
+	$sql = "insert mediapension_admisiones (data, idmediapension, qtdedepax, tarifa, actualizado, idlocales) values (NOW() ,";
 	$sql .= "".$idmediapension.",";
 	$sql .= "".$qtdedepaxagora.",";
-	$sql .= "".$precio.") ";
+	$sql .= "".$precio.",";
+	
+	if ($idlocales > 0){
+		$sql .= "0, ";
+	}
+	else{
+		$sql .= "1, ";
+	}
+	
+	$sql .= "".$idlocales.") ";
 	$resultadoStringSQL = resultFromQuery($sql);		
 	$idadmision = mysql_insert_id();
 	return $idadmision;
@@ -890,7 +899,7 @@ function calcularDias($idmediapension, $qtycomidas, $dataIN, $dataOUT, $admision
 	
 	$table = $table . '<TH>';
 	$comidasrestantes = $qtycomidas-$admisiones;
-	$table .= ' < '.$comidasrestantes.' servicios restantes | <a href="#myModal" data-toggle="modal" class="" onclick="document.getElementById(\'modal-body\').innerHTML=\'<object id=foo name=foo type=text/html width=530 height=350 data=mediapension.admisiones.php?idmediapension='.$idmediapension.'></object>\'">ver detalle</a>'.' ';
+	$table .= ' < '.$comidasrestantes.' servicios restantes | <a href="#myModal" data-toggle="modal" class="" onclick="document.getElementById(\'modal-body\').innerHTML=\'<object id=foo name=foo type=text/html width=530 height=310 data=mediapension.admisiones.php?idmediapension='.$idmediapension.'></object>\'">ver detalle</a>'.' ';
 	$table .= ' | <a href="#myModal" data-toggle="modal" class="" onclick="document.getElementById(\'modal-body\').innerHTML=\'<object id=foo name=foo type=text/html width=530 height=250 data=mediapension.admitir.php?idmediapension='.$idmediapension.'></object>\'">admitir servicio</a>'.' > ';
 	$table = $table . '</TH>';
 	$table = $table . '</TR>';
@@ -986,6 +995,27 @@ function getMonthDays($Month, $Year) {
    } 
 } 
 
+function dateFormatMySQL($date){
+	
+	
+		$dtlatin = DateTime::createFromFormat("d/m/Y", $date);
+		$dtlatin !== false && !array_sum($dtlatin->getLastErrors());
+		
+		$dtmysql= DateTime::createFromFormat("Y-m-d", $date);
+		$dtmysql !== false && !array_sum($dtmysql->getLastErrors());
+		
+		if ($dtlatin){
+			return $dtlatin->format('Y-m-d');
+		}
+		elseif ($dtmysql){
+			return $dtmysql->format('Y-m-d');
+		}
+		else{
+			return false;
+		}
+		
+	
+}
 	/* ESTO FUNCIONA, PERO CARGA TODO JUNTO, SIN IDENTIFICAR DIFERENCIAS DE PRECIOS.
 	$sql = " INSERT INTO _temp_liquidaciones_mp (idmediapension, Titular, Q, Agencia, Posada, DataIN, DataOUT, numeroexterno, N, M, Servicio) ";
 	$sql .= " ( ";

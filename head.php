@@ -5,8 +5,7 @@
 include "lib/sessionLib.php";
 $script_name = $_SERVER['SCRIPT_NAME'];
 
-if($_SESSION["NombreCompleto"]=="") {
-	$_SESSION["login"] = 0;
+if($_SESSION["login"] == 0) {
 	echo '<script languaje="javascript"> self.location="start.php"</script>';
 }
 
@@ -15,7 +14,7 @@ if($_SESSION["NombreCompleto"]=="") {
 <title>DaVinci MAP</title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<link rel="stylesheet" href="css/bootstrap.min.css" />
+<link rel="stylesheet" href="css/bootstrap.min.css" />z
 <link rel="stylesheet" href="css/bootstrap-responsive.min.css" />
 <link rel="stylesheet" href="css/colorpicker.css" />
 <link rel="stylesheet" href="css/datepicker.css" />

@@ -21,16 +21,16 @@ $idlocales = $_SESSION["idlocales"];
 <div id="information"></div>
 
 <?php
-$total = 19;
+$total = 11;
 
 updatesToServer($idlocales);
 actualizacionDeDatosManual($idlocales);
 
 function updatesToServer($idlocales){
-	$total = 19;
+	$total = 11;
 	
 	// Obtengo la información sobre la base de datos local
-	updateBar(1, "Obtenção de informação do banco de dados local.");
+	updateBar(1, "Obtenção de informação dos bancos de dados local e remoto");
 	$sql = " SELECT * FROM locales where idlocales =  ".$idlocales;
 	$resultado = resultFromQuery($sql);
 	
@@ -50,7 +50,7 @@ function updatesToServer($idlocales){
 				
 				
 	// Obtengo la información sobre la base de datos del servidor
-	updateBar(2, "Obtenção de informação do banco de dados remoto.");
+	//updateBar(2, "Obtenção de informação do banco de dados remoto.");
 	$sql = " SELECT * FROM locales where idlocales = 0 ";
 	$resultado = resultFromQuery($sql);	
 
@@ -75,7 +75,7 @@ function updatesToServer($idlocales){
 		if (!function_exists("ssh2_connect")) die("La funcion ssh2_connect no existe");
 		
 		// Se loguea en localhost en el puerto 22
-		updateBar(3, "Intentando conectarse por ssh2 localmente.");
+		//updateBar(3, "Intentando conectarse por ssh2 localmente.");
 		if(!($con = ssh2_connect($db_hostname_local, 22)))
 		{
 			updateBar($total, "Sem acceso ssh ao computador local");
@@ -84,7 +84,7 @@ function updatesToServer($idlocales){
 		else
 		{
 			// try to authenticate with username root, password secretpassword
-			updateBar(4, "Iniciando sesión.");
+			updateBar(2, "Iniciando sesión.");
 			if(!ssh2_auth_password($con, $ssh2_local_user, $ssh2_local_password))
 			{
 				updateBar($total, "Erro de autenticação ssh local");
@@ -102,7 +102,7 @@ function updatesToServer($idlocales){
 				}
 			
 				// Selecciono de la tabla MP con la columna actualizado = 0
-				updateBar(5, "Procurando vouchers sem atualizar.");
+				updateBar(3, "Procurando vouchers sem atualizar.");
 				$sql = " select * from ".$db_database_local.".mediapension MP ";
 				$sql .= " inner join ".$db_database_local.".huespedes H on MP.idhuespedes = H.idhuespedes ";
 				$sql .= " where MP.actualizado = 0; ";
@@ -150,7 +150,7 @@ function updatesToServer($idlocales){
 					if ($idmediapension > -1)
 					{
 						//INSERT HUESPED
-						updateBar(6, "Insertando hospedes novos no servidor.");
+						updateBar(4, "Insertando vouchers novos no servidor.");
 						$sql = "insert ".$db_database_server.".huespedes (titular, idpaises) values (";
 						$sql .= "'".$nomedopax."',";
 						$sql .= "'".$idpaises."') ";
@@ -160,7 +160,7 @@ function updatesToServer($idlocales){
 						bitacoras($_SESSION["idusuarios"], 'Insertar Huesped: ID '.$idhuespedes);
 
 						//INSERT MEDIAPENSION
-						updateBar(7, "Insertando meia pensões novas no servidor.");
+						//updateBar(7, "Insertando meia pensões novas no servidor.");
 						$sql = "insert ".$db_database_server.".mediapension (numeroexterno, idoperadoresturisticos, idposadas, idagencias, idresponsablesDePago, idhuespedes, qtdedepax, dataIN, dataOUT, qtdedecomidas, idservicios, idlocales, mensajeinterno, mensajegarcon, actualizado) values (";
 						$sql .= "'".$numeroexterno."',";
 						$sql .= "".$idoperadoresturisticos.",";
@@ -190,7 +190,7 @@ function updatesToServer($idlocales){
 
 						//INSERT MEDIAPENSION ADMICION
 						// consulto todas las admisiones locales y luego realizo un insert por cada admision referenciada con $idmediapension_local
-						updateBar(8, "Insertando admisiones ingresadas com vouchers novos no servidor.");
+						//updateBar(8, "Insertando admisiones ingresadas com vouchers novos no servidor.");
 						
 						$sql = " select * from ".$db_database_local.".mediapension_admisiones where idmediapension = ".$idmediapension_local;
 						$resultado = resultFromQuery($sql);	
@@ -201,16 +201,17 @@ function updatesToServer($idlocales){
 							$datadiaria = date("Y-m-d");
 							//$precio = valordiaria($datadiaria, $idposadas, $idservicios);
 							$precio = 0;
-							$sql = "insert ".$db_database_server.".mediapension_admisiones (data, idmediapension, qtdedepax, tarifa, actualizado) values (";
+							$sql = "insert ".$db_database_server.".mediapension_admisiones (data, idmediapension, qtdedepax, tarifa, actualizado, idlocales) values (";
 							$sql .= "'".$row_admision->data."',";
 							$sql .= "".$idmediapension.",";
 							$sql .= "".$row_admision->qtdedepax.",";
-							$sql .= "".$precio.", 1) ";
+							$sql .= "".$precio.", 1, ";
+							$sql .= "".$idlocales.") ";
 							$resultadoStringSQL = mysql_resultFromQuery($sql, $dbConnection_server);		
 							$idadmision = mysql_insert_id();
 
 							//INSERT MEDIAPENSION TICKTS 
-							updateBar(9, "Insertando tickets novos no servidor.");
+							//updateBar(9, "Insertando tickets novos no servidor.");
 							$sql = " select * from ".$db_database_local.".mediapension_tickets where idmediapension_admisiones = ".$idamision_local;
 							$resultado = resultFromQuery($sql);	
 
@@ -225,20 +226,20 @@ function updatesToServer($idlocales){
 								$resultadoStringSQL = mysql_resultFromQuery($sql, $dbConnection_server);		
 								$idtickets = mysql_insert_id();
 							}
-							updateBar(10, "Estableciendo admisiones locales como atualizadas.");
+							//updateBar(10, "Estableciendo admisiones locales como atualizadas.");
 							$sql = " update ".$db_database_local.".mediapension_admisiones set actualizado = 1 where idmediapension = ".$idmediapension_local;
 							$resultado = resultFromQuery($sql);									
 						}
 					}
 				
-				updateBar(11, "Estableciendo vouchers locales como atualizados.");
+				//updateBar(11, "Estableciendo vouchers locales como atualizados.");
 				$sql = " update ".$db_database_local.".mediapension set actualizado = 1 where idmediapension = ".$idmediapension_local;
 				$resultado = resultFromQuery($sql);	
 				}
 
 
 				//INSERT ADMISIONES SOLAS
-				updateBar(12, "Procurando admisiones sem voucher.");
+				updateBar(5, "Procurando admisiones sem voucher.");
 				if ($idlocales == 2)
 				{
 					ssh2_exec($con, "echo  > /dev/lp0");
@@ -254,7 +255,7 @@ function updatesToServer($idlocales){
 				
 				$resultado = resultFromQuery($sql);	
 				
-				updateBar(13, "Insertando admisiones sem voucher no servidor.");
+				updateBar(6, "Insertando admisiones sem voucher no servidor.");
 				while ($row_admision = mysql_fetch_object($resultado)) 
 				{				
 					$dbConnection_server = mysql_dbConnect($db_hostname_server, $db_database_server, $db_username_server, $db_password_server);
@@ -273,18 +274,19 @@ function updatesToServer($idlocales){
 						ssh2_exec($con, "echo ".$nomedopax." X".$qtdedepax." -".$dataTime."- > /dev/lp0");
 					}
 					
-					$sql = "insert ".$db_database_server.".mediapension_admisiones (data, idmediapension, qtdedepax, tarifa, actualizado) values (";
+					$sql = "insert ".$db_database_server.".mediapension_admisiones (data, idmediapension, qtdedepax, tarifa, actualizado, idlocales) values (";
 					$sql .= "'".$row_admision->data."',";
 					$sql .= "".$row_admision->idmediapension.",";
 					$sql .= "".$row_admision->qtdedepax.",";
-					$sql .= "".$precio.", 1) ";
+					$sql .= "".$precio.", 1, ";
+					$sql .= "".$idlocales.") ";
 					$resultadoStringSQL = mysql_resultFromQuery($sql, $dbConnection_server);		
 					$idadmision = mysql_insert_id();
 					
 					
 				}
 				
-				updateBar(14, "Estableciendo admisiones locales sem voucher como atualizadas.");
+				//updateBar(14, "Estableciendo admisiones locales sem voucher como atualizadas.");
 				$sql = " update ".$db_database_local.".mediapension_admisiones set actualizado = 1 where actualizado = 0";
 				$resultado = resultFromQuery($sql);
 
@@ -301,13 +303,13 @@ function updatesToServer($idlocales){
 
 function actualizacionDeDatosManual($idlocales){
 	
-	$total = 19;
+	$total = 11;
 	
 	//Directorio y archivo donde se va a guardar en el localhost como en el server
 	$updownpathfile = '/tmp/backup.sql.gz';
 	
 	// Obtengo la información sobre la base de datos del servidor
-	updateBar(15, 'Leitura de configuraçao do servidor');
+	updateBar(7, 'Leitura de configuraçao do servidor e do computador local');
 	$sql = " SELECT * FROM locales where idlocales =  0";
 	$resultado = resultFromQuery($sql);
 				
@@ -324,7 +326,7 @@ function actualizacionDeDatosManual($idlocales){
 	}
 	
 	// Obtengo la información sobre la base de datos local
-	updateBar(16, 'Leitura de configuraçao do localhost');
+	//updateBar(16, 'Leitura de configuraçao do localhost');
 	$sql = " SELECT * FROM locales where idlocales = ".$idlocales;
 	$resultado = resultFromQuery($sql);
 				
@@ -359,8 +361,8 @@ function actualizacionDeDatosManual($idlocales){
 		else 
 		{
 			//Genera el backup en el servidor
-			updateBar(17, "Creando backup do banco de dados no servidor.");
-			$sqldump = "mysqldump --opt  -u ".$db_remote_user." -p".$db_remote_password." ".$db_remote_database." | gzip  > ".$updownpathfile;
+			updateBar(8, "Creando backup do banco de dados no servidor.");
+			$sqldump = "mysqldump --opt  -u ".$db_remote_user." -p".$db_remote_password." ".$db_remote_database." agencias usuarios usuarios_tipos mediapension mediapension_admisiones mediapension_tickets huespedes operadoresturisticos posadas posadas_listasdeprecios responsablesDePago | gzip  > ".$updownpathfile;
 		
 			if (!(ssh2_exec($con_remote, $sqldump))) 
 			{
@@ -370,7 +372,7 @@ function actualizacionDeDatosManual($idlocales){
 			else
 			{
 				//ssh2_scp_recv(Connection, Remote path, Local Path)
-				updateBar(18, "Baixando banco de dados do servidor.");
+				updateBar(9, "Baixando banco de dados do servidor.");
 				if (!ssh2_scp_recv($con_remote, $updownpathfile, $updownpathfile))
 				{
 					updateBar($total, "Não foi possível fazer o download do banco de dados do servidor.");
@@ -394,7 +396,7 @@ function actualizacionDeDatosManual($idlocales){
 						else
 						{
 
-							updateBar(19, "Aplicando actualizações.");
+							updateBar(10, "Aplicando actualizações.");
 							$sqlrestore = "gzip -dc < ".$updownpathfile." | mysql -u ".$db_local_user." -p".$db_local_password." ".$db_local_database."";
 							
 							$restore = ssh2_exec($con_local, $sqlrestore);
@@ -408,7 +410,7 @@ function actualizacionDeDatosManual($idlocales){
 }
 
 function updateBar($i, $message){
-	$total = 19;
+	$total = 11;
     // Calculate the percentation
     $percent = intval($i/$total * 100)."%";
 

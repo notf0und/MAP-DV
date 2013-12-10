@@ -1,7 +1,7 @@
 
 $(document).ready(function(){
 	
-	
+	/*
 	// === Prepare the chart data ===/
 	var sin = [], cos = [];
     for (var i = 0; i < 14; i += 0.5) {
@@ -17,7 +17,7 @@ $(document).ready(function(){
 
 	// === Make chart === //
     var plot = $.plot($(".chart"),
-           [ { data: sin, label: "sin(x)", color: "#ee7951"}, { data: cos, label: "cos(x)",color: "#4fb9f0" } ], {
+           [ { data: sin, label: "Previsão", color: "#ee7951"}, { data: cos, label: "Comeram",color: "#4fb9f0" } ], {
                series: {
                    lines: { show: true },
                    points: { show: true }
@@ -103,7 +103,7 @@ $(document).ready(function(){
 		legend: true
 	});
 	
-});
+});*/
 	
 
 maruti = {

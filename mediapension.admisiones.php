@@ -1,6 +1,35 @@
 <?php 
 include "lib/sessionLib.php";
 $script_name = $_SERVER['SCRIPT_NAME'];
+
+//Lista con informacion detallada de los consumos
+$sqlQuery = " SELECT ";
+$sqlQuery .= " MPA.idmediapension, ";				
+$sqlQuery .= " MPA.data 'Data de admision', ";
+$sqlQuery .= " MPA.qtdedepax 'Pessoas', ";
+$sqlQuery .= " L.nombre 'Resto' ";
+$sqlQuery .= " FROM mediapension_admisiones MPA ";
+$sqlQuery .= " LEFT JOIN locales L ON MPA.idlocales = L.idlocales ";
+$sqlQuery .= " WHERE MPA.idmediapension = ".$_GET["idmediapension"];
+$sqlQuery .= " ORDER BY MPA.data";
+$tablaconsumos = tableFromResult(resultFromQuery($sqlQuery), 'mediapension', false, false, 'posts.php', true);
+
+//Total de servicios
+$sqlQuery = " SELECT ";
+$sqlQuery .= " MP.qtdedecomidas, SUM(MPA.qtdedepax), MP.dataIN, MP.dataOUT";			
+$sqlQuery .= " FROM mediapension MP";
+$sqlQuery .= " LEFT JOIN mediapension_admisiones MPA ON MP.idmediapension = MPA.idmediapension";
+$sqlQuery .= " WHERE MP.idmediapension = ".$_GET["idmediapension"];
+$sqlResult = resultFromQuery($sqlQuery);
+          
+while ($row = mysql_fetch_row($sqlResult)){
+	$totalcomidas = "$row[0]";
+	$serviciosconsumidos = "$row[1]";
+	$datain = "$row[2]";
+	$dataout =  "$row[3]";
+	$serviciosrestantes = $totalcomidas - $serviciosconsumidos;
+}
+
 ?>
 <html lang="en">
 <head>
@@ -23,77 +52,19 @@ $script_name = $_SERVER['SCRIPT_NAME'];
 <body>
 <!--main-container-part-->
 <div id="content">
-  <div class="container-fluid">
-	<div class="row-fluid">
-		<div class="span6">
 			<div class="widget-box">
-				<?php
-				$sqlQuery = " SELECT ";
-				$sqlQuery .= " MPA.idmediapension, ";				
-				$sqlQuery .= " MPA.data 'Data de admision', ";
-				$sqlQuery .= " MPA.qtdedepax 'Quantidade de pessoas', ";
-				$sqlQuery .= " L.nombre 'Resto' ";
-				$sqlQuery .= " FROM mediapension_admisiones MPA ";
-				$sqlQuery .= " INNER JOIN mediapension MP ON MPA.idmediapension = MP.idmediapension ";
-				$sqlQuery .= " INNER JOIN locales L ON MP.idlocales = L.idlocales ";
-				$sqlQuery .= " WHERE MP.idmediapension = ".$_GET["idmediapension"];
-				echo tableFromResult(resultFromQuery($sqlQuery), 'mediapension', false, false, 'posts.php', true);
-				?>
 				
-						
+				<?php echo $tablaconsumos; ?>
 				<b>Resumen:</b><br>
 				
-				Total de servicios: 
-				<?php
-				$sqlQuery = " SELECT ";
-				$sqlQuery .= " qtdedecomidas";				
-				$sqlQuery .= " FROM mediapension ";
-				$sqlQuery .= " WHERE idmediapension = ".$_GET["idmediapension"];
-				$sqlResult = resultFromQuery($sqlQuery);
-              
-				while ($row = mysql_fetch_row($sqlResult)){
-					echo "$row[0]"; 
-				} 
-				?>				
-				<br>
+				Total de servicios:<b><?php echo $totalcomidas; ?></b><br>
+				Serviços Consumidos:<b>	<?php echo $serviciosconsumidos; ?></b><br>
+				Serviços Restantes:<b>	<?php echo $serviciosrestantes; ?></b><br><br>
 				
-				
-				
-				DataIN :
-				<?php
-				$sqlQuery = " SELECT ";
-				$sqlQuery .= " dataIN";				
-				$sqlQuery .= " FROM mediapension ";
-				$sqlQuery .= " WHERE idmediapension = ".$_GET["idmediapension"];
-				$sqlResult = resultFromQuery($sqlQuery);
-              
-				while ($row = mysql_fetch_row($sqlResult)){
-					echo "$row[0]"; 
-				} 
-				?>
-				
-				
-				<br>
-				DataOUT :
-				<?php
-				$sqlQuery = " SELECT ";
-				$sqlQuery .= " dataOUT";				
-				$sqlQuery .= " FROM mediapension ";
-				$sqlQuery .= " WHERE idmediapension = ".$_GET["idmediapension"];
-				$sqlResult = resultFromQuery($sqlQuery);
-              
-				while ($row = mysql_fetch_row($sqlResult)){
-					echo "$row[0]"; 
-				} 
-				?>
-				<br>
-
+				DataIN :<b><?php echo $datain;?></b><br>
+				DataOUT :<b><?php echo $dataout;?></b>
 			</div>
 			
-		</div>
-	</div>
-    <hr/>
-  </div>
 </div>
 
 <!--end-main-container-part-->

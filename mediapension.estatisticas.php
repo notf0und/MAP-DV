@@ -61,7 +61,7 @@
                 </strong> <small>Pessoas já comeram</small></li>
                 
 				<!-- Cantidad de personas que faltan por comer -->
-				<li class="bg_ly"><i class="icon-plus"></i> <strong>
+				<li class="bg_ly"><i class="icon-group"></i> <strong>
 				<?php
 				
 				$faltancomer = $comeranentotal - $yacomieron;
@@ -87,7 +87,22 @@
           </div>
         </div>
       </div>
+
+	<div class="row-fluid">
+      <div class="span12">
+        <div class="widget-box">
+          <div class="widget-title"> <span class="icon"> <i class="icon-signal"></i> </span>
+            <h5>Historial</h5>
+          </div>
+          <div class="widget-content">
+            <div class="chart"></div>
+          </div>
+        </div>
+      </div>
     </div>
+
+</div>   
+    
 <!--End-Chart-box--> 
 
 
@@ -96,4 +111,16 @@
 </div>
 
 <!--end-main-container-part-->
-<?php include "footer.php"; ?>
+
+<!--Footer-part-->
+<div class="row-fluid">
+  <div id="footer" class="span12"> 2013 © Grupos Das Americas. </div>
+</div>
+<!--end-Footer-part-->
+<script src="js/jquery.min.js"></script> 
+<script src="js/jquery.flot.min.js"></script> 
+<script src="js/matrix.charts.js"></script> 
+
+</body>
+</html>
+

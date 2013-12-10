@@ -85,4 +85,29 @@ $(document).ready(function(){
 			$(element).parents('.control-group').addClass('success');
 		}
 	});
+	
+	$("#jobcategory_validate").validate({
+		rules:{
+			name:{
+				required:true
+			},
+			basicsalary:{
+				required:true,
+				number:true
+			},
+			valid_from:{
+				required:true,
+				date: true
+			}
+		},
+		errorClass: "help-inline",
+		errorElement: "span",
+		highlight:function(element, errorClass, validClass) {
+			$(element).parents('.control-group').addClass('error');
+		},
+		unhighlight: function(element, errorClass, validClass) {
+			$(element).parents('.control-group').removeClass('error');
+			$(element).parents('.control-group').addClass('success');
+		}
+	});
 });
