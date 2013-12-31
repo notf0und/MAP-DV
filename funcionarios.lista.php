@@ -1,10 +1,15 @@
 <?php
 
 include "head.php"; 
+
 //SELECT
 $sqlQuery = "SELECT ";
 $sqlQuery .= "E.employee_id id, ";
-$sqlQuery .= "CONCAT(P.lastname, ', ', P.firstname) 'Nome Completo', ";
+$sqlQuery .= "NULL '&nbsp', ";
+$sqlQuery .= "CONCAT(P.firstname, ' ', P.lastname) 'Nome Completo', ";
+
+$sqlQuery .= "CONCAT(TIMESTAMPDIFF(YEAR, E.admission, NOW()), 'A / ', TIMESTAMPDIFF(MONTH, E.admission, NOW()) - (TIMESTAMPDIFF(YEAR, E.admission, NOW()) * 12), 'M') as Antiguedad, ";
+
 $sqlQuery .= "DATE_FORMAT(FROM_DAYS(DATEDIFF(NOW(), P.birthdate)), '%Y')+0 AS Edad, ";
 $sqlQuery .= "JC.name Categoría, ";
 $sqlQuery .= "EMP.nombre Empresa, ";
@@ -27,7 +32,15 @@ $sqlQuery .= "LEFT JOIN empresa EMP ON E.idempresa = EMP.idempresa ";
 $sqlQuery .= "LEFT JOIN city C ON P.birth_city_id = C.city_id ";
 $sqlQuery .= "LEFT JOIN state S ON C.state_id = S.state_id ";
 $sqlQuery .= "LEFT JOIN paises CO ON S.country_id = CO.idpaises";
-$tablafuncionarios = tableFromResult(resultFromQuery($sqlQuery), 'employee', false, false, 'posts.php', true);
+$resultado = resultFromQuery($sqlQuery);
+
+$tablafuncionarios = tableFromResult($resultado, 'employee', false, true, 'posts.php', true);
+$totalfuncionarios = mysql_num_rows($resultado);
+
+if ($_SESSION["idusuarios_tipos"] == 1) {
+	FB::info($tablafuncionarios, "All Turtles");
+}
+
 ?>	
 
 <!--main-container-part-->
@@ -46,11 +59,11 @@ $tablafuncionarios = tableFromResult(resultFromQuery($sqlQuery), 'employee', fal
 	<div class="row-fluid">
         <div class="widget-box">
           <div class="widget-title"> <span class="icon"><i class="icon-th"></i></span>
-            <h5>Lista de Funcionarios</h5>
+            <h5>Lista de Funcionarios - <?php echo $totalfuncionarios;?> funcionarios registrados</h5>
           </div>
           <form id="employeeForm" name="employeeForm" action="posts.php" method="post">
           <div class="widget-content nopadding">
-			<?php echo $tablafuncionarios;?>		  
+			  <?php echo $tablafuncionarios;?>
           </div>
 			<div id="myModal" class="modal hide">
 				<div class="modal-header">

@@ -1,8 +1,9 @@
 
 <!--Footer-part-->
-
+<div id="no-print">
 <div class="row-fluid">
   <div id="footer" class="span12"> 2013 &copy; Grupos Das Americas.</div>
+</div>
 </div>
 
 <!--end-Footer-part-->
@@ -19,13 +20,13 @@
 <script src="js/jquery.uniform.js"></script> 
 <script src="js/select2.min.js"></script> 
 <script src="js/matrix.js"></script> 
+<script src="js/matrix.popover.js"></script>
 <script src="js/matrix.wizard.js"></script>
 <script src="js/matrix.tables.js"></script>
 <script src="js/matrix.form_common.js"></script> 
 <script src="js/wysihtml5-0.3.0.js"></script> 
 <script src="js/jquery.peity.min.js"></script> 
 <script src="js/bootstrap-wysihtml5.js"></script> 
-
 
 <script>
 	$('.textarea_editor').wysihtml5();

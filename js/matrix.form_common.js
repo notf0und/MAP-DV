@@ -41,6 +41,11 @@ $(document).ready(function() {
 	$("#mask-fromhours").mask("99:99");
 	$("#mask-tohours").mask("99:99");
 	$("#mask-intervalhours").mask("9:99");
+	
+	//------------- Personalized Masks -------------//
+	$("#idnumber").mask("**.***.***-*");
+	$("#cpfnumber").mask("999.999.999-99");
+	$("#eleitornumber").mask("9999.9999.9999");
 
 	//------------- Toggle button  -------------//
 

@@ -24,7 +24,7 @@ $idlocales = $_SESSION["idlocales"];
 				<div class="widget-content nopadding">
 					<form action="posts.php" id="form-wizard" name="form-wizard" class="form-horizontal" method="post">
 						<input type="hidden" id="accion" name="accion" value="admitirMediapension" />
-						<input type="hidden" id="idmediapension" name="idmediapension" value="<?php echo $idmediapension;?>" />
+						<input type="hidden" id="idmediapension" name="idmediapension" value="<?php echo isset($idmediapension) ? $idmediapension : '';?>" />
 						<div id="form-wizard-1" class="step">
 							<div class="control-group">
 								<label class="control-label">Nome do pax</label>
@@ -38,7 +38,7 @@ $idlocales = $_SESSION["idlocales"];
 									<?php
 										$sqlQuery = " SELECT idpaises, nombre FROM paises ";
 										$resultado = resultFromQuery($sqlQuery);
-										echo comboFromArray('idpaises', $resultado, $idpaises, '', '');
+										echo comboFromArray('idpaises', $resultado, isset($idpaises) ? $idpaises : '', '', '');
 									?>								
 								</div>
 							</div>
@@ -62,7 +62,7 @@ $idlocales = $_SESSION["idlocales"];
 									<?php
 										$sqlQuery = " SELECT idservicios, nombre FROM  servicios WHERE idservicios < 6 ";
 										$resultado = resultFromQuery($sqlQuery);
-										echo comboFromArray('idservicios', $resultado, $idservicios, '', '', true);
+										echo comboFromArray('idservicios', $resultado, isset($idservicios) ? $idservicios : '', '', '', true);
 									?>								
 								</div>
 							</div>
@@ -72,7 +72,7 @@ $idlocales = $_SESSION["idlocales"];
 									<?php
 										$sqlQuery = " SELECT idoperadoresturisticos, nombre FROM operadoresturisticos";
 										$resultado = resultFromQuery($sqlQuery);
-										echo comboFromArray('idoperadoresturisticos', $resultado, $idoperadoresturisticos, '', '');
+										echo comboFromArray('idoperadoresturisticos', $resultado, isset($idoperadoresturisticos) ? $idoperadoresturisticos : '', '', '');
 									?>								
 								</div>
 							</div>
@@ -82,7 +82,7 @@ $idlocales = $_SESSION["idlocales"];
 									<?php
 										$sqlQuery = " SELECT idposadas, nombre FROM posadas";
 										$resultado = resultFromQuery($sqlQuery);
-										echo comboFromArray('idposadas', $resultado, $idposadas, '', '', false);
+										echo comboFromArray('idposadas', $resultado, isset($idposadas) ? $idposadas : '', '', '', false);
 									?>								
 								</div>
 							</div>
@@ -92,7 +92,7 @@ $idlocales = $_SESSION["idlocales"];
 									<?php
 										$sqlQuery = " SELECT idagencias, nombre FROM agencias";
 										$resultado = resultFromQuery($sqlQuery);
-										echo comboFromArray('idagencias', $resultado, $idagencias, '', '');
+										echo comboFromArray('idagencias', $resultado, isset($idagencias) ? $idagencias : '', '', '');
 									?>								
 								</div>
 							</div>
@@ -102,7 +102,7 @@ $idlocales = $_SESSION["idlocales"];
 									<?php
 										$sqlQuery = " SELECT idresponsablesDePago, nombre FROM responsablesDePago";
 										$resultado = resultFromQuery($sqlQuery);
-										echo comboFromArray('idresponsablesDePago', $resultado, $idresponsablesDePago, '', '');
+										echo comboFromArray('idresponsablesDePago', $resultado, isset($idresponsablesDePago) ? $idresponsablesDePago : '', '', '');
 									?>								
 								</div>
 							</div>
@@ -111,8 +111,8 @@ $idlocales = $_SESSION["idlocales"];
 								<label class="control-label">Hoteleria</label>
 								<div class="controls">
 									<SELECT required="true" ID="hoteleria" NAME="hoteleria" SIZE="1" onchange="" STYLE="">
-										<OPTION STYLE="" VALUE="0" <?php if (!$hoteleria){echo 'SELECTED';}?>>NO</OPTION>
-										<OPTION STYLE="" VALUE="1" <?php if ($hoteleria){echo 'SELECTED';}?>>SI</OPTION>
+										<OPTION STYLE="" VALUE="0" <?php !isset($hoteleria) ? 'SELECTED' : '';?>>NO</OPTION>
+										<OPTION STYLE="" VALUE="1" <?php isset($hoteleria) ? 'SELECTED' : '';?>>SI</OPTION>
 									</SELECT>								
 								</div>
 							</div>

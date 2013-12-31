@@ -1,6 +1,13 @@
 <?php 
 include "head.php"; 
 
+if (isset($_SESSION['referer'])){
+	$referer = $_SESSION['referer'];
+}
+else{
+	$referer = $_SERVER['HTTP_REFERER'];
+}
+
 if (isset($_SESSION['idhoteleria'])){
 	$idhoteleria = $_SESSION['idhoteleria'];
 	$current = 'Edit';
@@ -11,7 +18,9 @@ if (isset($_SESSION['idhoteleria'])){
 	$sqlQuery .= " LEFT JOIN huespedes H ON HTL.idhuespedes = H.idhuespedes ";
 	$sqlQuery .= " WHERE 1 ";
 	$sqlQuery .= " AND HTL.idhoteleria = ".$_SESSION["idhoteleria"];
-	$resultadoStringSQL = resultFromQuery($sqlQuery);		
+	
+	$resultadoStringSQL = resultFromQuery($sqlQuery);
+		
 	if ($row = siguienteResult($resultadoStringSQL)){
 		$idhuespedes = $row->idhuespedes;
 		$nomedopax = $row->nomedopax;
@@ -51,9 +60,12 @@ if (isset($_SESSION['idhoteleria'])){
 				</div>
 				<div class="widget-content nopadding">
 					<form action="posts.php" id="form" name="form" class="form-horizontal" method="post">
+						
 						<input type="hidden" id="accion" name="accion" value="admitirHoteleria" />
 						<input type="hidden" id="idhoteleria" name="idhoteleria" value="<?php echo $idhoteleria;?>" />
 						<input type="hidden" id="idhuespedes" name="idhuespedes" value="<?php echo $idhuespedes;?>" />
+						<input type="hidden" id="referer" name="referer" value="<?php echo $referer;?>" />
+						
 						<div class="control-group">
 							<label class="control-label">Nome do pax</label>
 							<div class="controls">

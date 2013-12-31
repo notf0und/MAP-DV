@@ -30,9 +30,17 @@
     </div>
     <div class="quick-actions_homepage">
       <ul class="quick-actions">
+		  
+		  <?php if ($_SESSION["idusuarios_tipos"] == 1) {?>
+			  <li class="bg_lg span2"> <a href="reservas.php"> <i class="icon-calendar"></i> Reservas</a> </li>
+		  <?php }?>
+		  
 		<?php if (($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 4) || ($_SESSION["idusuarios_tipos"] == 5) ) {?>
-        <li class="bg_lg span2"> <a href="reservas.php"> <i class="icon-calendar"></i> Reservas</a> </li>
         <li class="bg_lo span2"> <a href="salarios.php"> <i class="icon-sitemap"></i> Área Contable </a> </li>
+  		<?php }?>
+  		
+  		<?php if ($_SESSION["idusuarios_tipos"] == 1) {?>
+        <li class="bg_lg span2"> <a href="general.estatisticas.php"> <i class="icon-bar-chart"></i> Estatísticas</a> </li>
   		<?php }?>
 
 

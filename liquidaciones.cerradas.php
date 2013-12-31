@@ -29,7 +29,7 @@
 					$sqlQuery .= " AND idliquidaciones > 0 ";
 					$sqlQuery .= " AND L.idestados = 3 ";
 					$sqlQuery .= " ORDER BY L.idestados, L.fecha ";
-					echo tableFromResultGDA(resultFromQuery($sqlQuery), 'Liquidaciones', false, true, 'posts.php', true);
+					echo tableFromResult(resultFromQuery($sqlQuery), 'Liquidaciones', false, true, 'posts.php', true);
 				?>		  
 			</div>
 			</form>

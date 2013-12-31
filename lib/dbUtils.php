@@ -15,10 +15,10 @@
 
 		
 		//Muestra opciones segun configuración de la terminal
-		$ldb = parse_ini_file("./local-config.ini", true)[local_database];
+		$ldb = parse_ini_file("/home/sistemas/Documents/dasamericas/www/local-config.ini", true)['local_database'];
 		
 
-    	$dbConnection = &mysql_dbConnect($ldb[dbhost], $ldb[dbname], $ldb[user], $ldb[password]);
+    	$dbConnection = mysql_dbConnect($ldb['dbhost'], $ldb['dbname'], $ldb['user'], $ldb['password']);
     }
     
     return $dbConnection;
@@ -27,7 +27,13 @@
   function mysql_dbConnect($host, $database, $user, $pass) {
 //    $dbConn = ocilogon($user, $pass, $host);
     $dbConn = mysql_connect($host, $user, $pass);
-		mysql_select_db($database, $dbConn);
+	
+	mysql_query("SET NAMES 'utf8'");
+	mysql_query('SET character_set_connection=utf8');
+	mysql_query('SET character_set_client=utf8');
+	mysql_query('SET character_set_results=utf8');
+	
+	mysql_select_db($database, $dbConn);
     
     if (!$dbConn) {
       die('Could not connect to database: ' . mysql_error());
@@ -51,7 +57,7 @@
       $dbConn = &$_SESSION["dbConnection"];
     }
     
-    $dbConn = &dbConnect();
+    $dbConn = dbConnect();
     
     mysql_query("SET NAMES 'utf8'");
 	mysql_query('SET character_set_connection=utf8');
@@ -174,14 +180,16 @@
   };
   
   function mysql_tableFromResult($result, $name = '', $deletableRows = false, $modifiableRows = false) {
-		$table = '<TABLE class="table table-bordered data-table" name="'.$name.'" >';
-  	if ($deletableRows || $modifiableRows) {
-  		$table .= '<form name="'.$name.'Form" method="POST">';
-  	}
+		$table = '<TABLE class="table table-bordered data-table" name="'.$name.'" id="'.$name.'">';
+  	//if ($deletableRows || $modifiableRows) {
+  	//	$table .= '<form name="'.$name.'Form" method="POST">';
+  	//}
  		$table .= '<thead>';
+ 		$table .= '<tr>';
+ 		//Prepara las columnas a mostrar
 		for ($i = 1; $i < dbFieldCount($result); $i++) {
 			$colname = dbFieldName($result,$i);
-			$table .= '<TH>' . dbFieldName($result,$i) . '</TH>';
+			$table .= "\n\t".'<TH>' . dbFieldName($result,$i) . '</TH>';
 		}
 		if ($deletableRows) {
 			$table .= '<TH>Eliminar</TH>';
@@ -189,10 +197,14 @@
 		if ($modifiableRows) {
 			$table .= '<TH>Modificar</TH>';
 		}
+		$table .= '</tr>';
  		$table .= '</thead>';
  		$table .= '<tbody>';
+ 		
 		while ($row = siguienteResult($result)) {
-			$table = $table . '<TR>';
+			
+			$table .= "\n\t".'<TR>';
+			
 			for ($j = 1; $j < dbFieldCount($result); $j++) {
 				$colname = dbFieldName($result, $j);
 				switch($colname){
@@ -203,13 +215,11 @@
 						break;
 					case 'Pagamentos':
 						$table .= '<TD>';
-						if ($_SESSION["idusuarios_tipos"] == 1 || $_SESSION["idusuarios_tipos"] == 4){
-							$table .= '<a href="funcionarios.pagamentos.php?employee_id='.$row->id.'">Balance de Salario</a>';
-						}
+						$table .= '<a href="funcionarios.pagamentos.php?employee_id='.$row->id.'">Balance de Salario</a>';
 						$table .= '</TD>';
 						break;
 					default:
-						$table = $table . '<TD>' . $row->$colname . '</TD>';
+						$table .= '<TD>' . $row->$colname . '</TD>';
 						break;
 					}
 				}
@@ -227,10 +237,11 @@
 			$table = $table . '</TR>';
 		};
  		$table .= '</tbody>';
-  	if ($deletableRows || $modifiableRows) {
-  		$table .= '</form>';
-  	}
+  	//if ($deletableRows || $modifiableRows) {
+  	//	$table .= '</form>';
+  	//}
 		$table = $table . '</TABLE>';
+    
     return $table;
   };
 

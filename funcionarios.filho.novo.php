@@ -11,20 +11,6 @@ $sqlQuery .= "FROM employee E ";
 $sqlQuery .= "LEFT JOIN profile P ON E.profile_id = P.profile_id ";
 $resultado = resultFromQuery($sqlQuery);
 $comboemployee = comboFromArray('employee_id', $resultado, isset($employee_id) ? $employee_id : '', '', '', false, 'span4 m-wrap');
-
-//PAYMENT TYPE COMBO
-$sqlQuery = "SELECT paymenttype_id, ";
-$sqlQuery .= "type ";
-$sqlQuery .= "FROM paymenttype ";
-$resultado = resultFromQuery($sqlQuery);
-$combopaymenttype = comboFromArray('paymenttype_id', $resultado, isset($paymenttype_id) ? $paymenttype_id : '', '', '', false, 'span4 m-wrap');
-
-//PAYMENT METHOD COMBO
-$sqlQuery = "SELECT paymentmethod_id, ";
-$sqlQuery .= "method ";
-$sqlQuery .= "FROM paymentmethod ";
-$resultado = resultFromQuery($sqlQuery);
-$combopaymentmethod = comboFromArray('paymentmethod_id', $resultado, isset($paymentmethod_id) ? $paymentmethod_id : '', '', '', false, 'span4 m-wrap');
 ?>
 
 <!--main-container-part-->
@@ -34,8 +20,8 @@ $combopaymentmethod = comboFromArray('paymentmethod_id', $resultado, isset($paym
     <div id="breadcrumb"> 
 		<a href="index.php" title="Home" class="tip-bottom"><i class="icon-home"></i> Home</a> 
 		<a href="salarios.php" title="Área Contable" class="tip-bottom">Área Contable</a>
-		<a href="salarios.php" title="Pagamentos" class="tip-bottom">Pagamentos</a>
-		<a href="#" class="current">Registrar Pagamento</a>
+		<a href="funcionarios.php" title="Funcionarios" class="tip-bottom">Funcionarios</a>
+		<a href="#" class="current">Registrar filho</a>
 	</div>
   </div>
 <!--End-breadcrumbs-->
@@ -44,11 +30,11 @@ $combopaymentmethod = comboFromArray('paymentmethod_id', $resultado, isset($paym
 		<div class="span12">
 			<div class="widget-box">
 				<div class="widget-title"> <span class="icon"> <i class="icon-align-justify"></i> </span>
-					<h5>Registrar Pagamento</h5>
+					<h5>Registrar Filho</h5>
 				</div>
 				<div class="widget-content nopadding">
 					<form action="posts.php" id="form" name="form" class="form-horizontal" method="post">
-						<input type="hidden" id="accion" name="accion" value="admitPayment" />
+						<input type="hidden" id="accion" name="accion" value="admitEmployeeSon" />
 
 						<!--EMPLOYEE COMBO-->
 						<div class="control-group">
@@ -58,41 +44,30 @@ $combopaymentmethod = comboFromArray('paymentmethod_id', $resultado, isset($paym
 							</div>
 						</div>
 						
-						<!--PAYMENT TYPE COMBO-->
+						<!--SON INPUT-->
 						<div class="control-group">
-							<label class="control-label">Tipo</label>
+							<label class="control-label">Filho</label>
 							<div class="controls">
-								<?php echo $combopaymenttype; ?>
-							</div>
-						</div>
-						
-						<!--PAYMENT METHOD COMBO-->
-						<div class="control-group">
-							<label class="control-label">Método</label>
-							<div class="controls">
-								<?php echo $combopaymentmethod; ?>
-							</div>
-						</div>
-						
-						<!--AMMOUNT INPUT-->
-						<div class="control-group">
-							<label class="control-label">Monto</label>
-							<div class="controls">
-								<div class="input-prepend"> <span class="add-on">$</span>
-									<input id="ammount" name="ammount" type="text" class="span12 m-wrap"  required />
+								
+								<input id="name" name="name" type="text" class="span4 m-wrap" placeholder="Nome completo" required /><br>
+								
+								<div data-date="" class="input-append date datepicker">
+										<input id="birthdate" name="birthdate" type="text" data-date-format="yyyy-mm-dd" placeholder="Data de nascimento" value="<?php echo isset($birthdate) ? $birthdate : '' ;?>" required>
+										<span class="add-on"><i class="icon-th"></i></span>
 								</div>
+								
+								<li>
+								<SELECT ID="is_alive" NAME="is_alive" SIZE="1" placeholder="Status" class="span4 m-wrap">
+									  <OPTION VALUE="0">Vivo</OPTION>
+									  <OPTION VALUE="1">Defunto</OPTION>
+								</SELECT></li>
+								
+								
 							</div>
+							
+							
 						</div>
 						
-						<!--DETAILS TEXTAREA-->
-						<div class="control-group">
-							<label class="control-label">Detalhes</label>
-							<div class="controls">
-								<textarea id="details" name="details" class="span4"></textarea>
-							</div>
-						</div>
-						
-
 						<div class="control-group">
 							<br><button class="btn btn-success" type="submit">Aceitar</button>
 							<br><br>

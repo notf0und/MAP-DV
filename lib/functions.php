@@ -220,8 +220,8 @@ function liquidacionCambiarEstado($idliquidaciones, $idestados, $titulo){
 
 function liquidacionServicios($idresponsablesDePago, $id, $dataIN, $dataOUT){
 
-	eliminarTablesLiquidacionesMP();
-	crearTablesLiquidacionesMP();
+	eliminarTablesLiquidacionesMP();//DROP table _temp_liquidaciones_mp
+	crearTablesLiquidacionesMP();// CREATE table _temp_liquidaciones_mp
 	insertoBloqueDeMediapension($idresponsablesDePago, $id, $dataIN, $dataOUT);
 
 	eliminarTablesLiquidacionesHTL();
@@ -235,7 +235,7 @@ function liquidacionServicios($idresponsablesDePago, $id, $dataIN, $dataOUT){
 }
 
 function insertoBloqueDeMediapension($idresponsablesDePago, $id, $dataIN, $dataOUT){
-
+	
 	$sql = " SELECT idresponsablesDePago, nombre, tabla ";
 	$sql .= " FROM responsablesDePago "; 
 	$sql .= " WHERE 1 "; 
@@ -248,7 +248,7 @@ function insertoBloqueDeMediapension($idresponsablesDePago, $id, $dataIN, $dataO
 		$nombre = $rowLine->nombre;
 	}
 
-	$sql = " 	SELECT  MP.idmediapension, H.Titular 'Titular', MP.qtdedepax 'Q', A.Nombre 'Agencia', P.Nombre 'Posada', P.idposadas 'idposadas', MP.DataIN 'DataIN', MP.DataOUT 'DataOUT', MP.numeroexterno, MP.hoteleria ,  ";
+	$sql = "SELECT  MP.idmediapension, H.Titular 'Titular', MP.qtdedepax 'Q', A.Nombre 'Agencia', P.Nombre 'Posada', P.idposadas 'idposadas', MP.DataIN 'DataIN', MP.DataOUT 'DataOUT', MP.numeroexterno, MP.hoteleria ,  ";
 	$sql .= " 	DATEDIFF(MP.DataOUT, MP.DataIN) 'N', (MP.qtdedepax*DATEDIFF(MP.DataOUT, MP.DataIN)) 'M', S.Nombre 'Servicio', S.idservicios 'idservicios' ";
 	$sql .= " 	FROM `mediapension` MP  ";
 	$sql .= " 	LEFT JOIN huespedes H ON MP.idhuespedes = H.idhuespedes  ";
@@ -257,25 +257,29 @@ function insertoBloqueDeMediapension($idresponsablesDePago, $id, $dataIN, $dataO
 	$sql .= " 	LEFT JOIN servicios S ON MP.idservicios = S.idservicios  ";
 	$sql .= " 	WHERE 1  ";
 	$sql .= " 	AND MP.DataIN >= '".$dataIN."' AND MP.DataIN <= '".$dataOUT."'	 "; // las consultas en la fecha, no son un error, sino que se toma con la fecha de salida de la media pension.
-	$sql .= " 	AND MP.idliquidaciones = 0";  	
+	$sql .= " 	AND MP.idliquidaciones = 0 ";
+	$sql .= " 	AND MP.habilitado = 1";
 	if ($id > 0){
 		$sql .= " 	AND MP.id".$tabla." = ".$id;
 		$sql .= " 	AND MP.idresponsablesDePago = ".$idresponsablesDePago;
 	}
 	$resultado = resultFromQuery($sql);	
-
+	
 	while ($row = siguienteResult($resultado)) {
 		// echo 'idmediapension : '.$row->idmediapension.' - data: '.$row->DataIN.' - ('.$row->N.' Noches - '.$row->Q.' Q - '.$row->M.' MP) <br>';
 		// Inserto en tabla temporal para saber las diferencias en los precios que pueda llegar a existir
 		$start = strtotime($row->DataIN);
-		$end = strtotime($row->DataOUT.' -1 day');
-		for ( $i = $start; $i <= $end; $i += 86400 ){
+		$end = strtotime($row->DataOUT);
+		
+		for ($i=$start;$i<=$end;$i = $i + 86400 ){
+			
 
 			$fechaActual = date("Y-m-d",$i);
 			$data = $fechaActual;
 			$idposadas = $row->idposadas;
 			$idservicios = $row->idservicios;
 			//$precio = valordiaria($fechaActual, $row->idposadas, $row->idservicios); // Version antigua
+
 			$precio = valordiaria($data, $idresponsablesDePago, $id, $idservicios, $idposadas);
 
 			$sql = " INSERT INTO _temp_liquidaciones_mp_cuentas (data, precio) VALUES (";
@@ -284,6 +288,10 @@ function insertoBloqueDeMediapension($idresponsablesDePago, $id, $dataIN, $dataO
 			$sql .= " ) ";
 			$resultadoInsertLine = resultFromQuery($sql);	
 
+		}
+		
+		if ($_SESSION["idusuarios_tipos"] == 1) {
+				FB::info('Saliendo del for');
 		}
 		//hago un disctinct de los valores
 
@@ -752,7 +760,7 @@ function admitirServicioReservas($idreservas, $idposadas, $idhabitaciones, $qtde
 function precioListasdeprecios($idposadas_internas_idservicios, $idlistasdeprecios){
 	$sqlPrecios = "select precio from servicios_listasdeprecios where idlistasdeprecios = ".$idlistasdeprecios;
 	$sqlPrecios .= " and CONCAT(idposadas_internas, '_', idservicios) = '".$idposadas_internas_idservicios."';";
-	echo $sqlPrecios;
+	//echo $sqlPrecios;
 	$resultado = resultFromQuery($sqlPrecios);
 	if ($rowLine = siguienteResult($resultado)){
 		$precio = $rowLine->precio;
@@ -795,7 +803,6 @@ function admitirServicio($idmediapension, $qtdedepaxagora, $precio, $idlocales=0
 }
 
 function valordiaria($data, $idresponsablesDePago, $id, $idservicios, $idposadas){
-
 	/*
 	Si la siguiente consulta viene vacia, es porque la posada no tiene una lista de precios particualar para media pension 
 	y va a usar los precios genericos. Osea los estan para idposadas = 0.
@@ -866,11 +873,15 @@ function valordiaria($data, $idresponsablesDePago, $id, $idservicios, $idposadas
 		$valor = $resultado[0];
 	}
 	
+	if ($_SESSION["idusuarios_tipos"] == 1) {
+		FB::info('data: '.$data.' idresponsablesdepago: '.$idresponsablesDePago.' id: '.$id.' idservicios: '.$idservicios.' idposadas: '.$idposadas.' valor: '.$valor);
+	}
+	
 	return $valor;
 
 }
 
-function calcularDias($idmediapension, $qtycomidas, $dataIN, $dataOUT, $admisiones){
+function calcularDias($idmediapension, $qtycomidas, $admisiones){
 	
 	
 	$totalComidas = $qtycomidas;
@@ -926,6 +937,7 @@ function tableFromResultGDA($result, $name = '', $deletableRows = false, $modifi
 };
 
 function mysql_tableFromResultGDA($result, $name = '', $deletableRows = false, $modifiableRows = false, $link, $paginado) {
+	
 	if ($paginado){
 		$table = '<TABLE class="table table-bordered data-table" name="'.$name.'" >';
 	}else{
@@ -934,23 +946,28 @@ function mysql_tableFromResultGDA($result, $name = '', $deletableRows = false, $
 	if ($deletableRows || $modifiableRows) {
 		$table .= '<form name="'.$name.'Form" method="POST">';
 	}
-		$table .= '<thead>';
-		for ($i = 0; $i < dbFieldCount($result); $i++) {
-			$colname = dbFieldName($result,$i);
-			if (!(($colname == 'admisiones') || ($colname == 'idmediapension') || ($colname == 'idhabitaciones'))){
-				$table .= '<TH>' . dbFieldName($result,$i) . '</TH>';
-			}
+	
+	$table .= '<thead>';
+	
+	for ($i = 0; $i < dbFieldCount($result); $i++) {
+		$colname = dbFieldName($result,$i);
+		if (!(($colname == 'admisiones') || ($colname == 'idmediapension') || ($colname == 'idhabitaciones'))){
+			$table .= '<TH>' . dbFieldName($result,$i) . '</TH>';
 		}
-		$table .= '</thead>';
-		$table .= '<tbody>';
-		while ($row = siguienteResult($result)) {
-			$table = $table . '<TR>';
-			for ($j = 0; $j < dbFieldCount($result); $j++) {
-				$colname = dbFieldName($result, $j);
-					if (!(($colname == 'admisiones') || ($colname == 'idmediapension') || ($colname == 'idhabitaciones'))){
-						switch ($colname) {
-							case 'Dias':
-								$table = $table . '<TD class="span9">' . calcularDias($row->idmediapension, $row->Dias, $row->dataIN, $row->dataOUT, $row->admisiones). '</TD>';
+	}
+	
+	$table .= '</thead>';
+	$table .= '<tbody>';
+		
+	while ($row = siguienteResult($result)) {
+		
+		$table = $table . '<TR>';
+		for ($j = 0; $j < dbFieldCount($result); $j++) {
+			$colname = dbFieldName($result, $j);
+				if (!(($colname == 'admisiones') || ($colname == 'idmediapension') || ($colname == 'idhabitaciones'))){
+					switch ($colname) {
+						case 'Dias':
+								$table = $table . '<TD class="span9">' .calcularDias($row->idmediapension, $row->Dias, $row->admisiones). '</TD>';
 								break;
 							case 'calendario':
 								$table = $table . '<TD class="span9"> ' . reservasVector($row->calendario.','.$row->idhabitaciones) . ' </TD>';
@@ -978,7 +995,7 @@ function mysql_tableFromResultGDA($result, $name = '', $deletableRows = false, $
 	if ($deletableRows || $modifiableRows) {
 		$table .= '</form>';
 	}
-		$table = $table . '</TABLE><BR>';
+		$table = $table . '</TABLE>';
 	return $table;
 };
 

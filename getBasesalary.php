@@ -1,5 +1,5 @@
 <?php 
-include 'lib/dbUtils.php';
+include_once 'lib/dbUtils.php';
 
 $jobcategory=intval($_GET['jobcategory']);
 

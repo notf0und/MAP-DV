@@ -19,7 +19,7 @@
     <div class="quick-actions_homepage">
       <ul class="quick-actions">
   		
-  		<?php if (($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 4)) {?>
+  		<?php if (($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 4) || ($_SESSION["idusuarios_tipos"] == 5)) {?>
         <li class="bg_lr span2"> <a href="funcionarios.novo.php"> <i class="icon-plus"></i> Registrar </a> </li>
         <li class="bg_ly span2"> <a href="funcionarios.lista.php"> <i class="icon-list-alt"></i> Veja a lista </a> </li>
   		<?php } ?>

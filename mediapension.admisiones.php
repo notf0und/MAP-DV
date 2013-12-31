@@ -4,8 +4,8 @@ $script_name = $_SERVER['SCRIPT_NAME'];
 
 //Lista con informacion detallada de los consumos
 $sqlQuery = " SELECT ";
-$sqlQuery .= " MPA.idmediapension, ";				
-$sqlQuery .= " MPA.data 'Data de admision', ";
+$sqlQuery .= " MPA.idmediapension, ";
+$sqlQuery .= " DATE_FORMAT(MPA.data, '%d/%c - %H:%i') 'Data de admision', ";
 $sqlQuery .= " MPA.qtdedepax 'Pessoas', ";
 $sqlQuery .= " L.nombre 'Resto' ";
 $sqlQuery .= " FROM mediapension_admisiones MPA ";

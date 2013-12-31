@@ -1,7 +1,9 @@
 <?php 
 	include "lib/sessionLib.php";
-	//include "dBug.php";
-	//new dBug($_POST);
+	if ($_SESSION["idusuarios_tipos"] == 1){
+		include "dBug.php";
+		new dBug($_POST);
+	}
 	//var_dump($_POST);
 	//die($_POST);
 
@@ -426,6 +428,8 @@ if (isset( $_POST['accion'] )) {
 /* Hoteleria */
 
 	if ($_POST['accion'] == 'admitirHoteleria') {
+		
+		$referer = $_POST['referer'];
 
 		$idhoteleria = $_POST['idhoteleria'];
 		$numeroexterno = $_POST['numeroexterno'];
@@ -470,8 +474,6 @@ if (isset( $_POST['accion'] )) {
 			$resultadoStringSQL = resultFromQuery($sql);		
 
 			bitacoras($_SESSION["idusuarios"], 'Modificacion de Voucher HTL: ID '.$idhoteleria);
-			echo '<script languaje="javascript"> self.location="hoteleria.vouchers.php"</script>';
-			
 		} else {
 		
 			//INSERT HUESPED
@@ -496,11 +498,17 @@ if (isset( $_POST['accion'] )) {
 			$sql .= "".$qtdedenoites.",";
 			$sql .= "".$idservicios.",";
 			$sql .= "".$idlocales.") ";
+			
 			$resultadoStringSQL = resultFromQuery($sql);		
 			$idmediapension = mysql_insert_id();
+			
 			bitacoras($_SESSION["idusuarios"], 'Insertar HTL: ID '.$idhoteleria);
-
+		}
 		
+		if (isset($referer)){
+			echo '<script languaje="javascript"> self.location="'.$referer.'"</script>';
+		}
+		else{
 			echo '<script languaje="javascript"> self.location="hoteleria.vouchers.php"</script>';
 		}
 		
@@ -513,6 +521,7 @@ if (isset( $_POST['accion'] )) {
 
 	if ($_POST['accion'] == 'VouchersHTLModify') {
 		$_SESSION['idhoteleria'] = $_POST['id'];
+		$_SESSION['referer'] = $_SERVER['HTTP_REFERER'];
 		echo '<script languaje="javascript"> self.location="hoteleria.vouchers.edit.php"</script>';
 	}
 
@@ -571,6 +580,8 @@ if (isset( $_POST['accion'] )) {
 	}
 
 	if ($_POST['accion'] == 'admitirMediapension') {
+		
+		$referer = $_POST['referer'];
 
 		$idmediapension = $_POST['idmediapension'];
 		$numeroexterno = $_POST['numeroexterno'];//ok
@@ -636,7 +647,6 @@ if (isset( $_POST['accion'] )) {
 			$resultadoStringSQL = resultFromQuery($sql);		
 
 			bitacoras($_SESSION["idusuarios"], 'Modificacion de Voucher MP: ID '.$idmediapension);
-			echo '<script languaje="javascript"> self.location="mediapension.vouchers.php"</script>';
 			
 		} else {
 		
@@ -674,22 +684,26 @@ if (isset( $_POST['accion'] )) {
 			
 			if ($qtdedepaxagora)
 			{ 
-			bitacoras($_SESSION["idusuarios"], 'Insertar $qtdedepaxagora: '.$qtdedepaxagora);
+			bitacoras($_SESSION["idusuarios"], 'Insertar admision x '.$qtdedepaxagora);
 			//INSERT MEDIAPENSION ADMICION
 			$datadiaria = date("Y-m-d");
 			//$precio = valordiaria($datadiaria, $idposadas, $idservicios);
 			$precio = 0;
 			$idadmision = admitirServicio($idmediapension, $qtdedepaxagora, $precio, $idlocales);
 			}
-			
-			if ($_SESSION["idlocales"]>0){
-				echo '<script languaje="javascript"> self.location="mediapension.print.php?id='.$idadmision.'"</script>';
-			}else{
-				
-				echo '<script languaje="javascript"> self.location="mediapension.vouchers.php"</script>';
-			}
+	
 		}
 		
+		if ($_SESSION["idlocales"]>0){
+				echo '<script languaje="javascript"> self.location="mediapension.print.php?id='.$idadmision.'"</script>';
+			}else{
+				if (isset($referer)){
+					echo '<script languaje="javascript"> self.location="'.$referer.'"</script>';
+				}
+				else{
+					echo '<script languaje="javascript"> self.location="mediapension.lista.php"</script>';
+				}
+			}		
 	}
 
 	if ($_POST['accion'] == 'borrarMediapension') {
@@ -765,14 +779,22 @@ if (isset( $_POST['accion'] )) {
 		}
 		
 	}
+	
+	if ($_POST['accion'] == 'ReportesModify') {
+		$_SESSION['idmediapension'] = -1;
+		$_SESSION['referer'] = $_SERVER['HTTP_REFERER'];
+		echo '<script languaje="javascript"> self.location="mediapension.vouchers.edit.php"</script>';
+	}
 
 	if ($_POST['accion'] == 'VouchersMPNew') {
 		$_SESSION['idmediapension'] = -1;
+		$_SESSION['referer'] = $_SERVER['HTTP_REFERER'];
 		echo '<script languaje="javascript"> self.location="mediapension.vouchers.edit.php"</script>';
 	}
 
 	if ($_POST['accion'] == 'VouchersMPModify') {
 		$_SESSION['idmediapension'] = $_POST['id'];
+		$_SESSION['referer'] = $_SERVER['HTTP_REFERER'];
 		echo '<script languaje="javascript"> self.location="mediapension.vouchers.edit.php"</script>';
 	}
 
@@ -826,8 +848,9 @@ if (isset( $_POST['accion'] )) {
 			$sql = "update ddv2_posiciones set ";
 			$sql .= "nombre = '".$nombre."' ";
 			$sql .= "where idddv2_posiciones = ".$_SESSION['idddv2_posiciones'];
-		} else {
-		
+		}
+		else {
+			
 			//INSERT HUESPED
 			$sql = "insert huespedes (titular) values (";
 			$sql .= "'".$nomedopax."') ";
@@ -916,308 +939,574 @@ if (isset( $_POST['accion'] )) {
 
 /* Area Contable */
 	if ($_POST['accion'] == 'admitirEmpleado') {
-			
-		//INSERT ADDRESS
-		//Parametros que se van a pasar
-		$sql = "INSERT address(";
-		$sql .= $_POST['city_id'] != '' ? 'city_id' : '';//Validar, debe ir obligatoriamente
-		$sql .= $_POST['neightborhood'] != '' ? ', neightborhood' : '';
-		$sql .= $_POST['address'] != '' ? ', address' : '';
-		$sql .= $_POST['addressnumber'] != '' ? ', addressnumber' : '';
-		$sql .= $_POST['addressfloor'] != '' ? ', addressfloor' : '';
-		$sql .= $_POST['addressapartment'] != '' ? ', addressapartment' : '';
-		$sql .= ") ";
 		
-		//Valores a pasar
-		$sql .= "VALUES (";		
-		$sql .= $_POST['city_id'] != '' ? $_POST['city_id'] : '';
-		$sql .= $_POST['neightborhood'] != '' ? ', '."'".$_POST['neightborhood']."'" : '';
-		$sql .= $_POST['address'] != '' ? ', '."'".$_POST['address']."'" : '';
-		$sql .= $_POST['addressnumber'] != '' ? ', '."'".$_POST['addressnumber']."'" : '';
-		$sql .= $_POST['addressfloor'] != '' ? ', '."'".$_POST['addressfloor']."'" : '';
-		$sql .= $_POST['addressapartment'] != '' ? ', '."'".$_POST['addressapartment']."'" : '';
-		$sql .= ")";
-		
-		$resultado = resultFromQuery($sql);
-		$address_id = mysql_insert_id();
-		
-		//INSERT PROFILE
-		
-		//Validación de fechas
-		include_once 'lib/functions.php';
-		$birthdate = dateFormatMySQL($_POST['birthdate']);
-		
-		//Parametros a pasar
-		$sql = "INSERT profile(";
-		$sql .= $_POST['profile_firstname'] != '' ? 'firstname' : '';//Validar, debe ir obligatoriamente
-		$sql .= $_POST['profile_lastname'] != '' ? ', lastname' : '';
-		$sql .= $_POST['sex_id'] != 0 ? ', sex_id' : '';
-		$sql .= $birthdate ? ', birthdate' : '';
-		$sql .= $_POST['birth_city_id'] != '' ? ', birth_city_id' : '';
-		$sql .= $_POST['fathername'] != '' ? ', fathername' : '';
-		$sql .= $_POST['mothername'] != '' ? ', mothername' : '';
-		$sql .= $_POST['civilstatus'] != '' ? ', civilstatus' : '';
-		$sql .= $_POST['marriedname'] != '' ? ', marriedname' : '';
-		$sql .= $_POST['education_id'] != 0 ? ', education_id' : '';
-		$sql .= $address_id != '' ? ', address_id' : '';
-		$sql .= ") ";
-		
-		//Valores a pasar
-		$sql .= "VALUES (";		
-		$sql .= $_POST['profile_firstname'] != '' ? "'".$_POST['profile_firstname']."'" : '';
-		$sql .= $_POST['profile_lastname'] != '' ? ', '."'".$_POST['profile_lastname']."'" : '';
-		$sql .= $_POST['sex_id'] != 0 ? ', '.$_POST['sex_id'] : '';
-		$sql .= $birthdate ? ', '."'".$birthdate."'" : '';
-		$sql .= $_POST['birth_city_id'] != '' ? ', '.$_POST['birth_city_id'] : '';
-		$sql .= $_POST['fathername'] != '' ? ', '."'".$_POST['fathername']."'" : '';
-		$sql .= $_POST['mothername'] != '' ? ', '."'".$_POST['mothername']."'" : '';
-		$sql .= $_POST['civilstatus'] != '' ? ', '.$_POST['civilstatus'] : '';
-		$sql .= $_POST['marriedname'] != '' ? ', '."'".$_POST['marriedname']."'" : '';
-		$sql .= $_POST['education_id'] != 0 ? ', '.$_POST['education_id'] : '';
-		$sql .= $address_id != '' ? ', '.$address_id : '';
-		$sql .= ")";
-		
-		$resultado = resultFromQuery($sql);
-		$profile_id = mysql_insert_id();
-		
-		//INSERT PHONE
-		if ($_POST['phone1'] != ''){
-			//Parametros a pasar
-			$sql = "INSERT phone_number(";
-			$sql .= 'number';
-			$sql .= ", phone_type_id";
-			$sql .= ") ";
+		if ($_POST['edit'] == true) {
 			
-			//Valores a pasar
-			$sql .= "VALUES (";		
-			$sql .= "'".$_POST['phone1']."'";
-			$sql .= ", 5"; //De momento los ingresa como celular a todos (5)
-			$sql .= ")";
+			//UPDATE
+			//ADDRESS
+			if ($_POST['city_id'] != 0){
+				$table = 'address';	
+				$column = getColumns($table);
+				
+				$value = ['', $_POST['city_id'], $_POST['neightborhood'], $_POST['address'], $_POST['addressnumber'], $_POST['addressfloor'], $_POST['addressapartment']];
+				
+				//if (isset($_POST['address_id']) && $_POST['address_id'] != ''){
+				if (isset($_POST[$table.'_id']) && $_POST[$table.'_id'] != ''){
+					$address_id = $_POST[$table.'_id'];
+					$condition = $table.'_id = '.$address_id;
+					$sqlQuery = updateQuery($table, $column, $value, $condition);
+					$resultado = resultFromQuery($sqlQuery);
+				}
+				else{
+					$sqlQuery = insertQuery($table, $column, $value);
+					$resultado = resultFromQuery($sqlQuery);
+					$address_id = mysql_insert_id();
+				}
+			}
 			
-			$resultado = resultFromQuery($sql);
-			$phone_number_id = mysql_insert_id();
+			//PROFILE
+			//Validación de fechas
+			include_once 'lib/functions.php';
+			$birthdate = dateFormatMySQL($_POST['birthdate']);
 			
-			//INSERT PROFILE_PHONE
-			//Parametros a pasar
-			$sql = "INSERT profile_phone(profile_id, phone_number_id) ";
+			//Validacion de seleccion de ciudad de nacimiento
+			$birth_city_id = isset($_POST['birth_city_id']) && $_POST['birth_city_id'] != 'Cidade' ? $_POST['birth_city_id'] : NULL;
+			$education_id = isset($_POST['education_id']) && $_POST['education_id'] != 0 ? $_POST['education_id'] : NULL;
 			
-			//Valores a pasar
-			$sql .= "VALUES (";	
-			$sql .= $profile_id.", ";
-			$sql .= $phone_number_id;	
-			$sql .= ")";
 			
-			$resultado = resultFromQuery($sql);
-		}
+			$table = 'profile';
 			
-		//INSERT WORKINGCARD (Carteira de trabalho)
-		if ($_POST['carteiranumber'] != ''){
+			$column = getColumns($table);
 			
+			
+			
+			$value = ['', $_POST['profile_firstname'], $_POST['profile_lastname'], $_POST['sex_id'], $birthdate, $birth_city_id, $_POST['fathername'], $_POST['mothername'], $_POST['civilstatus'], $_POST['marriedname'], $education_id, $address_id];
+			
+			if (isset($_POST[$table.'_id']) && $_POST[$table.'_id'] != ''){
+				$profile_id = $_POST[$table.'_id'];
+				$condition = $table.'_id = '.$profile_id;
+				$sqlQuery = updateQuery($table, $column, $value, $condition);
+				$resultado = resultFromQuery($sqlQuery);
+			}
+			else{
+				$sqlQuery = insertQuery($table, $column, $value);
+				$resultado = resultFromQuery($sqlQuery);
+				$profile_id = mysql_insert_id();
+			}
+			
+			//FALTA PHONE
+			
+			//Carteira de Trabalho
+			if ($_POST['carteiranumber'] != ''){
+			
+				//Validacion de fechas
+				$carteiradate = dateFormatMySQL($_POST['carteiradate']);
+				
+				$table = 'workingcard';
+				
+				$column = getColumns($table);
+				
+				$value = ['', $_POST['profile_id'], $_POST['carteiranumber'], $_POST['carteiraserie'], $carteiradate];
+				
+				if (isset($_POST[$table.'_id']) && $_POST[$table.'_id'] != ''){
+					$workingcard_id = $_POST[$table.'_id'];
+					$condition = $table.'_id = '.$workingcard_id;
+					$sqlQuery = updateQuery($table, $column, $value, $condition);
+					$resultado = resultFromQuery($sqlQuery);
+				}
+				else{
+					$sqlQuery = insertQuery($table, $column, $value);
+					$resultado = resultFromQuery($sqlQuery);
+					$workingcard_id = mysql_insert_id();
+				}
+			}
+			
+			//CPF
+			if ($_POST['cpfnumber'] != ''){
+				$table = 'cpfcard';
+				
+				$column = getColumns($table);
+				
+				$value = ['', $_POST['profile_id'], $_POST['cpfnumber']];
+				
+				if (isset($_POST[$table.'_id']) && $_POST[$table.'_id'] != ''){
+					$cpfcard_id = $_POST[$table.'_id'];
+					$condition = $table.'_id = '.$cpfcard_id;
+					$sqlQuery = updateQuery($table, $column, $value, $condition);
+					$resultado = resultFromQuery($sqlQuery);
+				}
+				else{
+					$sqlQuery = insertQuery($table, $column, $value);
+					$resultado = resultFromQuery($sqlQuery);
+					$cpfcard_id = mysql_insert_id();
+				}
+			}
+			
+			//INSERT VOTINGCARD (Titulo Eleitor)
+			if ($_POST['eleitornumber'] != ''){
+				
+				//Validacion de fechas
+				$eleitordate = dateFormatMySQL($_POST['eleitordate']);
+				
+				$table = 'votingcard';
+				
+				$column = getColumns($table);
+				
+				$value = ['', $_POST['profile_id'], $_POST['eleitornumber'], $_POST['eleitorzone'], $_POST['eleitorsection'], $eleitordate];
+				
+				if (isset($_POST[$table.'_id']) && $_POST[$table.'_id'] != ''){
+					$votingcard_id = $_POST[$table.'_id'];
+					$condition = $table.'_id = '.$votingcard_id;
+					$sqlQuery = updateQuery($table, $column, $value, $condition);
+					$resultado = resultFromQuery($sqlQuery);
+				}
+				else{
+					$sqlQuery = insertQuery($table, $column, $value);
+					$resultado = resultFromQuery($sqlQuery);
+					$votingcard_id = mysql_insert_id();
+				}
+			}
+	
+			//INSERT RGCARD (Registro de identidade RG)
+			if ($_POST['idnumber'] != ''){
+				
+				//Validacion de fechas
+				$iddate = dateFormatMySQL($_POST['iddate']);
+				
+				$table = 'rgcard';
+				
+				$column = getColumns($table);
+				
+				$value = ['', $_POST['profile_id'], $_POST['idnumber'], $_POST['idexpeditor'], $iddate];
+				
+				if (isset($_POST[$table.'_id']) && $_POST[$table.'_id'] != ''){
+					$rgcard_id = $_POST[$table.'_id'];
+					$condition = $table.'_id = '.$rgcard_id;
+					$sqlQuery = updateQuery($table, $column, $value, $condition);
+					$resultado = resultFromQuery($sqlQuery);
+				}
+				else{
+					$sqlQuery = insertQuery($table, $column, $value);
+					$resultado = resultFromQuery($sqlQuery);
+					$rgcard_id = mysql_insert_id();
+				}
+			}
+			
+			//PISCARD (Programa de integração Social PS)
+			if ($_POST['pisnumber'] != ''){
+				
+				//Validacion de fechas
+				$pisdate = dateFormatMySQL($_POST['pisdate']);
+				
+				$table = 'piscard';
+				
+				$column = getColumns($table);
+				
+				$value = ['', $_POST['profile_id'], $_POST['pisnumber'], $_POST['pisbanknumber'], $pisdate];
+				
+				if (isset($_POST[$table.'_id']) && $_POST[$table.'_id'] != ''){
+					$piscard_id = $_POST[$table.'_id'];
+					$condition = $table.'_id = '.$piscard_id;
+					$sqlQuery = updateQuery($table, $column, $value, $condition);
+					$resultado = resultFromQuery($sqlQuery);
+				}
+				else{
+					$sqlQuery = insertQuery($table, $column, $value);
+					$resultado = resultFromQuery($sqlQuery);
+					$piscard_id = mysql_insert_id();
+				}
+			}
+		
+			//MILITARYCARD (Certificado militar)
+			if ($_POST['milcertnumber'] != ''){
+				
+				$table = 'militarycard';
+				
+				$column = getColumns($table);
+				
+				$value = ['', $_POST['profile_id'], $_POST['milcertnumber'], $_POST['milcertserie'], $_POST['milcertcategory']];
+				
+				if (isset($_POST[$table.'_id']) && $_POST[$table.'_id'] != ''){
+					$militarycard_id = $_POST[$table.'_id'];
+					$condition = $table.'_id = '.$militarycard_id;
+					$sqlQuery = updateQuery($table, $column, $value, $condition);
+					//$resultado = resultFromQuery($sqlQuery);
+				}
+				else{
+					$sqlQuery = insertQuery($table, $column, $value);
+					$resultado = resultFromQuery($sqlQuery);
+					$militarycard_id = mysql_insert_id();
+				}
+			}
+			
+			//HABILITATION CARD
+			if ($_POST['habilitationnumber'] != ''){
+				
+				//Validacion de fechas
+				$habilitationdate = dateFormatMySQL($_POST['habilitationdate']);
+				$habilitationvaliddate = dateFormatMySQL($_POST['habilitationvaliddate']);
+				
+				$table = 'habilitationcard';
+				
+				$column = getColumns($table);
+				
+				$value = ['', $_POST['profile_id'], $_POST['habilitationnumber'], $_POST['habilitationcategory'], $habilitationdate, $habilitationvaliddate];
+				
+				if (isset($_POST[$table.'_id']) && $_POST[$table.'_id'] != ''){
+					$habilitationcard_id = $_POST[$table.'_id'];
+					$condition = $table.'_id = '.$habilitationcard_id;
+					$sqlQuery = updateQuery($table, $column, $value, $condition);
+					$resultado = resultFromQuery($sqlQuery);
+				}
+				else{
+					$sqlQuery = insertQuery($table, $column, $value);
+					$resultado = resultFromQuery($sqlQuery);
+					$habilitationcard_id = mysql_insert_id();
+				}
+			}
+			
+			//EMPLOYEE
 			//Validacion de fechas
-			$carteiradate = dateFormatMySQL($_POST['carteiradate']);
-		
+			$admissiondate = dateFormatMySQL($_POST['admissiondate']);
+			$contractdate = dateFormatMySQL($_POST['contractdate']);
+			
+			//Conversion de , a .
+			$transportvalue = str_replace(',', '.', $_POST['transportvalue']);
+			
+			//Comprobacion de checkbox de insalubridad
+			$unhealthy = isset($_POST['unhealthy']) ? 1  : '0';
+			
+			$table = 'employee';
+				
+			$column = getColumns($table);
+				
+			$value = ['', $_POST['profile_id'], $_POST['idempresa'], $_POST['jobcategory_id'], $_POST['bonussalary'], $admissiondate, $contractdate, $transportvalue, $_POST['traject'], $_POST['fromhour'], $_POST['tohour'], $_POST['intervalhour'], $_POST['experiencecontract'], $unhealthy];
+				
+			if (isset($_POST[$table.'_id']) && $_POST[$table.'_id'] != ''){
+				$employee_id = $_POST[$table.'_id'];
+				$condition = $table.'_id = '.$employee_id;
+				$sqlQuery = updateQuery($table, $column, $value, $condition);
+				$resultado = resultFromQuery($sqlQuery);
+			}
+			else{
+				$sqlQuery = insertQuery($table, $column, $value);
+				$resultado = resultFromQuery($sqlQuery);
+				$employee_id = mysql_insert_id();
+			}
+			echo '<script languaje="javascript"> self.location="funcionarios.lista.php"</script>';
+		}
+		else{
+			//INSERT ADDRESS
+			//Parametros que se van a pasar
+			if ($_POST['city_id'] != 0){
+				
+				$sql = "INSERT address(";
+				$sql .= $_POST['city_id'] != '' ? 'city_id' : '';//Validar, debe ir obligatoriamente
+				$sql .= $_POST['neightborhood'] != '' ? ', neightborhood' : '';
+				$sql .= $_POST['address'] != '' ? ', street' : '';
+				$sql .= $_POST['addressnumber'] != '' ? ', number' : '';
+				$sql .= $_POST['addressfloor'] != '' ? ', floor' : '';
+				$sql .= $_POST['addressapartment'] != '' ? ', apartment' : '';
+				$sql .= ") ";
+				
+				//Valores a pasar
+				$sql .= "VALUES (";		
+				$sql .= $_POST['city_id'] != '' ? $_POST['city_id'] : '';
+				$sql .= $_POST['neightborhood'] != '' ? ', '."'".$_POST['neightborhood']."'" : '';
+				$sql .= $_POST['address'] != '' ? ', '."'".$_POST['address']."'" : '';
+				$sql .= $_POST['addressnumber'] != '' ? ', '."'".$_POST['addressnumber']."'" : '';
+				$sql .= $_POST['addressfloor'] != '' ? ', '."'".$_POST['addressfloor']."'" : '';
+				$sql .= $_POST['addressapartment'] != '' ? ', '."'".$_POST['addressapartment']."'" : '';
+				$sql .= ")";
+				
+				$resultado = resultFromQuery($sql);
+				$address_id = mysql_insert_id();
+			}
+			
+			//INSERT PROFILE
+			
+			//Validación de fechas
+			include_once 'lib/functions.php';
+			$birthdate = dateFormatMySQL($_POST['birthdate']);
+			
 			//Parametros a pasar
-			$sql = "INSERT workingcard(";
-			$sql .= "profile_id";
-			$sql .= $_POST['carteiranumber'] != '' ? ', number' : '';
-			$sql .= $_POST['carteiraserie'] != '' ? ', serie' : '';
-			$sql .= $carteiradate ? ', expedition_date' : '';
+			$sql = "INSERT profile(";
+			$sql .= $_POST['profile_firstname'] != '' ? 'firstname' : '';//Validar, debe ir obligatoriamente
+			$sql .= $_POST['profile_lastname'] != '' ? ', lastname' : '';
+			$sql .= $_POST['sex_id'] != 0 ? ', sex_id' : '';
+			$sql .= $birthdate ? ', birthdate' : '';
+			$sql .= $_POST['birth_city_id'] != 'Cidade' ? ', birth_city_id' : '';
+			$sql .= $_POST['fathername'] != '' ? ', fathername' : '';
+			$sql .= $_POST['mothername'] != '' ? ', mothername' : '';
+			$sql .= $_POST['civilstatus'] != '' ? ', civilstatus' : '';
+			$sql .= $_POST['marriedname'] != '' ? ', marriedname' : '';
+			$sql .= $_POST['education_id'] != 0 ? ', education_id' : '';
+			$sql .= isset($address_id) ? ', address_id' : '';
 			$sql .= ") ";
 			
 			//Valores a pasar
 			$sql .= "VALUES (";		
-			$sql .= $profile_id;
-			$sql .= $_POST['carteiranumber'] != '' ? ', '.$_POST['carteiranumber'] : '';
-			$sql .= $_POST['carteiraserie'] != '' ? ', '."'".$_POST['carteiraserie']."'" : '';
-			$sql .= $carteiradate ? ', '."'".$carteiradate."'" : '';
+			$sql .= $_POST['profile_firstname'] != '' ? "'".$_POST['profile_firstname']."'" : '';
+			$sql .= $_POST['profile_lastname'] != '' ? ', '."'".$_POST['profile_lastname']."'" : '';
+			$sql .= $_POST['sex_id'] != 0 ? ', '.$_POST['sex_id'] : '';
+			$sql .= $birthdate ? ', '."'".$birthdate."'" : '';
+			$sql .= $_POST['birth_city_id'] != 'Cidade' ? ', '.$_POST['birth_city_id'] : '';
+			$sql .= $_POST['fathername'] != '' ? ', '."'".$_POST['fathername']."'" : '';
+			$sql .= $_POST['mothername'] != '' ? ', '."'".$_POST['mothername']."'" : '';
+			$sql .= $_POST['civilstatus'] != '' ? ', '.$_POST['civilstatus'] : '';
+			$sql .= $_POST['marriedname'] != '' ? ', '."'".$_POST['marriedname']."'" : '';
+			$sql .= $_POST['education_id'] != 0 ? ', '.$_POST['education_id'] : '';
+			$sql .= isset($address_id) ? ', '.$address_id : '';
 			$sql .= ")";
-		
-			$resultado = resultFromQuery($sql);
-		}
-		
-		//INSERT CPFCARD (CPF)
-		if ($_POST['cpfnumber'] != ''){
-			//Parametros a pasar
-			$sql = "INSERT cpfcard(";
-			$sql .= "profile_id";
-			$sql .= $_POST['cpfnumber'] != '' ? ', number' : '';
-			$sql .= ") ";
 			
-			//Valores a pasar
-			$sql .= "VALUES (";		
-			$sql .= $profile_id;
-			$sql .= $_POST['cpfnumber'] != '' ? ', '.$_POST['cpfnumber'] : '';
-			$sql .= ")";
-		
 			$resultado = resultFromQuery($sql);
-		}
-		
-		//INSERT VOTINGCARD (Titulo Eleitor)
-		if ($_POST['eleitornumber'] != ''){
+			$profile_id = mysql_insert_id();
 			
+			//INSERT PHONE
+			if ($_POST['phone1'] != ''){
+				//Parametros a pasar
+				$sql = "INSERT phone_number(";
+				$sql .= 'number';
+				$sql .= ", phone_type_id";
+				$sql .= ") ";
+				
+				//Valores a pasar
+				$sql .= "VALUES (";		
+				$sql .= "'".$_POST['phone1']."'";
+				$sql .= ", 5"; //De momento los ingresa como celular a todos (5)
+				$sql .= ")";
+				
+				$resultado = resultFromQuery($sql);
+				$phone_number_id = mysql_insert_id();
+				
+				//INSERT PROFILE_PHONE
+				//Parametros a pasar
+				$sql = "INSERT profile_phone(profile_id, phone_number_id) ";
+				
+				//Valores a pasar
+				$sql .= "VALUES (";	
+				$sql .= $profile_id.", ";
+				$sql .= $phone_number_id;	
+				$sql .= ")";
+				
+				$resultado = resultFromQuery($sql);
+			}
+				
+			//INSERT WORKINGCARD (Carteira de trabalho)
+			if ($_POST['carteiranumber'] != ''){
+				
+				//Validacion de fechas
+				$carteiradate = dateFormatMySQL($_POST['carteiradate']);
+			
+				//Parametros a pasar
+				$sql = "INSERT workingcard(";
+				$sql .= "profile_id";
+				$sql .= $_POST['carteiranumber'] != '' ? ', number' : '';
+				$sql .= $_POST['carteiraserie'] != '' ? ', serie' : '';
+				$sql .= $carteiradate ? ', expedition_date' : '';
+				$sql .= ") ";
+				
+				//Valores a pasar
+				$sql .= "VALUES (";		
+				$sql .= $profile_id;
+				$sql .= $_POST['carteiranumber'] != '' ? ', '.$_POST['carteiranumber'] : '';
+				$sql .= $_POST['carteiraserie'] != '' ? ', '."'".$_POST['carteiraserie']."'" : '';
+				$sql .= $carteiradate ? ', '."'".$carteiradate."'" : '';
+				$sql .= ")";
+			
+				$resultado = resultFromQuery($sql);
+			}
+			
+			//INSERT CPFCARD (CPF)
+			if ($_POST['cpfnumber'] != ''){
+				//Parametros a pasar
+				$sql = "INSERT cpfcard(";
+				$sql .= "profile_id";
+				$sql .= $_POST['cpfnumber'] != '' ? ', number' : '';
+				$sql .= ") ";
+				
+				//Valores a pasar
+				$sql .= "VALUES (";		
+				$sql .= $profile_id;
+				$sql .= $_POST['cpfnumber'] != '' ? ", '".$_POST['cpfnumber']."'" : '';
+				$sql .= ")";
+			
+				$resultado = resultFromQuery($sql);
+			}
+			
+			//INSERT VOTINGCARD (Titulo Eleitor)
+			if ($_POST['eleitornumber'] != ''){
+				
+				//Validacion de fechas
+				$eleitordate = dateFormatMySQL($_POST['eleitordate']);
+				
+				//Parametros a pasar
+				$sql = "INSERT votingcard(";
+				$sql .= "profile_id";
+				$sql .= $_POST['eleitornumber'] != '' ? ', number' : '';
+				$sql .= $_POST['eleitorzone'] != '' ? ', zone' : '';
+				$sql .= $_POST['eleitorsection'] != '' ? ', section' : '';
+				$sql .= $eleitordate ? ', emissiondate' : '';
+				$sql .= ") ";
+				
+				//Valores a pasar
+				$sql .= "VALUES (";		
+				$sql .= $profile_id;
+				$sql .= $_POST['eleitornumber'] != '' ? ', '."'".$_POST['eleitornumber']."'" : '';
+				$sql .= $_POST['eleitorzone'] != '' ? ', '."'".$_POST['eleitorzone']."'" : '';
+				$sql .= $_POST['eleitorsection'] != '' ? ', '."'".$_POST['eleitorsection']."'" : '';
+				$sql .= $eleitordate ? ', '."'".$eleitordate."'" : '';
+				$sql .= ")";
+			
+				$resultado = resultFromQuery($sql);
+			}
+			
+			//INSERT RGCARD (Registro de identidade RG)
+			if ($_POST['idnumber'] != ''){
+				
+				//Validacion de fechas
+				$iddate = dateFormatMySQL($_POST['iddate']);
+				
+				//Parametros a pasar
+				$sql = "INSERT rgcard(";
+				$sql .= "profile_id";
+				$sql .= $_POST['idnumber'] != '' ? ', number' : '';
+				$sql .= $_POST['idexpeditor'] != '' ? ', expeditor' : '';
+				$sql .= $iddate ? ', date' : '';
+				$sql .= ") ";
+				
+				//Valores a pasar
+				$sql .= "VALUES (";		
+				$sql .= $profile_id;
+				$sql .= $_POST['idnumber'] != '' ? ", '".$_POST['idnumber']."'" : '';
+				$sql .= $_POST['idexpeditor'] != '' ? ", '".$_POST['idexpeditor']."'" : '';
+				$sql .= $iddate ? ', '."'".$iddate."'" : '';
+				$sql .= ")";
+			
+				$resultado = resultFromQuery($sql);
+			}
+			
+			//INSERT PISCARD (Programa de integração Social PS)
+			if ($_POST['pisnumber'] != ''){
+				
+				//Validacion de fechas
+				$pisdate = dateFormatMySQL($_POST['pisdate']);
+				
+				//Parametros a pasar
+				$sql = "INSERT piscard(";
+				$sql .= "profile_id";
+				$sql .= $_POST['pisnumber'] != '' ? ', number' : '';
+				$sql .= $_POST['pisbanknumber'] != '' ? ', bank' : '';
+				$sql .= $pisdate ? ', expeditiondate' : '';
+				$sql .= ") ";
+				
+				//Valores a pasar
+				$sql .= "VALUES (";		
+				$sql .= $profile_id;
+				$sql .= $_POST['pisnumber'] != '' ? ', '."'".$_POST['pisnumber']."'" : '';
+				$sql .= $_POST['pisbanknumber'] != '' ? ', '."'".$_POST['pisbanknumber']."'" : '';
+				$sql .= $pisdate ? ', '."'".$pisdate."'" : '';
+				$sql .= ")";
+			
+				$resultado = resultFromQuery($sql);
+			}
+			
+			//INSERT MILITARYCARD (Certificado militar)
+			if ($_POST['milcertnumber'] != ''){
+				//Parametros a pasar
+				$sql = "INSERT militarycard(";
+				$sql .= "profile_id";
+				$sql .= $_POST['milcertnumber'] != '' ? ', number' : '';
+				$sql .= $_POST['milcertserie'] != '' ? ', serie' : '';
+				$sql .= $_POST['milcertcategory'] != '' ? ', category' : '';
+				$sql .= ") ";
+				
+				//Valores a pasar
+				$sql .= "VALUES (";		
+				$sql .= $profile_id;
+				$sql .= $_POST['milcertnumber'] != '' ? ', '.$_POST['milcertnumber'] : '';
+				$sql .= $_POST['milcertserie'] != '' ? ', '."'".$_POST['milcertserie']."'" : '';
+				$sql .= $_POST['milcertcategory'] != '' ? ', '."'".$_POST['milcertcategory']."'" : '';
+				$sql .= ")";
+			
+				$resultado = resultFromQuery($sql);
+			}
+			
+			//INSERT HABILITATIONCARD (Carteira de habilitação)
+			if ($_POST['habilitationnumber'] != ''){
+				
+				//Validacion de fechas
+				$habilitationdate = dateFormatMySQL($_POST['habilitationdate']);
+				$habilitationvaliddate = dateFormatMySQL($_POST['habilitationvaliddate']);
+				
+				//Parametros a pasar
+				$sql = "INSERT habilitationcard(";
+				$sql .= "profile_id";
+				$sql .= $_POST['habilitationnumber'] != '' ? ', number' : '';
+				$sql .= $_POST['habilitationcategory'] != '' ? ', category' : '';
+				$sql .= $habilitationdate ? ', expedition' : '';
+				$sql .= $habilitationvaliddate ? ', valid' : '';
+				$sql .= ") ";
+				
+				//Valores a pasar
+				$sql .= "VALUES (";		
+				$sql .= $profile_id;
+				$sql .= $_POST['habilitationnumber'] != '' ? ', '."'".$_POST['habilitationnumber']."'" : '';
+				$sql .= $_POST['habilitationcategory'] != '' ? ', '."'".$_POST['habilitationcategory']."'" : '';
+				$sql .= $habilitationdate ? ', '."'".$habilitationdate."'" : '';
+				$sql .= $habilitationvaliddate ? ', '."'".$habilitationvaliddate."'" : '';
+				$sql .= ")";
+			
+				$resultado = resultFromQuery($sql);
+			}
+			
+			//INSERT EMPLOYEE
 			//Validacion de fechas
-			$eleitordate = dateFormatMySQL($_POST['eleitordate']);
+			$admissiondate = dateFormatMySQL($_POST['admissiondate']);
+			$contractdate = dateFormatMySQL($_POST['contractdate']);
+			
+			//Conversion de , a .
+			$transportvalue = str_replace(',', '.', $_POST['transportvalue']);
 			
 			//Parametros a pasar
-			$sql = "INSERT votingcard(";
+			$sql = "INSERT employee(";
 			$sql .= "profile_id";
-			$sql .= $_POST['eleitornumber'] != '' ? ', number' : '';
-			$sql .= $_POST['eleitorzone'] != '' ? ', zone' : '';
-			$sql .= $_POST['eleitorsection'] != '' ? ', section' : '';
-			$sql .= $eleitordate ? ', emissiondate' : '';
+			$sql .= $_POST['idempresa'] != '' ? ', idempresa' : '';
+			$sql .= $_POST['jobcategory_id'] != '' ? ', jobcategory_id' : '';
+			$sql .= $_POST['bonussalary'] != '' ? ', bonussalary' : '';
+			$sql .= $_POST['admissiondate'] ? ', admission' : '';
+			$sql .= $_POST['contractdate'] != '' ? ', contract' : '';
+			$sql .= $_POST['transport'] != 0 ? ', transport' : '';
+			$sql .= $_POST['traject'] != '' ? ', traject' : '';
+			$sql .= $_POST['fromhour'] != '' ? ', fromhour' : '';
+			$sql .= $_POST['tohour'] != '' ? ', tohour' : '';
+			$sql .= $_POST['intervalhour'] != '' ? ', intervalhour' : '';
+			$sql .= $_POST['experiencecontract'] != 0 ? ', experiencecontract' : '';
+			$sql .= ', created';
 			$sql .= ") ";
 			
 			//Valores a pasar
 			$sql .= "VALUES (";		
 			$sql .= $profile_id;
-			$sql .= $_POST['eleitornumber'] != '' ? ', '."'".$_POST['eleitornumber']."'" : '';
-			$sql .= $_POST['eleitorzone'] != '' ? ', '."'".$_POST['eleitorzone']."'" : '';
-			$sql .= $_POST['eleitorsection'] != '' ? ', '."'".$_POST['eleitornumber']."'" : '';
-			$sql .= $eleitordate ? ', '."'".$eleitordate."'" : '';
+			$sql .= $_POST['idempresa'] != '' ? ', '.$_POST['idempresa'] : '';
+			$sql .= $_POST['jobcategory_id'] != '' ? ', '.$_POST['jobcategory_id'] : '';
+			$sql .= $_POST['bonussalary'] != '' ? ', '."'".$_POST['bonussalary']."'" : '';
+			$sql .= $admissiondate ? ', '."'".$admissiondate."'" : '';
+			$sql .= $contractdate ? ', '."'".$contractdate."'" : '';
+			$sql .= $_POST['transport'] != 0 ? ', '."'".$transportvalue."'" : '';
+			$sql .= $_POST['traject'] != '' ? ', '."'".$_POST['traject']."'" : '';
+			$sql .= $_POST['fromhour'] != '' ? ', '."'".$_POST['fromhour']."'" : '';
+			$sql .= $_POST['tohour'] != '' ? ', '."'".$_POST['tohour']."'" : '';
+			$sql .= $_POST['intervalhour'] != '' ? ', '."'".$_POST['intervalhour']."'" : '';
+			$sql .= $_POST['experiencecontract'] != 0 ? ', '."'".$_POST['experiencecontract']."'" : '';
+			$sql .= ', current_timestamp';
+			
 			$sql .= ")";
-		
+			
 			$resultado = resultFromQuery($sql);
-		}
-		
-		//INSERT RGCARD (Registro de identidade RG)
-		if ($_POST['idnumber'] != ''){
 			
-			//Validacion de fechas
-			$iddate = dateFormatMySQL($_POST['iddate']);
-			
-			//Parametros a pasar
-			$sql = "INSERT rgcard(";
-			$sql .= "profile_id";
-			$sql .= $_POST['idnumber'] != '' ? ', number' : '';
-			$sql .= $_POST['idexpeditor'] != '' ? ', expeditor' : '';
-			$sql .= $iddate ? ', date' : '';
-			$sql .= ") ";
-			
-			//Valores a pasar
-			$sql .= "VALUES (";		
-			$sql .= $profile_id;
-			$sql .= $_POST['idnumber'] != '' ? ', '.$_POST['idnumber'] : '';
-			$sql .= $_POST['idexpeditor'] != '' ? ', '."'".$_POST['idexpeditor']."'" : '';
-			$sql .= $iddate ? ', '."'".$iddate."'" : '';
-			$sql .= ")";
-		
-			$resultado = resultFromQuery($sql);
-		}
-		
-		//INSERT PISCARD (Programa de integração Social PS)
-		if ($_POST['pisnumber'] != ''){
-			
-			//Validacion de fechas
-			$pisdate = dateFormatMySQL($_POST['pisdate']);
-			
-			//Parametros a pasar
-			$sql = "INSERT piscard(";
-			$sql .= "profile_id";
-			$sql .= $_POST['pisnumber'] != '' ? ', number' : '';
-			$sql .= $_POST['pisbanknumber'] != '' ? ', bank' : '';
-			$sql .= $pisdate ? ', expeditiondate' : '';
-			$sql .= ") ";
-			
-			//Valores a pasar
-			$sql .= "VALUES (";		
-			$sql .= $profile_id;
-			$sql .= $_POST['pisnumber'] != '' ? ', '."'".$_POST['pisnumber']."'" : '';
-			$sql .= $_POST['pisbanknumber'] != '' ? ', '."'".$_POST['pisbanknumber']."'" : '';
-			$sql .= $pisdate ? ', '."'".$pisdate."'" : '';
-			$sql .= ")";
-		
-			$resultado = resultFromQuery($sql);
-		}
-		
-		//INSERT MILITARYCARD (Certificado militar)
-		if ($_POST['milcertnumber'] != ''){
-			//Parametros a pasar
-			$sql = "INSERT militarycard(";
-			$sql .= "profile_id";
-			$sql .= $_POST['milcertnumber'] != '' ? ', number' : '';
-			$sql .= $_POST['milcertserie'] != '' ? ', serie' : '';
-			$sql .= $_POST['milcertcategory'] != '' ? ', category' : '';
-			$sql .= ") ";
-			
-			//Valores a pasar
-			$sql .= "VALUES (";		
-			$sql .= $profile_id;
-			$sql .= $_POST['milcertnumber'] != '' ? ', '.$_POST['milcertnumber'] : '';
-			$sql .= $_POST['milcertserie'] != '' ? ', '."'".$_POST['milcertserie']."'" : '';
-			$sql .= $_POST['milcertcategory'] != '' ? ', '."'".$_POST['milcertcategory']."'" : '';
-			$sql .= ")";
-		
-			$resultado = resultFromQuery($sql);
-		}
-		
-		//INSERT HABILITATIONCARD (Carteira de habilitação)
-		if ($_POST['habilitationnumber'] != ''){
-			
-			//Validacion de fechas
-			$habilitationdate = dateFormatMySQL($_POST['habilitationdate']);
-			$habilitationvaliddate = dateFormatMySQL($_POST['habilitationvaliddate']);
-			
-			//Parametros a pasar
-			$sql = "INSERT habilitationcard(";
-			$sql .= "profile_id";
-			$sql .= $_POST['habilitationnumber'] != '' ? ', number' : '';
-			$sql .= $_POST['habilitationcategory'] != '' ? ', category' : '';
-			$sql .= $habilitationdate ? ', expedition' : '';
-			$sql .= $habilitationvaliddate ? ', valid' : '';
-			$sql .= ") ";
-			
-			//Valores a pasar
-			$sql .= "VALUES (";		
-			$sql .= $profile_id;
-			$sql .= $_POST['habilitationnumber'] != '' ? ', '."'".$_POST['habilitationnumber']."'" : '';
-			$sql .= $_POST['habilitationcategory'] != '' ? ', '."'".$_POST['habilitationcategory']."'" : '';
-			$sql .= $habilitationdate ? ', '."'".$habilitationdate."'" : '';
-			$sql .= $habilitationvaliddate ? ', '."'".$habilitationvaliddate."'" : '';
-			$sql .= ")";
-		
-			$resultado = resultFromQuery($sql);
-		}
-		
-		//INSERT EMPLOYEE
-		//Validacion de fechas
-		$admissiondate = dateFormatMySQL($_POST['admissiondate']);
-		$contractdate = dateFormatMySQL($_POST['contractdate']);
-		
-		//Parametros a pasar
-		$sql = "INSERT employee(";
-		$sql .= "profile_id";
-		$sql .= $_POST['idempresa'] != '' ? ', idempresa' : '';
-		$sql .= $_POST['jobcategory_id'] != '' ? ', jobcategory_id' : '';
-		$sql .= $_POST['bonussalary'] != '' ? ', bonussalary' : '';
-		$sql .= $admissiondate ? ', admission' : '';
-		$sql .= $_POST['contractdate'] != '' ? ', contract' : '';
-		$sql .= $_POST['transport'] != 0 ? ', transport' : '';
-		$sql .= $_POST['traject'] != '' ? ', traject' : '';
-		$sql .= $_POST['fromhour'] != '' ? ', fromhour' : '';
-		$sql .= $_POST['tohour'] != '' ? ', tohour' : '';
-		$sql .= $_POST['intervalhour'] != '' ? ', intervalhour' : '';
-		$sql .= $_POST['experiencecontract'] != 0 ? ', experiencecontract' : '';
-		$sql .= ") ";
-		
-		//Valores a pasar
-		$sql .= "VALUES (";		
-		$sql .= $profile_id;
-		$sql .= $_POST['idempresa'] != '' ? ', '.$_POST['idempresa'] : '';
-		$sql .= $_POST['jobcategory_id'] != '' ? ', '.$_POST['jobcategory_id'] : '';
-		$sql .= $_POST['bonussalary'] != '' ? ', '."'".$_POST['bonussalary']."'" : '';
-		$sql .= $admissiondate ? ', '."'".$admissiondate."'" : '';
-		$sql .= $contractdate ? ', '."'".$contractdate."'" : '';
-		$sql .= $_POST['transport'] != 0 ? ', '."'".$_POST['transportvalue']."'" : '';
-		$sql .= $_POST['traject'] != '' ? ', '."'".$_POST['traject']."'" : '';
-		$sql .= $_POST['fromhour'] != '' ? ', '."'".$_POST['fromhour']."'" : '';
-		$sql .= $_POST['tohour'] != '' ? ', '."'".$_POST['tohour']."'" : '';
-		$sql .= $_POST['intervalhour'] != '' ? ', '."'".$_POST['intervalhour']."'" : '';
-		$sql .= $_POST['experiencecontract'] != 0 ? ', '."'".$_POST['experiencecontract']."'" : '';
-		$sql .= ")";
-		
-		$resultado = resultFromQuery($sql);
-		
-		echo '<script languaje="javascript"> self.location="salarios.php"</script>';
+			echo '<script languaje="javascript"> self.location="salarios.php"</script>';
+		}		
 	}
 
 	if ($_POST['accion'] == 'admitJobcategory') {
@@ -1252,25 +1541,53 @@ if (isset( $_POST['accion'] )) {
 	
 	if ($_POST['accion'] == 'admitPayment') {
 		
-		$employee_id = $_POST['employee_id'];
-		$paymenttype_id = $_POST['paymenttype_id'];
-		$paymentmethod_id = $_POST['paymentmethod_id'];
-		$ammount = $_POST['ammount'];
+		if (isset($_POST['employee_id'])){
+			//Parametros a pasar
+			$sql = "INSERT payment(";
+			$sql .= "employee_id";
+			$sql .= $_POST['paymenttype_id'] != 0 ? ', paymenttype_id' : '';
+			$sql .= $_POST['paymentmethod_id'] != 0 ? ', paymentmethod_id' : '';
+			$sql .= $_POST['ammount'] != '' ? ', ammount' : '';
+			$sql .= $_POST['details'] != '' ? ', details' : '';
+			$sql .= ", date) ";
+			
+			//Valores a pasar
+			$sql .= "VALUES (";
+			$sql .= $_POST['employee_id'];
+			$sql .= $_POST['paymenttype_id'] != 0 ? ', '.$_POST['paymenttype_id'] : '';
+			$sql .= $_POST['paymentmethod_id'] != 0 ? ', '.$_POST['paymentmethod_id'] : '';
+			$sql .= $_POST['ammount'] != '' ? ', '.$_POST['ammount'] : '';
+			$sql .= $_POST['details'] != '' ? ", '".$_POST['details']."'" : '';
+			$sql .= ", current_timestamp) ";
+			
+			$resultadoStringSQL = resultFromQuery($sql);		
+			$payment_id = mysql_insert_id();
+			
+			bitacoras($_SESSION["idusuarios"], 'Insertar Pagamento: '.$payment_id);
+		}
 		
-		//Insert Base Salary
-		$sql = "INSERT payment(employee_id, paymenttype_id, paymentmethod_id, ammount, date) ";
-		$sql .= "VALUES (";
-		$sql .= $employee_id.", ";
-		$sql .= $paymenttype_id.", ";
-		$sql .= $paymentmethod_id.", ";
-		$sql .= "'".$ammount."', ";
-		$sql .= "current_timestamp) ";
-		$resultadoStringSQL = resultFromQuery($sql);		
-		$payment_id = mysql_insert_id();
+		if ($_SESSION["idusuarios_tipos"] == 1 || $_SESSION["idusuarios_tipos"] == 4){
+			echo '<script languaje="javascript"> self.location="pagamentos.php"</script>';
+		}
+		else{
+			echo '<script languaje="javascript"> self.location="funcionarios.lista.php"</script>';
+		}
+	}
+
+	if ($_POST['accion'] == 'paymentDelete') {
 		
-		bitacoras($_SESSION["idusuarios"], 'Insertar Pagamento: '.$payment_id);
+		if (isset($_POST['id'])){
+			$sql = 'UPDATE payment ';
+			$sql .= 'SET enabled = 0 ';
+			$sql .= 'WHERE 1 ';
+			$sql .= 'AND payment_id = '.$_POST['id'] ;
+			
+			$resultadoStringSQL = resultFromQuery($sql);
+						
+			bitacoras($_SESSION["idusuarios"], 'Deshabilitar payment id: '.$_POST['id']);
+		}
 		
-		echo '<script languaje="javascript"> self.location="pagamentos.php"</script>';
+		echo '<script languaje="javascript"> self.location="pagamentos.lista.php"</script>';
 	}
 
 	if ($_POST['accion'] == 'employeeModify') {
@@ -1278,6 +1595,74 @@ if (isset( $_POST['accion'] )) {
 		echo '<script languaje="javascript"> self.location="funcionarios.novo.php"</script>';
 	}
 
+	if ($_POST['accion'] == 'admitEmployeeSon') {
+		
+		if (isset($_POST['employee_id']) && $_POST['employee_id'] != 0){
+			
+			//Obtener el perfil del empleado
+			$sql = 'SELECT profile_id FROM employee WHERE employee_id = '.$_POST['employee_id'];
+			$resultado = resultFromQuery($sql);
+						
+			if ($row = siguienteResult($resultado)) {
+				$profile_id = $row->profile_id;
+				
+				$sql = 'INSERT son(profile_id, name, birthdate, is_alive) ';
+				$sql .= 'VALUES( ';
+				$sql .= $profile_id.', ';
+				$sql .= "'".$_POST['name']."', ";
+				$sql .= "'".$_POST['birthdate']."', ";
+				$sql .= $_POST['is_alive'].') ';
+				
+				
+				$resultado = resultFromQuery($sql);
+				$son_id = mysql_insert_id();
+				
+				bitacoras($_SESSION["idusuarios"], 'Ingresado filho id: '.$son_id);
+			}
+
+		}
+		
+		echo '<script languaje="javascript"> self.location="funcionarios.lista.php"</script>';
+	}
+
+	if ($_POST['accion'] == 'employeeFood') {
+		
+		
+		
+		$employee_id = $_POST['employee_id'];
+		
+		$sql = "SELECT status FROM foodemployee WHERE employee_id = ".$employee_id." ORDER BY created DESC LIMIT 1;";
+		
+		$resultado = resultFromQuery($sql);
+		
+		if ($row = siguienteResult($resultado)) {
+			$prevstatus = $row->status;
+		}
+		
+		
+		$sql = "INSERT INTO foodemployee(employee_id, status) VALUES (";
+		$sql .= $employee_id.", ";
+		
+		if ($_POST['food'] == 'add' && $prevstatus != 1){
+						
+			$sql .= "1)";
+			
+			$resultado = resultFromQuery($sql);
+			$foodemployee_id = mysql_insert_id();
+				
+			bitacoras($_SESSION["idusuarios"], 'Adicionada alimentaçao id: '.$foodemployee_id);
+		}
+		elseif ($_POST['food'] == 'remove' && $prevstatus != 0){
+			
+			$sql .= "0)";
+			
+			$resultado = resultFromQuery($sql);
+			$foodemployee_id = mysql_insert_id();
+				
+			bitacoras($_SESSION["idusuarios"], 'Apagada alimentaçao id: '.$foodemployee_id);
+		}
+		echo '<script languaje="javascript"> self.location="'.$_SERVER['HTTP_REFERER'].'"</script>';
+	}
 
 /*Procesos*/
 
@@ -1368,6 +1753,7 @@ if (isset( $_POST['accion'] )) {
 		//Retorna a la pagina desde donde fue llamado
 		echo '<script languaje="javascript"> top.location=window.top.location.href</script>';
 	}
+
 /* Reportes */
 
 	if ($_POST['accion'] == 'exportarReportes') {
@@ -1410,5 +1796,101 @@ if (!isset($_SESSION["idusuarios"])){
 	echo '<script languaje="javascript"> self.location="login.php"</script>';
 }
 
+function updateQuery($table, $column, $value, $condition){
+	
+	$sqlQuery = 'UPDATE ';
+	$sqlQuery .= $table.' ';
+	$sqlQuery .= 'SET ';
+	
+	foreach ($column as $j => $val) {
+		
+		if (mb_substr($sqlQuery, -4) != 'SET ' && mb_substr($sqlQuery, -2) != ', '){
+			$sqlQuery  .= ', ';
+		}
+		
+		if ($value[$j] != '' && isset($value[$j])){
+			
+			if (is_numeric($value[$j])){
+				$sqlQuery .= $val.' = '.$value[$j];
+			}
+			else{
+				$sqlQuery .= $val." = '".$value[$j]."'";
+			}
+		}
+	}
+	
+	if (mb_substr($sqlQuery, -2) == ', '){
+			$sqlQuery = substr($sqlQuery, 0, -2);
+	}
+	
+	$sqlQuery .= ' WHERE 1 ';
+	$sqlQuery .= 'AND '.$condition;
+	
+	return $sqlQuery;
+}
 
+function insertQuery($table, $column, $value){
+	
+	$sqlQuery = 'INSERT ';
+	$sqlQuery .= $table.'(';
+	
+	foreach ($column as $j => $val) {
+
+		
+		if (mb_substr($sqlQuery, -1) != '(' && mb_substr($sqlQuery, -2) != ', '){
+			$sqlQuery  .= ', ';
+		}
+		
+		if ($value[$j] != ''){
+			$sqlQuery .= $val;
+		}
+	}
+	if (mb_substr($sqlQuery, -2) == ', '){
+			$sqlQuery = substr($sqlQuery, 0, -2);
+	}
+	
+	$sqlQuery .= ') VALUES (';
+	
+	foreach ($column as $j => $val) {
+		
+		if (mb_substr($sqlQuery, -1) != '(' && mb_substr($sqlQuery, -2) != ', '){
+			$sqlQuery  .= ', ';
+		}
+		
+		if ($value[$j] != ''){
+			if (is_numeric($value[$j]))
+			{
+				$sqlQuery .= $value[$j];
+			}
+			else
+			{
+				$sqlQuery .= "'".$value[$j]."'";
+			}
+		}
+	}
+	if (mb_substr($sqlQuery, -2) == ', '){
+			$sqlQuery = substr($sqlQuery, 0, -2);
+	}
+	
+	$sqlQuery  .= ")";
+	
+	return $sqlQuery;
+}
+
+function getColumns($table){
+	
+	$resultado = resultFromQuery("SHOW COLUMNS FROM ".$table);
+	if (!$resultado) {
+		echo 'No se pudo ejecutar la consulta: ' . mysql_error();
+		exit;
+	}
+	
+	if (mysql_num_rows($resultado) > 0) {
+		while ($fila = mysql_fetch_assoc($resultado)) {
+			$column[] = $fila['Field'];
+		}
+	}
+	
+	return $column;
+}
 ?> 

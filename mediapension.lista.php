@@ -19,12 +19,28 @@
           </div>
           <div class="widget-content nopadding">
 			<?php
-				$sqlQuery = "SELECT MP.idmediapension, H.Titular 'Nome PAX', MP.numeroexterno 'Voucher', S.Nombre 'Servicio', MP.qtdedepax Pax, qtdedecomidas 'Dias', (SELECT SUM(qtdedepax) FROM mediapension_admisiones WHERE idmediapension = MP.idmediapension) 'admisiones' FROM `mediapension` MP";
-				$sqlQuery .= " LEFT JOIN huespedes H ON MP.idhuespedes = H.idhuespedes ";
-				$sqlQuery .= " LEFT JOIN servicios S ON MP.idservicios = S.idservicios ";
-				$sqlQuery .= " WHERE 1 ";
-				$sqlQuery .= " AND habilitado = 1 ";
-				$sqlQuery .= " AND CURRENT_DATE BETWEEN MP.DataIN AND MP.DataOUT";
+				$sqlQuery = "SELECT ";
+				$sqlQuery .= "MP.idmediapension, ";
+				$sqlQuery .= "H.Titular 'Nome PAX', ";
+				$sqlQuery .= "MP.numeroexterno 'Voucher', ";
+				$sqlQuery .= "S.Nombre 'Servicio', ";
+				$sqlQuery .= "MP.qtdedepax 'Pax', ";
+				
+				// Solo para camila mostrar el nombre de la posada, para los demas es irrelevante
+				if ($_SESSION["idusuarios_tipos"] == 2) {
+					$sqlQuery .= "P.nombre 'Pousada', ";
+				}
+				
+				
+				$sqlQuery .= "qtdedecomidas 'Dias', ";
+				$sqlQuery .= "(SELECT SUM(qtdedepax) FROM mediapension_admisiones WHERE idmediapension = MP.idmediapension) 'admisiones' ";
+				$sqlQuery .= "FROM mediapension MP ";
+				$sqlQuery .= "LEFT JOIN huespedes H ON MP.idhuespedes = H.idhuespedes ";
+				$sqlQuery .= "LEFT JOIN servicios S ON MP.idservicios = S.idservicios ";
+				$sqlQuery .= "LEFT JOIN posadas P ON MP.idposadas = P.idposadas ";
+				$sqlQuery .= "WHERE 1 ";
+				$sqlQuery .= "AND habilitado = 1 ";
+				$sqlQuery .= "AND CURRENT_DATE BETWEEN MP.DataIN AND MP.DataOUT ";
 				echo tableFromResultGDA(resultFromQuery($sqlQuery), 'mediapension', false, false, 'posts.php', true);
 			?>		  
           </div>

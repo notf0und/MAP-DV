@@ -3,9 +3,9 @@
 include "head.php"; 
 //SELECT
 $sqlQuery = "SELECT ";
-$sqlQuery .= "PAY.payment_id id, ";
+$sqlQuery .= "PAY.payment_id AS id, ";
 $sqlQuery .= "date(PAY.date) Data, ";
-$sqlQuery .= "CONCAT(P.lastname, ', ', P.firstname) 'Beneficiario', ";
+$sqlQuery .= "CONCAT(P.firstname, ' ', P.lastname) 'Beneficiario', ";
 $sqlQuery .= "PT.type Tipo, ";
 $sqlQuery .= "PM.method Modo, ";
 $sqlQuery .= "CONCAT('$', PAY.ammount) Monto ";
@@ -25,7 +25,9 @@ $sqlQuery .= "LEFT JOIN paymenttype PT ON PAY.paymenttype_id = PT.paymenttype_id
 //Union de payment con paymentmethod
 $sqlQuery .= "LEFT JOIN paymentmethod PM ON PAY.paymentmethod_id = PM.paymentmethod_id ";
 
-$tablapagamentos = tableFromResult(resultFromQuery($sqlQuery), 'Pagamentoss', false, false, 'posts.php', true);
+$sqlQuery .= "WHERE enabled = 1 ";
+
+$tablapagamentos = tableFromResult(resultFromQuery($sqlQuery), 'payment', true, false, 'posts.php', true);
 ?>	
 
 <!--main-container-part-->
@@ -44,10 +46,15 @@ $tablapagamentos = tableFromResult(resultFromQuery($sqlQuery), 'Pagamentoss', fa
 	<div class="row-fluid">
         <div class="widget-box">
           <div class="widget-title"> <span class="icon"><i class="icon-th"></i></span>
-            <h5>Lista de Funcionarios</h5>
+            <h5>Lista de Pagamentos</h5>
           </div>
           <div class="widget-content nopadding">
-			<?php echo $tablapagamentos;?>		  
+			  <form id="paymentForm" name="paymentForm" action="posts.php" method="post">
+				  <!--Tabla-->
+				  <?php echo $tablapagamentos;?>
+				  <!--Tabla-->
+				</form> 
+					  
           </div>
 			<div id="myModal" class="modal hide">
 				<div class="modal-header">

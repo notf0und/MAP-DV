@@ -1,7 +1,9 @@
 <?php include "head.php"; 
 
-$numero = cal_days_in_month(CAL_GREGORIAN, $_SESSION["visualizarMes"], $_SESSION["visualizarAno"]); 
-$dataIN = '2012-01-01';//$_SESSION["visualizarAno"]."-".$_SESSION["visualizarMes"]."-01";
+//cantidad de dias en el mes del año especificado 
+$numero = cal_days_in_month(CAL_GREGORIAN, $_SESSION["visualizarMes"], $_SESSION["visualizarAno"]);
+
+$dataIN = $_SESSION["visualizarAno"]."-".$_SESSION["visualizarMes"]."-01";
 $dataOUT = $_SESSION["visualizarAno"]."-".$_SESSION["visualizarMes"]."-".$numero;
 
 $idresponsablesDePago = $_GET['idresponsablesDePago'];
@@ -18,7 +20,9 @@ if ($rowLine = siguienteResult($resultadoResponsables)) {
 	$tabla = $rowLine->tabla;
 	$nombre = $rowLine->nombre;
 }
-
+if ($_SESSION["idusuarios_tipos"] == 1) {
+		FB::info('idresponsablesDePago: '.$idresponsablesDePago.' id: '.$id.' dataIN: '.$dataIN.' dataOUT: '.$dataOUT);
+	}
 liquidacionServicios($idresponsablesDePago, $id, $dataIN, $dataOUT);	
 
 $sql = "SELECT * FROM `".$tabla."` WHERE `id".$tabla."` = ".$id;
@@ -30,8 +34,9 @@ $row = siguienteResult($resultado);
 <!--breadcrumbs-->
   <div id="content-header">
     <div id="breadcrumb"> 
-		<a href="index.php" title="ir para Início" class="tip-bottom"><i class="icon-home"></i> Início</a>
-		<a href="liquidaciones.php" title="liquidaciones" class="tip-bottom"> Liquidaciones</a>
+		<a href="index.php" title="Home" class="tip-bottom"><i class="icon-home"></i> Home</a> 
+		<a href="liquidaciones.php" title="Liquidaciones" class="tip-bottom">Liquidaciones</a>
+		<a href="liquidaciones.mensual.php" title="Liquidação Mensual" class="tip-bottom">Liquidação Mensual</a>
 		<a href="#" class="current">Proceso de Liquidaciones Mensual</a>
 	</div>
 	<h1>Export Liquidacion | <?php echo $nombre;?></h1><hr>
@@ -43,12 +48,14 @@ $row = siguienteResult($resultado);
 			<div class="widget-title"> <span class="icon"><i class="icon-th"></i></span>
 				<h5><?php echo $nombre;?> - Media Pension</h5>
 			</div>
+			<form id="VouchersMPForm" name="VouchersMPForm" action="posts.php" method="post">
 			<div class="widget-content nopadding">
 				<?php
-					$sqlQuery = "SELECT * FROM _temp_liquidaciones_mp";
-					echo tableFromResultGDA(resultFromQuery($sqlQuery), 'Reporte', false, false, 'posts.php', false);
+					$sqlQuery = "SELECT idmediapension id, Titular 'Nome PAX', numeroexterno '# Voucher', Q 'Qtde de PAX', DataIN, DataOUT, Agencia, Posada, N, M, Servicio, USD, Tarifa, NULL 'Detalles' FROM _temp_liquidaciones_mp";
+					echo tableFromResult(resultFromQuery($sqlQuery), 'VouchersMP', true, true, 'posts.php', true);
 				?>
 			</div>
+			</form>
         </div>
 			<?php
 			$sql = "SELECT SUM(`USD`) total FROM `_temp_liquidaciones_mp` WHERE 1";
@@ -64,12 +71,14 @@ $row = siguienteResult($resultado);
 			<div class="widget-title"> <span class="icon"><i class="icon-th"></i></span>
 				<h5><?php echo $nombre;?> - Hoteleria</h5>
 			</div>
+			<form id="VouchersHTLForm" name="VouchersHTLForm" action="posts.php" method="post">
 			<div class="widget-content nopadding">
 				<?php
-					$sqlQuery = "SELECT * FROM _temp_liquidaciones_htl";
-					echo tableFromResultGDA(resultFromQuery($sqlQuery), 'Reporte2', false, false, 'posts.php', false);
+					$sqlQuery = "SELECT idhoteleria id, Titular 'Nome PAX', numeroexterno '# Voucher', Q 'Qtde de PAX', DataIN, DataOUT, Agencia, Posada, N, M, Servicio, USD, Tarifa FROM _temp_liquidaciones_htl";
+					echo tableFromResult(resultFromQuery($sqlQuery), 'VouchersHTL', true, true, 'posts.php', true);
 				?>
 			</div>
+			</form>
         </div>
 			<?php
 			$sql = "SELECT SUM(`USD`) total FROM `_temp_liquidaciones_htl` WHERE 1";
@@ -99,7 +108,16 @@ $row = siguienteResult($resultado);
                 <div class="form-actions">
                     <span class="pull-left"><a href="mediapension.liquidaciones.mensual.php" class="flip-link btn btn-info" id="to-recover">Voltar</a></span>
                     <span class="pull-right"><button class="btn btn-success" type="submit">Generar liquidacion</button></span>
-                </div>				
+                </div>
+                <div id="myModal" class="modal hide">
+				<div class="modal-header">
+					<button data-dismiss="modal" class="close" type="button">×</button>
+					<h3>Detalle</h3>
+				</div>
+				<div class="modal-body" id="modal-body">
+					<p>Here is the text coming you can put also image if you want…</p>
+				</div>
+			</div>		
             </form>
 
     <hr/>
