@@ -65,6 +65,7 @@ if (isset($_SESSION['employee'])){
 	$sqlQuery .= "E.jobcategory_id, ";
 	$sqlQuery .= "E.admission, ";
 	$sqlQuery .= "E.contract, ";
+	$sqlQuery .= "E.decline, ";
 	$sqlQuery .= "BS.basesalary, ";
 	$sqlQuery .= "E.bonussalary, ";
 	$sqlQuery .= "E.fromhour, ";
@@ -82,7 +83,7 @@ if (isset($_SESSION['employee'])){
 	$sqlQuery .= "LEFT JOIN jobcategory JC ON E.jobcategory_id = JC.jobcategory_id ";
 	
 	//Union de jobcategory con base salary
-	$sqlQuery .= "LEFT JOIN basesalary BS ON JC.basesalary_id = BS.basesalary_id ";
+	$sqlQuery .= "LEFT JOIN basesalary BS ON JC.jobcategory_id = BS.jobcategory_id ";
 
 	//Union de employee con profile
 	$sqlQuery .= "LEFT JOIN profile P ON E.profile_id = P.profile_id ";
@@ -189,6 +190,7 @@ if (isset($_SESSION['employee'])){
 		$jobcategory_id = $row->jobcategory_id;
 		$admission = $row->admission;
 		$contract = $row->contract;
+		$decline = $row->decline;
 		$basesalary = $row->basesalary;
 		$bonussalary = $row->bonussalary;
 		$fromhour = $row->fromhour;
@@ -403,9 +405,11 @@ if (isset($_SESSION['employee'])){
 		<div class="row-fluid">
 			<div class="span12">
 				<div class="widget-box">
+					
 					<div class="widget-title"> <span class="icon"> <i class="icon-pencil"></i> </span>
-            <h5>Registro de funcionario</h5>
-          </div>
+						<h5>Registro de funcionario</h5>
+					</div>
+					
 					<div class="widget-content nopadding">
 						<!--Start form-->
 						<form action="posts.php" id="form-wizard" name="form-wizard" class="form-horizontal" method="post">
@@ -492,8 +496,6 @@ if (isset($_SESSION['employee'])){
 								<div class="controls">
 									<SELECT ID="birth_city_id" NAME="birth_city_id" SIZE="1" onchange="setCity(this.value)" class="span4 m-wrap"><OPTION VALUE="0">Cidade</OPTION></SELECT>
 								</div>
-								
-								
 							</div>
 
 							
@@ -760,6 +762,12 @@ if (isset($_SESSION['employee'])){
 								  <!--Contract Date-->
 								  <div data-date="" class="input-append date datepicker">
 										<input id="contractdate" name="contractdate" type="text" data-date-format="yyyy-mm-dd" placeholder="Data de contrataçao" value="<?php echo isset($contract) ? $contract : '' ?>">
+										<span class="add-on"><i class="icon-th"></i></span>
+								  </div><br>
+								  
+								  <!--Contract Date-->
+								  <div data-date="" class="input-append date datepicker">
+										<input id="decline" name="decline" type="text" data-date-format="yyyy-mm-dd" placeholder="Data do desligamento" value="<?php echo isset($decline) ? $decline : '' ?>">
 										<span class="add-on"><i class="icon-th"></i></span>
 								  </div>
 									

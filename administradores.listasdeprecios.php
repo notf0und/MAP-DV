@@ -7,16 +7,16 @@
     <div id="breadcrumb"> 
 		<a href="index.php" title="Home" class="tip-bottom"><i class="icon-home"></i> Home</a> 
 		<a href="administradores.php" title="Administradores" class="tip-bottom">Administradores</a>
-		<a href="#" class="current">Listas de precios</a>
+		<a href="#" class="current">Listas de preços</a>
 	</div>
-	<h1>Listas de precios</h1><hr>
+	<h1>Listas de preços</h1><hr>
   </div>
 <!--End-breadcrumbs-->
   <div class="container-fluid">
 	<div class="row-fluid">
         <div class="widget-box">
 			<div class="widget-title"> <span class="icon"><i class="icon-th"></i></span>
-				<h5>Listas de precios</h5>
+				<h5>Listas de preços</h5>
 			</div>
 			<form id="ListasdepreciosForm" name="ListasdepreciosForm" action="posts.php" method="post">
 			<div class="widget-content nopadding">

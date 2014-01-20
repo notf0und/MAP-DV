@@ -62,14 +62,14 @@ if (isset($_SESSION['idhoteleria'])){
 					<form action="posts.php" id="form" name="form" class="form-horizontal" method="post">
 						
 						<input type="hidden" id="accion" name="accion" value="admitirHoteleria" />
-						<input type="hidden" id="idhoteleria" name="idhoteleria" value="<?php echo $idhoteleria;?>" />
-						<input type="hidden" id="idhuespedes" name="idhuespedes" value="<?php echo $idhuespedes;?>" />
+						<input type="hidden" id="idhoteleria" name="idhoteleria" value="<?php echo isset($idhoteleria) ? $idhoteleria : '';?>" />
+						<input type="hidden" id="idhuespedes" name="idhuespedes" value="<?php echo isset($idhuespedes) ? $idhuespedes : '';?>" />
 						<input type="hidden" id="referer" name="referer" value="<?php echo $referer;?>" />
 						
 						<div class="control-group">
 							<label class="control-label">Nome do pax</label>
 							<div class="controls">
-								<input id="nomedopax" name="nomedopax" type="text" class="span11" placeholder="Nome do pax" required="true" value="<?php echo $nomedopax;?>"/>
+								<input id="nomedopax" name="nomedopax" type="text" class="span11" placeholder="Nome do pax" required="true" value="<?php echo isset($nomedopax) ? $nomedopax : '';?>"/>
 							</div>
 						</div>
 						<div class="control-group">
@@ -78,21 +78,21 @@ if (isset($_SESSION['idhoteleria'])){
 								<?php
 									$sqlQuery = " SELECT idpaises, nombre FROM paises ";
 									$resultado = resultFromQuery($sqlQuery);
-									echo comboFromArray('idpaises', $resultado, $idpaises, '', '');
+									echo comboFromArray('idpaises', $resultado, isset($idpaises) ? $idpaises : '', '', '');
 								?>								
 							</div>
 						</div>
 						<div class="control-group">
 							<label class="control-label">Qtde de Pax</label>
 							<div class="controls">
-								<input id="qtdedepax" name="qtdedepax" type="text" class="span2" required="true" min=1 max=99  value="<?php echo $qtdedepax;?>" />
+								<input id="qtdedepax" name="qtdedepax" type="text" class="span2" required="true" min=1 max=99  value="<?php echo isset($qtdedepax) ? $qtdedepax : '';?>" />
 							</div>
 						</div>
 						<div class="control-group">
 							<label class="control-label">Voucher #</label>
 							<div class="controls">
 								<div class="input-prepend"> <span class="add-on">#</span>
-									<input id="numeroexterno" name="numeroexterno" type="text" class="span11" placeholder="numero do voucher" value="<?php echo $numeroexterno;?>" />
+									<input id="numeroexterno" name="numeroexterno" type="text" class="span11" placeholder="numero do voucher" value="<?php echo isset($numeroexterno) ? $numeroexterno : '';?>" />
 								</div>
 							</div>
 						</div>
@@ -102,7 +102,7 @@ if (isset($_SESSION['idhoteleria'])){
 								<?php
 									$sqlQuery = " SELECT idservicios, nombre FROM servicios WHERE idservicios > 5 ";
 									$resultado = resultFromQuery($sqlQuery);
-									echo comboFromArray('idservicios', $resultado, $idservicios, '', '', 'true');
+									echo comboFromArray('idservicios', $resultado, isset($idservicios) ? $idservicios : '', '', '', 'true');
 								?>								
 							</div>
 						</div>
@@ -112,7 +112,7 @@ if (isset($_SESSION['idhoteleria'])){
 								<?php
 									$sqlQuery = " SELECT idoperadoresturisticos, nombre FROM operadoresturisticos";
 									$resultado = resultFromQuery($sqlQuery);
-									echo comboFromArray('idoperadoresturisticos', $resultado, $idoperadoresturisticos, '', '');
+									echo comboFromArray('idoperadoresturisticos', $resultado, isset($idoperadoresturisticos) ? $idoperadoresturisticos : '', '', '');
 								?>								
 							</div>
 						</div>
@@ -122,7 +122,7 @@ if (isset($_SESSION['idhoteleria'])){
 								<?php
 									$sqlQuery = " SELECT idposadas, nombre FROM posadas";
 									$resultado = resultFromQuery($sqlQuery);
-									echo comboFromArray('idposadas', $resultado, $idposadas, '', '');
+									echo comboFromArray('idposadas', $resultado, isset($idposadas) ? $idposadas : '', '', '');
 								?>								
 							</div>
 						</div>
@@ -132,7 +132,7 @@ if (isset($_SESSION['idhoteleria'])){
 								<?php
 									$sqlQuery = " SELECT idagencias, nombre FROM agencias";
 									$resultado = resultFromQuery($sqlQuery);
-									echo comboFromArray('idagencias', $resultado, $idagencias, '', '');
+									echo comboFromArray('idagencias', $resultado, isset($idagencias) ? $idagencias : '', '', '');
 								?>								
 							</div>
 						</div>
@@ -142,7 +142,7 @@ if (isset($_SESSION['idhoteleria'])){
 								<?php
 									$sqlQuery = " SELECT idresponsablesDePago, nombre FROM responsablesDePago";
 									$resultado = resultFromQuery($sqlQuery);
-									echo comboFromArray('idresponsablesDePago', $resultado, $idresponsablesDePago, '', '');
+									echo comboFromArray('idresponsablesDePago', $resultado, isset($idresponsablesDePago) ? $idresponsablesDePago : '', '', '');
 								?>								
 							</div>
 						</div>
@@ -150,7 +150,7 @@ if (isset($_SESSION['idhoteleria'])){
 							<label class="control-label">Data IN</label>
 							<div class="controls">
 								<div data-date="" class="input-append date datepicker">
-									<input id="dataIN" name="dataIN" type="text" class="span11" required="true" value="<?php echo $DataIN;?>" />
+									<input id="dataIN" name="dataIN" type="text" class="span11" required="true" value="<?php echo isset($DataIN) ? $DataIN : '';?>" />
 									<span class="add-on"><i class="icon-th"></i></span> 
 								</div>
 							</div>
@@ -159,7 +159,7 @@ if (isset($_SESSION['idhoteleria'])){
 							<label class="control-label">Data OUT</label>
 							<div class="controls">
 								<div  data-date="" class="input-append date datepicker">
-									<input id="dataOUT" name="dataOUT" type="text" class="span11"  required="true" value="<?php echo $DataOUT;?>" />
+									<input id="dataOUT" name="dataOUT" type="text" class="span11"  required="true" value="<?php echo isset($DataOUT) ? $DataOUT : '';?>" />
 									<span class="add-on"><i class="icon-th"></i></span> 
 								</div>
 							</div>
@@ -167,7 +167,7 @@ if (isset($_SESSION['idhoteleria'])){
 						<div class="control-group">
 							<label class="control-label">Qtde de Serviços</label>
 							<div class="controls">
-								<input id="qtdedenoites" name="qtdedenoites" type="text" id="noites" class="span2"  required="true" value="<?php echo $qtdedenoites;?>" />
+								<input id="qtdedenoites" name="qtdedenoites" type="text" id="noites" class="span2"  required="true" value="<?php echo isset($qtdedenoites) ? $qtdedenoites : '' ;?>" />
 							</div>
 						</div>
 						<div class="control-group">

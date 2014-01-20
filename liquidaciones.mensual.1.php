@@ -20,9 +20,7 @@ if ($rowLine = siguienteResult($resultadoResponsables)) {
 	$tabla = $rowLine->tabla;
 	$nombre = $rowLine->nombre;
 }
-if ($_SESSION["idusuarios_tipos"] == 1) {
-		FB::info('idresponsablesDePago: '.$idresponsablesDePago.' id: '.$id.' dataIN: '.$dataIN.' dataOUT: '.$dataOUT);
-	}
+
 liquidacionServicios($idresponsablesDePago, $id, $dataIN, $dataOUT);	
 
 $sql = "SELECT * FROM `".$tabla."` WHERE `id".$tabla."` = ".$id;

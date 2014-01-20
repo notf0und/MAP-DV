@@ -27,8 +27,8 @@ if (isset($_SESSION['idlistasdeprecios'])){
     <div id="breadcrumb"> 
 		<a href="index.php" title="Home" class="tip-bottom"><i class="icon-home"></i> Home</a> 
 		<a href="administradores.php" title="Administradores" class="tip-bottom">Administradores</a>
-		<a href="administradores.listasdeprecios.php" title="Listas de precios" class="tip-bottom">Listas de precios</a>
-		<a href="#" class="current">Edit...</a>
+		<a href="administradores.listasdeprecios.php" title="Listas de precios" class="tip-bottom">Listas de preços</a>
+		<a href="#" class="current">Editar</a>
 	</div>
   </div>
 <!--End-breadcrumbs-->
@@ -38,22 +38,22 @@ if (isset($_SESSION['idlistasdeprecios'])){
 			<form action="posts.php" id="form" name="form" class="form-horizontal" method="post">
 			<div class="widget-box">
 				<div class="widget-title"> <span class="icon"> <i class="icon-align-justify"></i> </span>
-					<h5>Edit Lista de precios</h5>
+					<h5>Editar listas de preços</h5>
 				</div>
 				<div class="widget-content nopadding">
 					<input type="hidden" id="accion" name="accion" value="admitirListasdeprecios" />
 					<input type="hidden" id="idlistasdeprecios" name="idlistasdeprecios" value="<?php echo $idlistasdeprecios;?>" />
 					<div class="control-group">
-						<label class="control-label">Nombre</label>
+						<label class="control-label">Nome</label>
 						<div class="controls">
-							<input id="nombre" name="nombre" type="text" class="span11" placeholder="nombre" required="true" value="<?php echo $nombre;?>"/>
+							<input id="nombre" name="nombre" type="text" class="span11" placeholder="nombre" required="true" value="<?php echo isset($nombre) ? $nombre : '';?>"/>
 						</div>
 					</div>
 					<div class="control-group">
 						<label class="control-label">Vigencia IN</label>
 						<div class="controls">
 							<div data-date="" class="input-append date datepicker">
-								<input id="VigenciaIN" name="VigenciaIN" type="text" class="span11" required="true" value="<?php echo $VigenciaIN;?>" />
+								<input id="VigenciaIN" name="VigenciaIN" type="text" class="span11" required="true" value="<?php echo isset($VigenciaIN) ? $VigenciaIN : '';?>" />
 								<span class="add-on"><i class="icon-th"></i></span> 
 							</div>
 						</div>
@@ -62,18 +62,18 @@ if (isset($_SESSION['idlistasdeprecios'])){
 						<label class="control-label">Vigencia OUT</label>
 						<div class="controls">
 							<div  data-date="" class="input-append date datepicker">
-								<input id="VigenciaOUT" name="VigenciaOUT" type="text" class="span11"  required="true" value="<?php echo $VigenciaOUT;?>" />
+								<input id="VigenciaOUT" name="VigenciaOUT" type="text" class="span11"  required="true" value="<?php echo isset($VigenciaOUT) ? $VigenciaOUT : '';?>" />
 								<span class="add-on"><i class="icon-th"></i></span> 
 							</div>
 						</div>
 					</div>
 					<div class="control-group">
-						<label class="control-label">Responsables</label>
+						<label class="control-label">Responsáveis</label>
 						<div class="controls">
 							<?php
 								$sqlQuery = " SELECT idresponsablesDePago, plural FROM responsablesDePago";
 								$resultado = resultFromQuery($sqlQuery);
-								echo comboFromArray('idresponsablesDePago', $resultado, $idresponsablesDePago, '', '');
+								echo comboFromArray('idresponsablesDePago', $resultado, isset($idresponsablesDePago) ? $idresponsablesDePago : '', '', '');
 							?>								
 						</div>
 					</div>
@@ -81,7 +81,7 @@ if (isset($_SESSION['idlistasdeprecios'])){
 				</div>
 			</div>
 			<div class="class="form-actions">
-				<button class="btn btn-success" type="submit">Modificar</button>
+				<button class="btn btn-success" type="submit">Alterar</button>
 			</div>
 			</form>
 		</div>

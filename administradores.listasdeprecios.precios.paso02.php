@@ -42,8 +42,8 @@ if (isset($_GET['id'])){
     <div id="breadcrumb"> 
 		<a href="index.php" title="Home" class="tip-bottom"><i class="icon-home"></i> Home</a> 
 		<a href="administradores.php" title="Administradores" class="tip-bottom">Administradores</a>
-		<a href="administradores.listasdeprecios.php" title="Listas de precios" class="tip-bottom">Listas de precios</a>
-		<a href="#" class="current">Precios | Paso 2 de 2</a>
+		<a href="administradores.listasdeprecios.php" title="Listas de precios" class="tip-bottom">Listas de preços</a>
+		<a href="#" class="current">Preços | Paso 2 de 2</a>
 	</div>
   </div>
 <!--End-breadcrumbs-->
@@ -52,12 +52,12 @@ if (isset($_GET['id'])){
 		<div class="span6">
 				<div class="widget-box">
 					<div class="widget-title"> <span class="icon"> <i class="icon-align-justify"></i> </span>
-						<h5>Precios</h5>
+						<h5>Preços</h5>
 					</div>
 					<div class="widget-content nopadding">
 						<form action="posts.php" id="form-wizard" name="form-wizard" class="form-horizontal" method="post">
 						<div id="form-wizard-1" class="step">
-							<h4>&nbsp;&nbsp;- Media Pension - </h4>
+							<h4>&nbsp;&nbsp;- Meia-pensão - </h4>
 							<input type="hidden" id="accion" name="accion" value="admitirPrecios02" />
 							<input type="hidden" id="idlistasdeprecios" name="idlistasdeprecios" value="<?php echo $idlistasdeprecios;?>" />
 							<input type="hidden" id="iditem" name="iditem" value="<?php echo $iditem;?>" />
@@ -93,7 +93,37 @@ if (isset($_GET['id'])){
 							$resultadoServicios = mysql_query ($sqlQueryServicios);
 							while ($lineaServicios=mysql_fetch_row($resultadoServicios)) {
 								$precio = precioListasdeprecios($lineaPosadas[0].'_'.$lineaServicios[0], $idlistasdeprecios);
-								echo $lineaPosadas[0].'_'.$lineaServicios[0].'!!!'. $idlistasdeprecios
+								
+								$precios[$lineaServicios[1]] = $precio;
+								
+								if (strpos($lineaServicios[1], " C/Bebida")){
+									
+									$reference = rtrim($lineaServicios[1], " C/Bebida");
+									
+									$unit = 2;
+									
+									
+									if (strpos($reference, "FAP")){						
+										$unit *= 2;
+									}
+									
+									if (strpos($reference, "DBL ") === 0){
+										$unit *= 2;
+									}
+									elseif (strpos($reference, "TPL") === 0){
+										$unit *= 3;
+									}
+									elseif (strpos($reference, "CPL") === 0){
+										$unit *= 4;
+									}
+									
+									
+									$precio = $precios[$reference] + $unit;
+									
+									
+									//var_dump($precios);
+								}
+								//echo $lineaPosadas[0].'_'.$lineaServicios[0].'!!!'. $idlistasdeprecios
 							?>
 								<div class="control-group">
 									<label class="control-label"><?php echo $lineaServicios[1] ?></label>

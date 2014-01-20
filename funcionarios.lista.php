@@ -7,11 +7,12 @@ $sqlQuery = "SELECT ";
 $sqlQuery .= "E.employee_id id, ";
 $sqlQuery .= "NULL '&nbsp', ";
 $sqlQuery .= "CONCAT(P.firstname, ' ', P.lastname) 'Nome Completo', ";
+$sqlQuery .= "E.decline, ";
 
 $sqlQuery .= "CONCAT(TIMESTAMPDIFF(YEAR, E.admission, NOW()), 'A / ', TIMESTAMPDIFF(MONTH, E.admission, NOW()) - (TIMESTAMPDIFF(YEAR, E.admission, NOW()) * 12), 'M') as Antiguedad, ";
 
 $sqlQuery .= "DATE_FORMAT(FROM_DAYS(DATEDIFF(NOW(), P.birthdate)), '%Y')+0 AS Edad, ";
-$sqlQuery .= "JC.name Categoría, ";
+$sqlQuery .= 'CONCAT("<A HREF=funcionarios.categorias.lista.php>", JC.name, "</A>") Categoría, ';
 $sqlQuery .= "EMP.nombre Empresa, ";
 $sqlQuery .= "CONCAT(TIME_FORMAT(E.fromhour, '%H:%i'), ' - ', TIME_FORMAT(E.tohour, '%H:%i')) 'Horario', ";
 $sqlQuery .= "CO.nombre País, ";
@@ -37,10 +38,6 @@ $resultado = resultFromQuery($sqlQuery);
 $tablafuncionarios = tableFromResult($resultado, 'employee', false, true, 'posts.php', true);
 $totalfuncionarios = mysql_num_rows($resultado);
 
-if ($_SESSION["idusuarios_tipos"] == 1) {
-	FB::info($tablafuncionarios, "All Turtles");
-}
-
 ?>	
 
 <!--main-container-part-->
@@ -57,6 +54,8 @@ if ($_SESSION["idusuarios_tipos"] == 1) {
 <!--End-breadcrumbs-->
   <div class="container-fluid">
 	<div class="row-fluid">
+		<?php echo ($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 4) ? '<h2><b><div id="totalSalarios">
+			Previsão: R$</div></b></h2>' : '';?>
         <div class="widget-box">
           <div class="widget-title"> <span class="icon"><i class="icon-th"></i></span>
             <h5>Lista de Funcionarios - <?php echo $totalfuncionarios;?> funcionarios registrados</h5>

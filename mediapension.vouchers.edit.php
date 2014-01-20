@@ -167,15 +167,15 @@ if (isset($_SESSION['idmediapension'])){
 						<div class="control-group">
 							<label class="control-label">Qtde de Serviços</label>
 							<div class="controls">
-								<input id="qtdedecomidas" name="qtdedecomidas" type="text" id="comidas" class="span2"  required="true" value="<?php echo isset($qtdedecomidas) ? $qtdedecomidas : '';?>" />
+								<input id="qtdedecomidas" name="qtdedecomidas" type="text" class="span2"  required="true" value="<?php echo isset($qtdedecomidas) ? $qtdedecomidas : '';?>" />
 							</div>
 						</div>
 						<div class="control-group">
 							<label class="control-label">Hoteleria</label>
 							<div class="controls">
 								<SELECT required="true" ID="hoteleria" NAME="hoteleria" SIZE="1" onchange="" STYLE="">
-									<OPTION STYLE="" VALUE="0" <?php if (!isset($hoteleria)){echo 'SELECTED';}?>>NO</OPTION>
-									<OPTION STYLE="" VALUE="1" <?php if (isset($hoteleria)){echo 'SELECTED';}?>>SI</OPTION>
+									<OPTION STYLE="" VALUE="0" <?php if (isset($hoteleria) && $hoteleria == 0){echo 'SELECTED';}?>>NO</OPTION>
+									<OPTION STYLE="" VALUE="1" <?php if (isset($hoteleria) && $hoteleria == 1){echo 'SELECTED';}?>>SI</OPTION>
 								</SELECT>								
 							</div>
 						</div>

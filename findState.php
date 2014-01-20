@@ -1,13 +1,6 @@
-<!-- ==============================================
-//  Created by PHP Dev Zone           			 ||
-//	http://php-dev-zone.blogspot.com             ||
-//  Contact for any Web Development Stuff        ||
-//  Email: ketan32.patel@gmail.com     			 ||
-//=============================================-->
-
-
 <?php 
 include_once 'lib/dbUtils.php';
+
 $country=intval($_GET['country']);
 $selected=intval($_GET['selected']);
 

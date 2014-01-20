@@ -22,20 +22,35 @@ if (isset($_POST['desde']) || isset($_POST['ate'])){
 	
 	$sqlQuery .= (isset($_POST['desde']) && $_POST['desde'] != '') ? "AND MP.dataIN >= '".dateFormatMySQL($_POST['desde'])."' " : '';
 	$sqlQuery .= (isset($_POST['ate']) && $_POST['ate'] != '') ? "AND MP.dataIN <= '".dateFormatMySQL($_POST['ate'])."' " : '';
+		
+	$_SESSION['desde'] = $_POST['desde'];
+	$_SESSION['ate'] = $_POST['ate'];
+}
+elseif (isset($_SESSION['desde']) || isset($_SESSION['ate'])){
 	
-	$tablaVouchers = tableFromResult(resultFromQuery($sqlQuery), 'VouchersMP', true, true, 'posts.php', true);
+	$title = (isset($_SESSION['desde']) && $_SESSION['desde'] != '') ? $_SESSION['desde'] : 'Todos ';
+	$title .= (isset($_SESSION['ate']) && $_SESSION['ate'] != '') ? ' / '.$_SESSION['ate'] : ' / Todos';
 	
-	
+	$sqlQuery .= (isset($_SESSION['desde']) && $_SESSION['desde'] != '') ? "AND MP.dataIN >= '".dateFormatMySQL($_SESSION['desde'])."' " : '';
+	$sqlQuery .= (isset($_SESSION['ate']) && $_SESSION['ate'] != '') ? "AND MP.dataIN <= '".dateFormatMySQL($_SESSION['ate'])."' " : '';
+		
+	$_POST['desde'] = $_SESSION['desde'];
+	$_POST['ate'] = $_SESSION['ate'];
 }
 else{
 	$title = "Ultimo mes";
 
 	$sqlQuery .= "AND month(MP.dataIN) >= month(curdate()) ";
 	$sqlQuery .= "AND month(MP.dataIN) <= month(curdate())";
-	
-	$tablaVouchers = tableFromResult(resultFromQuery($sqlQuery), 'VouchersMP', true, true, 'posts.php', true);
-	
+	//$sqlQuery .= "AND MP.dataIN >= '2013-11-25' ";
+	//$sqlQuery .= "AND MP.dataIN <= '2014-01-01' ";
+}
 
+if ($_SESSION["idusuarios_tipos"] == 1 || $_SESSION["idusuarios_tipos"] == 3 ){
+	$tablaVouchers = tableFromResult(resultFromQuery($sqlQuery), 'VouchersMP', true, true, 'posts.php', true);
+}
+elseif ($_SESSION["idusuarios_tipos"] == 6){
+	$tablaVouchers = tableFromResult(resultFromQuery($sqlQuery), 'VouchersMP', false, true, 'posts.php', true);
 }
 	
 
@@ -56,6 +71,7 @@ else{
   <div class="container-fluid">
 	  <div class="row-fluid">
 		  <div class="span12">
+			  
 			  <div class="widget-box">
 				  <div class="widget-title"> <span class="icon"> <i class="icon-align-justify"></i> </span>
 				      <h5>Data de pesquisa</h5>
@@ -84,10 +100,7 @@ else{
 						  
 					  </form>
 				  </div>
-				  
-				  
-
-		  </div>
+			  </div>
 	  
 			  <div class="widget-box">
 				  <div class="widget-title">

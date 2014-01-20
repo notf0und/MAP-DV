@@ -84,6 +84,16 @@ $combopaymentmethod = comboFromArray('paymentmethod_id', $resultado, isset($paym
 							</div>
 						</div>
 						
+						<!--DATE PICKER-->
+						<div class="control-group">
+							<div class="controls">
+								<div data-date="" class="input-append date datepicker">
+									<input id="date" name="date" type="text" data-date-format="yyyy-mm-dd" placeholder="AAAA-MM-DD" value="<?php echo isset($date) ? $date : '' ;?>">
+									<span class="add-on"><i class="icon-th"></i></span>
+								</div>
+							</div>
+						</div>
+						
 						<!--DETAILS TEXTAREA-->
 						<div class="control-group">
 							<label class="control-label">Detalhes</label>

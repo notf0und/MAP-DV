@@ -1,10 +1,13 @@
 <?PHP
 // FUENTE : http://psoug.org/snippet/Export-table-to-Excel-or-MS-Word-file_314.htm
 // EDIT YOUR MySQL Connection Info:
-$DB_Server = "localhost";        //your MySQL Server
-$DB_Username = "root";                 //your MySQL User Name
-$DB_Password = "password";                //your MySQL Password
-$DB_DBName = "dasamericas";                //your MySQL Database Name
+$ldb = parse_ini_file("/home/sistemas/Documents/dasamericas/www/local-config.ini", true)['local_database'];
+
+
+$DB_Server = $ldb['dbhost'];        //your MySQL Server
+$DB_Username = $ldb['user'];                 //your MySQL User Name
+$DB_Password = $ldb['password'];                //your MySQL Password
+$DB_DBName = $ldb['dbname'];                //your MySQL Database Name
 $DB_TBLName = "_temp_liquidaciones_final";                //your MySQL Table Name
 $filename_name =  str_replace(" ", "_", $_GET['filename']); 
 //$DB_TBLName,  $DB_DBName, may also be commented out & passed to the browser

@@ -7,21 +7,21 @@
     <div id="breadcrumb"> 
 		<a href="index.php" title="Home" class="tip-bottom"><i class="icon-home"></i> Home</a> 
 		<a href="administradores.php" title="Administradores" class="tip-bottom">Administradores</a>
-		<a href="#" class="current">Agencias</a>
+		<a href="#" class="current">Agências</a>
 	</div>
-	<h1>Agencias</h1><hr>
+	<h1>Agências</h1><hr>
   </div>
 <!--End-breadcrumbs-->
   <div class="container-fluid">
 	<div class="row-fluid">
         <div class="widget-box">
 			<div class="widget-title"> <span class="icon"><i class="icon-th"></i></span>
-				<h5>Agencias</h5>
+				<h5>Agências</h5>
 			</div>
 			<form id="AgenciasForm" name="AgenciasForm" action="posts.php" method="post">
 			<div class="widget-content nopadding">
 				<?php
-					$sqlQuery = " SELECT *  ";
+					$sqlQuery = " SELECT idagencias, nombre Nome, telefono Telefone  ";
 					$sqlQuery .= " FROM `agencias`  ";
 					$sqlQuery .= " WHERE 1 ";
 					echo tableFromResult(resultFromQuery($sqlQuery), 'Agencias', true, true, 'posts.php', true);

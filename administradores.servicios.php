@@ -2,9 +2,6 @@
 
 <!--main-container-part-->
 <div id="content">
-<form id="formulario" name="formulario" method="post" action="posts.php">
-	<input type="hidden" id="accion" name="accion" value="" />
-	<input type="hidden" id="idposadas" name="idposadas" value="-1" />
 <!--breadcrumbs-->
   <div id="content-header">
     <div id="breadcrumb"> 
@@ -21,20 +18,23 @@
 			<div class="widget-title"> <span class="icon"><i class="icon-th"></i></span>
 				<h5>Serviços</h5>
 			</div>
+			<form id="administradoresServiceForm" name="administradoresServiceForm" action="posts.php" method="post">
+				<input type="hidden" id="accion" name="accion" value="administradoresService" />
+
 			<div class="widget-content nopadding">
 				<?php
-					$sqlQuery = "SELECT * FROM servicios";
-					echo tableFromResult(resultFromQuery($sqlQuery), 'posadas', false, true, 'posts.php', true);
+					$sqlQuery = "SELECT idservicios, nombre Nome, ComidasDiarias 'Refeições diárias' FROM servicios";
+					echo tableFromResult(resultFromQuery($sqlQuery), 'administradoresService', false, true, 'posts.php', true);
 				?>		  
 			</div>
+			</form>
         </div>
-		<form method="get" action="mediapension.novo.php">
+		<form method="get" action="administradores.servicios.novo.php">
 			<button class="btn btn-success" type="submit">Novo...</button>
 		</form>      	
 	</div>
     <hr/>
   </div>
 </div>
-</form>
 <!--end-main-container-part-->
 <?php include "footer.php"; ?>

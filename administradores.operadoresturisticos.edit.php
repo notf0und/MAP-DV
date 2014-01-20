@@ -24,8 +24,8 @@ if (isset($_SESSION['idoperadoresturisticos'])){
     <div id="breadcrumb"> 
 		<a href="index.php" title="Home" class="tip-bottom"><i class="icon-home"></i> Home</a> 
 		<a href="administradores.php" title="Administradores" class="tip-bottom">Administradores</a>
-		<a href="administradores.operadoresturisticos.php" title="Operadores Turisticos" class="tip-bottom">Operadores Turisticos</a>
-		<a href="#" class="current">Edit...</a>
+		<a href="administradores.operadoresturisticos.php" title="Operadores Turisticos" class="tip-bottom">Operadores Turísticos</a>
+		<a href="#" class="current">Editar</a>
 	</div>
   </div>
 <!--End-breadcrumbs-->
@@ -35,28 +35,28 @@ if (isset($_SESSION['idoperadoresturisticos'])){
 			<form action="posts.php" id="form" name="form" class="form-horizontal" method="post">
 			<div class="widget-box">
 				<div class="widget-title"> <span class="icon"> <i class="icon-align-justify"></i> </span>
-					<h5>Edit Operadores Turisticos</h5>
+					<h5>Editar operadores turísticos</h5>
 				</div>
 				<div class="widget-content nopadding">
 					<input type="hidden" id="accion" name="accion" value="admitirOperadoresturisticos" />
-					<input type="hidden" id="idoperadoresturisticos" name="idoperadoresturisticos" value="<?php echo $idoperadoresturisticos;?>" />
+					<input type="hidden" id="idoperadoresturisticos" name="idoperadoresturisticos" value="<?php echo isset($idoperadoresturisticos) ? $idoperadoresturisticos : '';?>" />
 					<div class="control-group">
-						<label class="control-label">Nombre</label>
+						<label class="control-label">Nome</label>
 						<div class="controls">
-							<input id="nombre" name="nombre" type="text" class="span11" placeholder="nombre" required="true" value="<?php echo $nombre;?>"/>
+							<input id="nombre" name="nombre" type="text" class="span11" placeholder="nombre" required="true" value="<?php echo isset($nombre) ? $nombre : '';?>"/>
 						</div>
 					</div>
 					<div class="control-group">
-						<label class="control-label">Telefono</label>
+						<label class="control-label">Telefone</label>
 						<div class="controls">
-							<input id="telefono" name="telefono" type="text" class="span11" placeholder="telefono" value="<?php echo $telefono;?>"/>
+							<input id="telefono" name="telefono" type="text" class="span11" placeholder="telefono" value="<?php echo isset($telefono) ? $telefono : '';?>"/>
 						</div>
 					</div>
 					<div id="status"></div>
 				</div>
 			</div>
 			<div class="class="form-actions">
-				<button class="btn btn-success" type="submit">Modificar</button>
+				<button class="btn btn-success" type="submit">Alterar</button>
 			</div>
 			</form>
 		</div>

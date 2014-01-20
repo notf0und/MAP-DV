@@ -1,25 +1,16 @@
-<!-- ==============================================
-//  Created by PHP Dev Zone           			 ||
-//	http://php-dev-zone.blogspot.com             ||
-//  Contact for any Web Development Stuff        ||
-//  Email: ketan32.patel@gmail.com     			 ||
-//=============================================-->
-
 <?php 
+include_once 'lib/dbUtils.php';
+
 $state=intval($_GET['state']);
 $selected=intval($_GET['selected']);
-$con = mysql_connect('localhost', 'root', 'password'); 
+
 mysql_query("SET NAMES 'utf8'");
 mysql_query('SET character_set_connection=utf8');
 mysql_query('SET character_set_client=utf8');
 mysql_query('SET character_set_results=utf8');
 
-if (!$con) {
-    die('Could not connect: ' . mysql_error());
-}
-mysql_select_db('dasamericas');
 $query="SELECT city_id, city FROM city WHERE state_id='$state'";
-$result=mysql_query($query);
+$result=resultFromQuery($query);
 
 ?>
 <select name="city">

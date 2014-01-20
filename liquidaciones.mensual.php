@@ -29,13 +29,36 @@ function comboDate($selection, $selected=false){
 	}
 
 	$combo = '';
-	for ($i=$min; $i<=$max; $i++){
+	if ($min > $max){
+		for ($i=$min; $i<=12; $i++){
+			
+			$combo .= '<option value="'.$i.'" ';
+			$combo .= isset($selected) && $i==$selected ? 'selected' : '';
+			$combo .= '>'.$i.'</option>';
+			$combo .= "\r\n";
+		}
 		
-		$combo .= '<option value="'.$i.'" ';
-		$combo .= isset($selected) && $i==$selected ? 'selected' : '';
-		$combo .= '>'.$i.'</option>';
-		$combo .= "\r\n";
+		for ($i=1; $i<=$max; $i++){
+			
+			$combo .= '<option value="'.$i.'" ';
+			$combo .= isset($selected) && $i==$selected ? 'selected' : '';
+			$combo .= '>'.$i.'</option>';
+			$combo .= "\r\n";
+			
+		}
 		
+		
+	}
+	else{
+		
+		for ($i=$min; $i<=$max; $i++){
+			
+			$combo .= '<option value="'.$i.'" ';
+			$combo .= isset($selected) && $i==$selected ? 'selected' : '';
+			$combo .= '>'.$i.'</option>';
+			$combo .= "\r\n";
+			
+		}
 	}
 	return $combo;
 }
@@ -46,7 +69,7 @@ if (isset($_GET['accion']) && $_GET['accion'] == 'liquidacion'){
 	
 	$resumen = '<div class="row-fluid">';
 	$resumen .= "\n\t".'<div class="container-fluid">';
-	$resumen .= "\n\t\t".'<h4>Resumen de responsables encontrados:</h4>';
+	$resumen .= "\n\t\t".'<h4>Resumo de responsávels encontrados:</h4>';
 			
 	$sql = "SELECT idresponsablesDePago, nombre, tabla FROM responsablesDePago ";
 	$resultadoResponsables= resultFromQuery($sql);	
@@ -66,7 +89,8 @@ if (isset($_GET['accion']) && $_GET['accion'] == 'liquidacion'){
 		$sqlResponsable .= 'AND idresponsablesDePago = '.$idresponsablesDePago.' ';
 		$sqlResponsable .= 'AND idliquidaciones = 0 ';
 		$sqlResponsable .= 'AND habilitado = 1 ';
-		$sqlResponsable .= 'AND MONTH(MP.DataIN) = '.$_SESSION["visualizarMes"].') ';
+		$sqlResponsable .= 'AND MONTH(MP.DataIN) = '.$_SESSION["visualizarMes"].' ';
+		$sqlResponsable .= 'AND YEAR(MP.DataIN) = '.$_SESSION["visualizarAno"].') ';
 		$sqlResponsable .= 'UNION  ';
 		$sqlResponsable .= '(';
 		$sqlResponsable .= 'SELECT HTL.id'.$tabla.' ID, O.nombre ';
@@ -76,7 +100,8 @@ if (isset($_GET['accion']) && $_GET['accion'] == 'liquidacion'){
 		$sqlResponsable .= 'AND idresponsablesDePago = '.$idresponsablesDePago.' ';
 		$sqlResponsable .= 'AND idliquidaciones = 0 ';
 		$sqlResponsable .= 'AND habilitado = 1 ';
-		$sqlResponsable .= 'AND MONTH(HTL.DataIN) = '.$_SESSION["visualizarMes"].') ';
+		$sqlResponsable .= 'AND MONTH(HTL.DataIN) = '.$_SESSION["visualizarMes"].' ';
+		$sqlResponsable .= 'AND YEAR(HTL.DataIN) = '.$_SESSION["visualizarAno"].') ';
 		$sqlResponsable .= 'ORDER BY nombre;';
 				
 //		echo $sqlResponsable;
@@ -92,7 +117,7 @@ if (isset($_GET['accion']) && $_GET['accion'] == 'liquidacion'){
 */
 		if ($resultadoResponsable = resultFromQuery($sqlResponsable)){
 			
-			$titulo = $nombre. " - tabla: ".$tabla; // Operador - Posada - Agencia - Venta por Balcon
+			$titulo = $nombre; // Operador - Posada - Agencia - Venta por Balcon
 			
 			$resumen .= "\n\t\t".'<div class="widget-box">';
 			$resumen .= "\n\t\t\t".'<div class="widget-title"> <span class="icon"><i class="icon-th"></i></span>';
@@ -126,15 +151,15 @@ if (isset($_GET['accion']) && $_GET['accion'] == 'liquidacion'){
 	<div id="content-header">
 		<div id="breadcrumb"> 
 			<a href="index.php" title="Home" class="tip-bottom"><i class="icon-home"></i> Home</a> 
-			<a href="liquidaciones.php" title="Liquidaciones" class="tip-bottom">Liquidaciones</a>
-			<a href="#" class="current">Liquidação Mensual</a>
+			<a href="liquidaciones.php" title="Liquidaciones" class="tip-bottom">Liquidações</a>
+			<a href="#" class="current">Liquidação Mensal</a>
 		</div>
 	</div>
 <!--End-breadcrumbs-->
 	<br/>
 	<div class="row-fluid">
 		<div class="container-fluid">
-			<h4>Proceso mensual</h4>
+			<h4>Liquidação Mensal</h4>
 			<div class="widget-box">
 				<div class="widget-content nopadding">
 					<form id="formBuscar" name="formBuscar" method="get">
@@ -152,13 +177,13 @@ if (isset($_GET['accion']) && $_GET['accion'] == 'liquidacion'){
 							</select>
 						</div>
 						<div class="control-group span2"><br>
-							<button class="btn btn-success" type="submit">Ejecutar proceso.</button>
+							<button class="btn btn-success" type="submit">Executar processo.</button>
 						</div>
 					</form>				
 				</div>
 			</div>
 			<div class="widget-box">
-				Se realizara una liquidacion para cada responsable existente en las mediapensiones del mes seleccionado.
+				Uma liquidação será feita para cada um dos responsávels existentes no mês selecionado.
 				<div class="widget-content nopadding">
 					<div class="control-group span11">
 					</div>

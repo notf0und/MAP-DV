@@ -10,7 +10,7 @@ if($_SESSION["login"] == 0) {
 	echo '<script languaje="javascript"> self.location="start.php"</script>';
 }
 
-if ($_SESSION["idusuarios_tipos"] == 1) {
+if ($_SESSION["idusuarios"] == 13) {
 	
 	//Reporte de errores PHP
 	error_reporting(E_ALL);
@@ -78,7 +78,7 @@ if ($_SESSION["idusuarios_tipos"] == 1) {
 <div id="sidebar"><a href="#" class="visible-phone"><i class="icon icon-home"></i> Dashboard</a>
   <ul>
 	<?php if (($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 2) || ($_SESSION["idusuarios_tipos"] == 3)) {?>
-    <li class="submenu <?php if(substr_count($script_name, 'mediapension') > 0){echo 'active';}; ?>"> <a href="#"><i class="icon icon-th-list"></i> <span>Media pensión</span></a>
+    <li class="submenu <?php if(substr_count($script_name, 'mediapension') > 0){echo 'active';}; ?>"> <a href="#"><i class="icon icon-th-list"></i> <span>Meia-pensão</span></a>
       <ul>
         <li><a href="mediapension.novo.php">Novo...</a></li>
         <li><a href="mediapension.lista.php">Veja a lista</a></li>
@@ -86,8 +86,8 @@ if ($_SESSION["idusuarios_tipos"] == 1) {
         <li><a href="mediapension.agencias.novoTipoUser2.php">Nueva Agencia</a></li>
 		<?php }?>
 		<?php if (($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 3)) {?>
-        <li><a href="mediapension.informes.php">Reports</a></li>
         <li><a href="mediapension.vouchers.php">Vouchers</a></li>
+        <li><a href="mediapension.estatisticas.php">Estatísticas</a></li>
         <li><a href="mediapension.administradores.php">Administradores</a></li>
 		<?php }?>
       </ul>

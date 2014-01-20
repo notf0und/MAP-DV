@@ -1,6 +1,6 @@
 <?php 
 	include "lib/sessionLib.php";
-	if ($_SESSION["idusuarios_tipos"] == 1){
+	if ($_SESSION["idusuarios"] == 13){
 		include "dBug.php";
 		new dBug($_POST);
 	}
@@ -359,12 +359,14 @@ if (isset( $_POST['accion'] )) {
 
 				$sqlPosadas = " SELECT * FROM posadas WHERE idposadas < 5 ";
 				$resultadoStringSQL = resultFromQuery($sqlPosadas);
-				new dBug($resultadoStringSQL);
+				
+				
+				if ($_SESSION["idusuarios"] == 13){
+					new dBug($resultadoStringSQL);
+				}
 
 				while ($row = mysql_fetch_object($resultadoStringSQL)) {
-					echo $row->idposadas;
-					echo $row->nombre;
-					echo "<br>";
+
 					if ($row->idposadas==0){
 						for($i=1;$i<6;$i++){
 							$precio = $_POST[$row->idposadas.'_'.$i];
@@ -375,7 +377,7 @@ if (isset( $_POST['accion'] )) {
 							echo ' servicio:'.$i.' - posada:'.$row->idposadas.' - precio:'.$precio.' <br>';
 						}
 					}else{
-						for($i=6;$i<15;$i++){
+						for($i=6;$i<21;$i++){
 							$precio = $_POST[$row->idposadas.'_'.$i];
 							$idservicios = $i;
 							$idposadas_internas = $row->idposadas;
@@ -386,14 +388,39 @@ if (isset( $_POST['accion'] )) {
 					}
 				}
 			}else{
-				for($i=1;$i<6;$i++){
-					$precio = $_POST['0_'.$i];
-					$idservicios = $i;
-					$idposadas_internas = 0;
-					$resultado = guardarPrecio($idlistasdeprecios, $idservicios, $precio, $idposadas_internas);
-					echo ' resultado = :'.$resultado.' - <br>';
-					echo ' servicio:'.$i.' - posada: 0 - precio:'.$precio.' <br>';
+				
+				$sqlPosadas = " SELECT * FROM posadas WHERE idposadas < 5 ";
+				$resultadoStringSQL = resultFromQuery($sqlPosadas);
+				
+				
+				if ($_SESSION["idusuarios"] == 13){
+					new dBug($resultadoStringSQL);
 				}
+
+				while ($row = mysql_fetch_object($resultadoStringSQL)) {
+				
+					if ($row->idposadas==0){
+						for($i=1;$i<6;$i++){
+							$precio = $_POST[$row->idposadas.'_'.$i];
+							$idservicios = $i;
+							$idposadas_internas = $row->idposadas;
+							$resultado = guardarPrecio($idlistasdeprecios, $idservicios, $precio, $idposadas_internas);
+							echo ' resultado = :'.$resultado.' - <br>';
+							echo ' servicio:'.$i.' - posada: 0 - precio:'.$precio.' <br>';
+						}
+					}
+					else{
+						for($i=6;$i<21;$i++){
+							$precio = $_POST[$row->idposadas.'_'.$i];
+							$idservicios = $i;
+							$idposadas_internas = $row->idposadas;
+							$resultado = guardarPrecio($idlistasdeprecios, $idservicios, $precio, $idposadas_internas);
+							echo ' resultado = :'.$resultado.' - <br>';
+							echo ' servicio:'.$i.' - posada: 0 - precio:'.$precio.' <br>';
+						}
+					}
+				}
+				
 			}
 
 	/*
@@ -411,7 +438,48 @@ if (isset( $_POST['accion'] )) {
 		
 	}
 
+	if ($_POST['accion'] == 'administradoresServiceNew') {
+		
+		$referer = $_POST['referer'];
+		
+		if (isset($_POST['idservicios']) && $_POST['idservicios'] != ''){
+			
+			$sql = "UPDATE servicios SET ";
+			$sql .= "nombre = '".$_POST['nombre']."', ";
+			$sql .= "ComidasDiarias = ".$_POST['ComidasDiarias']." ";
+			$sql .= "WHERE idservicios = ".$_POST['idservicios']." ";
+			
+			$result = resultFromQuery($sql);
+		}
+		else{ //INSERT
+			$sql = "SELECT MAX(idservicios) as 'idservicios' FROM servicios; ";
+			
+			$result = resultFromQuery($sql);
+			$row = siguienteResult($result);
+			$idservicios = $row->idservicios + 1;
+			
+			$sql = "INSERT INTO servicios(idservicios, nombre, ComidasDiarias) VALUES(";
+			$sql .= $idservicios.", ";
+			$sql .= "'".$_POST['nombre']."', ";
+			$sql .= $_POST['ComidasDiarias'].") ";
+			
+			$result = resultFromQuery($sql);
+						
+		}
+				
+		echo '<script languaje="javascript"> self.location="'.$referer.'"</script>';
 
+	}
+	
+	if ($_POST['accion'] == 'administradoresServiceModify') {
+		
+		
+		//echo $referer;
+		$_SESSION['idservicios'] = $_POST['idservicios'];
+		$_SESSION['referer'] = $_SERVER['HTTP_REFERER'];
+		echo '<script languaje="javascript"> self.location="administradores.servicios.novo.php"</script>';
+		
+	}
 
 	if ($_POST['accion'] == 'ListasdepreciosNew') {
 		$_SESSION['idlistasdeprecios'] = -1;
@@ -430,7 +498,7 @@ if (isset( $_POST['accion'] )) {
 	if ($_POST['accion'] == 'admitirHoteleria') {
 		
 		$referer = $_POST['referer'];
-
+		
 		$idhoteleria = $_POST['idhoteleria'];
 		$numeroexterno = $_POST['numeroexterno'];
 		$nomedopax = $_POST['nomedopax'];
@@ -474,7 +542,8 @@ if (isset( $_POST['accion'] )) {
 			$resultadoStringSQL = resultFromQuery($sql);		
 
 			bitacoras($_SESSION["idusuarios"], 'Modificacion de Voucher HTL: ID '.$idhoteleria);
-		} else {
+		} 
+		else {
 		
 			//INSERT HUESPED
 			$sql = "insert huespedes (titular, idpaises) values (";
@@ -516,6 +585,7 @@ if (isset( $_POST['accion'] )) {
 
 	if ($_POST['accion'] == 'VouchersHTLNew') {
 		$_SESSION['idhoteleria'] = -1;
+		$_SESSION['referer'] = $_SERVER['HTTP_REFERER'];
 		echo '<script languaje="javascript"> self.location="hoteleria.vouchers.edit.php"</script>';
 	}
 
@@ -525,7 +595,13 @@ if (isset( $_POST['accion'] )) {
 		echo '<script languaje="javascript"> self.location="hoteleria.vouchers.edit.php"</script>';
 	}
 
-
+	if ($_POST['accion'] == 'VouchersHTLDelete') {
+		
+		$sql = "update hoteleria set habilitado = 0 where 1 and idhoteleria = ".$_POST['id'];
+		$resultadoStringSQL = resultFromQuery($sql);
+		echo '<script languaje="javascript"> self.location="hoteleria.vouchers.php"</script>';
+	}
+		
 /* Media Pension */
 
 	if ($_POST['accion'] == 'admitirServicio') {
@@ -793,6 +869,7 @@ if (isset( $_POST['accion'] )) {
 	}
 
 	if ($_POST['accion'] == 'VouchersMPModify') {
+		
 		$_SESSION['idmediapension'] = $_POST['id'];
 		$_SESSION['referer'] = $_SERVER['HTTP_REFERER'];
 		echo '<script languaje="javascript"> self.location="mediapension.vouchers.edit.php"</script>';
@@ -1169,6 +1246,7 @@ if (isset( $_POST['accion'] )) {
 			//Validacion de fechas
 			$admissiondate = dateFormatMySQL($_POST['admissiondate']);
 			$contractdate = dateFormatMySQL($_POST['contractdate']);
+			$decline = dateFormatMySQL($_POST['decline']);
 			
 			//Conversion de , a .
 			$transportvalue = str_replace(',', '.', $_POST['transportvalue']);
@@ -1180,7 +1258,7 @@ if (isset( $_POST['accion'] )) {
 				
 			$column = getColumns($table);
 				
-			$value = ['', $_POST['profile_id'], $_POST['idempresa'], $_POST['jobcategory_id'], $_POST['bonussalary'], $admissiondate, $contractdate, $transportvalue, $_POST['traject'], $_POST['fromhour'], $_POST['tohour'], $_POST['intervalhour'], $_POST['experiencecontract'], $unhealthy];
+			$value = ['', $_POST['profile_id'], $_POST['idempresa'], $_POST['jobcategory_id'], $_POST['bonussalary'], $admissiondate, $contractdate, $decline, $transportvalue, $_POST['traject'], $_POST['fromhour'], $_POST['tohour'], $_POST['intervalhour'], $_POST['experiencecontract'], $unhealthy];
 				
 			if (isset($_POST[$table.'_id']) && $_POST[$table.'_id'] != ''){
 				$employee_id = $_POST[$table.'_id'];
@@ -1464,6 +1542,7 @@ if (isset( $_POST['accion'] )) {
 			//Validacion de fechas
 			$admissiondate = dateFormatMySQL($_POST['admissiondate']);
 			$contractdate = dateFormatMySQL($_POST['contractdate']);
+			$decline = dateFormatMySQL($_POST['decline']);
 			
 			//Conversion de , a .
 			$transportvalue = str_replace(',', '.', $_POST['transportvalue']);
@@ -1476,6 +1555,7 @@ if (isset( $_POST['accion'] )) {
 			$sql .= $_POST['bonussalary'] != '' ? ', bonussalary' : '';
 			$sql .= $_POST['admissiondate'] ? ', admission' : '';
 			$sql .= $_POST['contractdate'] != '' ? ', contract' : '';
+			$sql .= $_POST['decline'] != '' ? ', decline' : '';
 			$sql .= $_POST['transport'] != 0 ? ', transport' : '';
 			$sql .= $_POST['traject'] != '' ? ', traject' : '';
 			$sql .= $_POST['fromhour'] != '' ? ', fromhour' : '';
@@ -1493,6 +1573,7 @@ if (isset( $_POST['accion'] )) {
 			$sql .= $_POST['bonussalary'] != '' ? ', '."'".$_POST['bonussalary']."'" : '';
 			$sql .= $admissiondate ? ', '."'".$admissiondate."'" : '';
 			$sql .= $contractdate ? ', '."'".$contractdate."'" : '';
+			$sql .= $decline ? ', '."'".$decline."'" : '';
 			$sql .= $_POST['transport'] != 0 ? ', '."'".$transportvalue."'" : '';
 			$sql .= $_POST['traject'] != '' ? ', '."'".$_POST['traject']."'" : '';
 			$sql .= $_POST['fromhour'] != '' ? ', '."'".$_POST['fromhour']."'" : '';
@@ -1511,29 +1592,46 @@ if (isset( $_POST['accion'] )) {
 
 	if ($_POST['accion'] == 'admitJobcategory') {
 		
-		$name = $_POST['jobcategory_name'];
-		$basesalary = $_POST['basesalary'];
-		$valid_from = $_POST['valid_from'];
-		
-		//Insert Base Salary
-		$sql = "INSERT basesalary (basesalary, valid_from, created) ";
-		$sql .= "VALUES (";
-		$sql .= "'".$basesalary."',";
-		$sql .= "'".$valid_from."',";
-		$sql .= "current_timestamp) ";
-		$resultadoStringSQL = resultFromQuery($sql);		
-		$basesalary_id = mysql_insert_id();
-		
-		bitacoras($_SESSION["idusuarios"], 'Insertar Salario Base ID: '.$basesalary_id);
-		
-		//Insert Job Category
-		$sql = "INSERT jobcategory (name, basesalary_id, created) ";
-		$sql .= "VALUES (";
-		$sql .= "'".$name."',";
-		$sql .= "'".$basesalary_id."',";
-		$sql .= "current_timestamp) ";
-		$resultadoStringSQL = resultFromQuery($sql);		
-		$jobcategory_id = mysql_insert_id();
+		if (isset($_POST['jobcategory_id'])){
+			
+			$jobcategory_id = $_POST['jobcategory_id'];
+			$name = $_POST['name'];
+			
+			$sql = 'UPDATE jobcategory set name = ';
+			$sql .= "'".$name."' ";
+			$sql .= 'WHERE jobcategory_id = '.$jobcategory_id;
+			
+			$result = resultFromQuery($sql);
+			
+			echo '<script languaje="javascript"> self.location="'.$_SERVER['HTTP_REFERER'].'"</script>';
+			
+		}
+		else{
+				
+			$name = $_POST['jobcategory_name'];
+			$basesalary = $_POST['basesalary'];
+			$valid_from = $_POST['valid_from'];
+			
+			//Insert Base Salary
+			$sql = "INSERT basesalary (basesalary, valid_from, created) ";
+			$sql .= "VALUES (";
+			$sql .= "'".$basesalary."',";
+			$sql .= "'".$valid_from."',";
+			$sql .= "current_timestamp) ";
+			$resultadoStringSQL = resultFromQuery($sql);		
+			$basesalary_id = mysql_insert_id();
+			
+			bitacoras($_SESSION["idusuarios"], 'Insertar Salario Base ID: '.$basesalary_id);
+			
+			//Insert Job Category
+			$sql = "INSERT jobcategory (name, basesalary_id, created) ";
+			$sql .= "VALUES (";
+			$sql .= "'".$name."',";
+			$sql .= "'".$basesalary_id."',";
+			$sql .= "current_timestamp) ";
+			$resultadoStringSQL = resultFromQuery($sql);		
+			$jobcategory_id = mysql_insert_id();
+		}
 		
 		
 		bitacoras($_SESSION["idusuarios"], 'Insertar Categoria Laboral: '.$jobcategory_id);
@@ -1542,6 +1640,10 @@ if (isset( $_POST['accion'] )) {
 	if ($_POST['accion'] == 'admitPayment') {
 		
 		if (isset($_POST['employee_id'])){
+			
+			//Validacion de fechas
+			$date = dateFormatMySQL($_POST['date']);
+			
 			//Parametros a pasar
 			$sql = "INSERT payment(";
 			$sql .= "employee_id";
@@ -1558,7 +1660,8 @@ if (isset( $_POST['accion'] )) {
 			$sql .= $_POST['paymentmethod_id'] != 0 ? ', '.$_POST['paymentmethod_id'] : '';
 			$sql .= $_POST['ammount'] != '' ? ', '.$_POST['ammount'] : '';
 			$sql .= $_POST['details'] != '' ? ", '".$_POST['details']."'" : '';
-			$sql .= ", current_timestamp) ";
+			$sql .= $_POST['date'] != '' ? ", '".$date."') " : ", current_timestamp) ";
+				
 			
 			$resultadoStringSQL = resultFromQuery($sql);		
 			$payment_id = mysql_insert_id();
@@ -1664,6 +1767,69 @@ if (isset( $_POST['accion'] )) {
 		echo '<script languaje="javascript"> self.location="'.$_SERVER['HTTP_REFERER'].'"</script>';
 	}
 
+	if ($_POST['accion'] == 'employeeSyndicate') {
+		
+		
+		
+		$employee_id = $_POST['employee_id'];
+		
+		$sql = "SELECT status FROM syndicate WHERE employee_id = ".$employee_id." ORDER BY created DESC LIMIT 1;";
+		
+		$resultado = resultFromQuery($sql);
+		
+		if ($row = siguienteResult($resultado)) {
+			$prevstatus = $row->status;
+		}
+				
+		
+		$sql = "INSERT INTO syndicate(employee_id, status, created) VALUES (";
+		$sql .= $employee_id.", ";
+		
+		if ($_POST['syndicate'] == 'add' && $prevstatus != 1){
+						
+			$sql .= "1, ";
+			$sql .= "current_timestamp) ";
+			
+			$resultado = resultFromQuery($sql);
+			$syndicate_id = mysql_insert_id();
+				
+			bitacoras($_SESSION["idusuarios"], 'Adicionado sindicato id: '.$syndicate_id);
+		}
+		elseif ($_POST['syndicate'] == 'remove' && ($prevstatus != 0 || $prevstatus == NULL)){
+			
+			$sql .= "0, ";
+			$sql .= "current_timestamp) ";
+			
+			$resultado = resultFromQuery($sql);
+			$syndicate_id = mysql_insert_id();
+				
+			bitacoras($_SESSION["idusuarios"], 'Apagado sindicato id: '.$foodemployee_id);
+		}
+		echo '<script languaje="javascript"> self.location="'.$_SERVER['HTTP_REFERER'].'"</script>';
+	}
+
+
+	if ($_POST['accion'] == 'employeeNonAttendance') {
+		
+		$employee_id = $_POST['employee_id'];
+		
+		//UPDATE
+		//ADDRESS
+		if ($_POST['employee_id'] != 0){
+			$table = 'nonattendance';	
+			$column = getColumns($table);
+			
+			$value = ['', $_POST['employee_id'], $_POST['date'], 'current_timestamp'];
+			
+			$sqlQuery = insertQuery($table, $column, $value);
+			
+			$resultado = resultFromQuery($sqlQuery);
+			$nonattendance_id = mysql_insert_id();
+			
+			echo '<script languaje="javascript"> self.location="funcionarios.lista.php"</script>';
+		}
+	}
+		
 /*Procesos*/
 
 	if ($_POST['accion'] == 'admitirPais') {
@@ -1858,7 +2024,7 @@ function insertQuery($table, $column, $value){
 		}
 		
 		if ($value[$j] != ''){
-			if (is_numeric($value[$j]))
+			if (is_numeric($value[$j]) || $value[$j] == 'current_timestamp')
 			{
 				$sqlQuery .= $value[$j];
 			}

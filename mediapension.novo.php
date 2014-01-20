@@ -118,7 +118,7 @@ $idlocales = $_SESSION["idlocales"];
 							</div>
 							<?php }?>
 						</div>
-						<div id="form-wizard-2" class="step">
+						<div id="form-wizard-2" name="form-wizard-2" class="step">
 							<div class="control-group">
 								<label class="control-label">Data IN</label>
 								<div class="controls">
@@ -179,5 +179,4 @@ $idlocales = $_SESSION["idlocales"];
 </div>
 
 <!--end-main-container-part-->
-
 <?php include "footer.php"; ?>

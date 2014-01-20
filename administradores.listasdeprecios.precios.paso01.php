@@ -42,8 +42,8 @@ if (isset($_GET['id'])){
     <div id="breadcrumb"> 
 		<a href="index.php" title="Home" class="tip-bottom"><i class="icon-home"></i> Home</a> 
 		<a href="administradores.php" title="Administradores" class="tip-bottom">Administradores</a>
-		<a href="administradores.listasdeprecios.php" title="Listas de precios" class="tip-bottom">Listas de precios</a>
-		<a href="#" class="current">Precios | Paso 1 de 2</a>
+		<a href="administradores.listasdeprecios.php" title="Listas de precios" class="tip-bottom">Listas de preços</a>
+		<a href="#" class="current">Preços | Paso 1 de 2</a>
 	</div>
   </div>
 <!--End-breadcrumbs-->
@@ -53,13 +53,13 @@ if (isset($_GET['id'])){
 			<form action="posts.php" id="form" name="form" class="form-horizontal" method="post">
 			<div class="widget-box">
 				<div class="widget-title"> <span class="icon"> <i class="icon-align-justify"></i> </span>
-					<h5>Edit Lista de precios</h5>
+					<h5>Editar listas de preços</h5>
 				</div>
 				<div class="widget-content nopadding">
 					<input type="hidden" id="accion" name="accion" value="admitirPrecios01" />
 					<input type="hidden" id="idlistasdeprecios" name="idlistasdeprecios" value="<?php echo $idlistasdeprecios;?>" />
 					<div class="control-group">
-						<label class="control-label">Responsable</label>
+						<label class="control-label">Responsável</label>
 						<div class="controls">
 							<select name="iditem" id="iditem">
 							<?php

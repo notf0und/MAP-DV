@@ -269,7 +269,7 @@ function insertoBloqueDeMediapension($idresponsablesDePago, $id, $dataIN, $dataO
 		// echo 'idmediapension : '.$row->idmediapension.' - data: '.$row->DataIN.' - ('.$row->N.' Noches - '.$row->Q.' Q - '.$row->M.' MP) <br>';
 		// Inserto en tabla temporal para saber las diferencias en los precios que pueda llegar a existir
 		$start = strtotime($row->DataIN);
-		$end = strtotime($row->DataOUT);
+		$end = strtotime($row->DataOUT.' -1 day');
 		
 		for ($i=$start;$i<=$end;$i = $i + 86400 ){
 			
@@ -290,9 +290,6 @@ function insertoBloqueDeMediapension($idresponsablesDePago, $id, $dataIN, $dataO
 
 		}
 		
-		if ($_SESSION["idusuarios_tipos"] == 1) {
-				FB::info('Saliendo del for');
-		}
 		//hago un disctinct de los valores
 
 		$sql = " SELECT count(*) Noches, precio, MIN(data) AS min, MAX(data) AS max, SUM(precio) AS Total ";
@@ -357,7 +354,8 @@ function insertoBloqueDeHoteleria($idresponsablesDePago, $id, $dataIN, $dataOUT)
 	$sql .= " 	LEFT JOIN servicios S ON HTL.idservicios = S.idservicios  ";
 	$sql .= " 	WHERE 1  ";
 	$sql .= " 	AND HTL.DataIN >= '".$dataIN."' AND HTL.DataIN <= '".$dataOUT."'	 "; // las consultas en la fecha, no son un error, sino que se toma con la fecha de salida de la hoteleria.
-	$sql .= " 	AND HTL.idliquidaciones = 0";  	
+	$sql .= " 	AND HTL.idliquidaciones = 0 ";  
+	$sql .= " 	AND HTL.habilitado = 1 ";  	
 	if ($id > 0){
 		$sql .= " 	AND HTL.id".$tabla." = ".$id;
 		$sql .= " 	AND HTL.idresponsablesDePago = ".$idresponsablesDePago;
@@ -376,7 +374,7 @@ function insertoBloqueDeHoteleria($idresponsablesDePago, $id, $dataIN, $dataOUT)
 			$idposadas = $row->idposadas;
 			$idservicios = $row->idservicios;
 			//$precio = valordiaria($fechaActual, $row->idposadas, $row->idservicios); // Version antigua
-			$precio = valordiaria($data, $idresponsablesDePago, $id, $idservicios, $idposadas);
+			$precio = valordiaria($data, $idresponsablesDePago, $id, $idservicios, $idposadas, true);
 
 			$sql = " INSERT INTO _temp_liquidaciones_htl_cuentas (data, precio) VALUES (";
 			$sql .= " '".$fechaActual."',";
@@ -765,13 +763,16 @@ function precioListasdeprecios($idposadas_internas_idservicios, $idlistasdepreci
 	if ($rowLine = siguienteResult($resultado)){
 		$precio = $rowLine->precio;
 	}
-	return $precio;
+	return isset($precio) ? $precio : false;
 }
 
 function guardarPrecio($idlistasdeprecios, $idservicios, $precio, $idposadas_internas){
 	// consulto si el $idservicios and $idlistasdeprecios exite para ver si hago un UPDATE o INSERT
 	$sqlExiste = " select * from servicios_listasdeprecios where idlistasdeprecios ='".$idlistasdeprecios."' and idservicios = '".$idservicios."' and idposadas_internas = '".$idposadas_internas."';";
-	$resultado = mysql_fetch_array(resultFromQuery($sqlExiste));	
+	$resultado = mysql_fetch_array(resultFromQuery($sqlExiste));
+	
+	echo $resultado;
+	echo $resultado[0];
 	
 	if ($resultado[0] == null){	
 		$query = "insert into servicios_listasdeprecios (idlistasdeprecios, idservicios, precio, idposadas_internas) values ('".$idlistasdeprecios."','".$idservicios."','".$precio."','".$idposadas_internas."');"; 
@@ -802,7 +803,7 @@ function admitirServicio($idmediapension, $qtdedepaxagora, $precio, $idlocales=0
 	return $idadmision;
 }
 
-function valordiaria($data, $idresponsablesDePago, $id, $idservicios, $idposadas){
+function valordiaria($data, $idresponsablesDePago, $id, $idservicios, $idposadas, $hoteleria = false){
 	/*
 	Si la siguiente consulta viene vacia, es porque la posada no tiene una lista de precios particualar para media pension 
 	y va a usar los precios genericos. Osea los estan para idposadas = 0.
@@ -843,12 +844,17 @@ function valordiaria($data, $idresponsablesDePago, $id, $idservicios, $idposadas
 	$sql .= " AND LDP.idresponsablesDePago = ".$idresponsablesDePago;
 	$sql .= " AND LDP.iditem = ".$id;
 	$sql .= " AND SLDP.idservicios = ".$idservicios;
+	//echo $idposadas.'<br>';
+	isset($hoteleria) && $hoteleria == true ? $sql .= " AND SLDP.idposadas_internas = ".$idposadas : '';
+	//$sql .= " AND SLDP.idposadas_internas = ".$idposadas;
 	$sql .= " AND  '".$data."' BETWEEN LDP.VigenciaIN AND LDP.VigenciaOUT ";
 	/*
 	echo "<hr><font color='white'>";
 	echo $sql;
 	echo "</font>";
 	*/
+	
+	
 	$resultado = mysql_fetch_array(resultFromQuery($sql));	
 	
 	if ($resultado[0] == null){
@@ -873,9 +879,6 @@ function valordiaria($data, $idresponsablesDePago, $id, $idservicios, $idposadas
 		$valor = $resultado[0];
 	}
 	
-	if ($_SESSION["idusuarios_tipos"] == 1) {
-		FB::info('data: '.$data.' idresponsablesdepago: '.$idresponsablesDePago.' id: '.$id.' idservicios: '.$idservicios.' idposadas: '.$idposadas.' valor: '.$valor);
-	}
 	
 	return $valor;
 
@@ -1089,6 +1092,239 @@ function dateFormatMySQL($date){
 			$resultadoInsertLine = resultFromQuery($sql);	
 		}
 		*/
+function calcularSalario($employee_id, $month = false, $year = false){
+	
+	$salario = array('employee' => array('employee_id' => $employee_id));
+	
+	//Informacion sobre el empleado y detalles sobre salario
+	//SELECT
+	$sqlQuery = "SELECT ";
+	$sqlQuery .= "E.employee_id id, ";
+	$sqlQuery .= "CONCAT(P.firstname, ' ', P.lastname) fullname, ";
+	$sqlQuery .= "BS.basesalary base, ";
+	$sqlQuery .= "E.bonussalary, ";
+	$sqlQuery .= "E.contract contract, ";
+	$sqlQuery .= "E.experiencecontract experiencecontract, ";
+	$sqlQuery .= "E.unhealthy, ";
+	$sqlQuery .= "count(H.profile_id) sons, ";
+	$sqlQuery .= "E.transport, ";
+	$sqlQuery .= "F.status food, ";
+	$sqlQuery .= "E.decline decline, ";
+	$sqlQuery .= 'count(NA.date) nonattendance, ';
+	$sqlQuery .= 'SY.status syndicate, ';
+	
+	//Cantidad de dias trabajados Minimo (desde la admision, contrato, dias transcurridos en el mes) o 0
+	
+	
+	if (isset($month) && isset($year) && $month != '' && $year != ''){
+		
+		$days_in_month = cal_days_in_month(CAL_GREGORIAN, $month, $year);
+		
+		$sqlQuery .= "COALESCE(LEAST(COALESCE(COALESCE(DATEDIFF(decline, admission), DATEDIFF('".$year."-".$month."-".$days_in_month."', admission)), DATEDIFF('".$year."-".$month."-".$days_in_month."', contract)), DATEDIFF('".$year."-".$month."-".$days_in_month."', DATE_FORMAT('".$year."-".$month."-".$days_in_month."', '%Y-%m-01'))), 0) + 1 as 'worked' ";
+	}
+	else{
+		$sqlQuery .= "COALESCE(LEAST(COALESCE(DATEDIFF(NOW(), admission), DATEDIFF(NOW(), contract)), DATEDIFF(NOW(), DATE_FORMAT(NOW(), '%Y-%m-01'))), 0) as 'worked' ";
+	}
+	
+	//FROM
+	$sqlQuery .= "FROM employee E ";
+
+	$sqlQuery .= "LEFT JOIN jobcategory JC ON E.jobcategory_id = JC.jobcategory_id ";
+	$sqlQuery .= "LEFT JOIN basesalary BS ON E.jobcategory_id = BS.jobcategory_id ";
+	$sqlQuery .= "LEFT JOIN profile P ON E.profile_id = P.profile_id ";
+	$sqlQuery .= "LEFT JOIN son H ON P.profile_id = H.profile_id ";
+	
+	$sqlQuery .= "LEFT JOIN nonattendance NA ON E.employee_id = NA.employee_id ";
+	$sqlQuery .= " AND MONTH(NA.date) = ".$month." ";
+	$sqlQuery .= " AND YEAR(NA.date) = ".$year." ";
+	
+	//Select latest food
+	$sqlQuery .= "LEFT JOIN foodemployee F ON E.employee_id = F.employee_id ";
+	$sqlQuery .= "AND F.created = (SELECT MAX(created) FROM foodemployee Z WHERE Z.employee_id = E.employee_id) ";
+	
+	//Select latest syndicate status
+	$sqlQuery .= "LEFT JOIN syndicate SY ON E.employee_id = SY.employee_id ";
+	$sqlQuery .= "AND SY.created = (SELECT MAX(created) FROM syndicate X WHERE X.employee_id = E.employee_id) ";
+	
+	
+	//WHERE
+	$sqlQuery .= "WHERE E.employee_id = ".$salario['employee']['employee_id'].' ';
+	
+	//Execute query
+	$resultado = resultFromQuery($sqlQuery);	
+	
+	if ($row = siguienteResult($resultado)) {
+		
+		//Nombre completo
+		$salario['employee']['fullname'] = $row->fullname;
+		
+		$salario['employee']['Worked Days'] = $row->worked;
+		
+		$salario['employee']['Contract'] = $row->contract;
+		
+		$salario['employee']['Experience Contract'] = $row->experiencecontract;
+		
+		$salario['employee']['Decline Date'] = $row->decline;
+		
+		//Faltas
+		$salario['employee']['Non Attendance'] = $row->nonattendance;
+		
+		if($salario['employee']['Worked Days'] > 0){
+			
+			//Faltas
+			$salario['employee']['Non Worked'] = cal_days_in_month(CAL_GREGORIAN, $month, $year) - $salario['employee']['Worked Days']; 
+			
+			//Si el empleado tiene fecha de baja
+			if ($salario['employee']['Decline Date']){
+			
+				//Compara la fecha de baja y si es menor a el mes a calcular, pone todo en 0
+				if (date($year.'-'.$month) > date('Y-m', strtotime($salario['employee']['Decline Date']))){
+					$salario['employee']['Declined'] = true;
+				}
+				elseif (date($year.'-'.$month) == date('Y-m', strtotime($salario['employee']['Decline Date']))){
+					
+					$salario['employee']['Worked Days'] -= 1;
+					$salario['employee']['Non Worked'] += 1;
+				}
+				
+					
+			}//if ($salario['employee']['Decline Date'])
+			
+			//Salario base
+			if($salario['employee']['Non Worked'] != 0){
+				$salario['+']['Salario Base'] = round($row->base - ($row->base * (($salario['employee']['Non Worked'] -1) / 30)), 2);
+			}
+			else{
+				$salario['+']['Salario Base'] = $row->base;
+			}
+			
+			//Salario abono
+			$_SESSION["idusuarios_tipos"] == 1 || $_SESSION["idusuarios_tipos"] == 4 ? $salario['+']['Abono'] = $row->bonussalary : false;
+			
+			//Insalubridad
+			$row->unhealthy != 0 ? $salario['+']['Insalubridade'] = 67.8 : '';
+			
+			//Cantidad de hijos
+			$row->sons > 0 ? $salario['+']['Salario Familia'] = $row->sons * 23.35 : false;
+			
+			//Faltas
+			$salario['employee']['Non Attendance'] != 0 ? $salario['-']['Faltas ('.$salario['employee']['Non Attendance'].')'] = round(($row->base / 30) * $salario['employee']['Non Attendance'], 2) : '';
+			
+			//INSS
+			if ($salario['employee']['Contract'] || $salario['employee']['Experience Contract'] != 0){
+				if (isset($salario['-']['Faltas ('.$salario['employee']['Non Attendance'].')'])){
+					$salario['-']['INSS'] = round(($salario['+']['Salario Base'] -  $salario['-']['Faltas ('.$salario['employee']['Non Attendance'].')']) * 0.08, 2);
+				}
+				else{
+					$salario['-']['INSS'] = round($salario['+']['Salario Base'] * 0.08, 2);
+				}
+			}
+			
+			//Descuentos por Transporte
+			if ($row->transport != NULL && $row->transport != '0'){
+				
+				if (isset($salario['-']['Faltas ('.$salario['employee']['Non Attendance'].')'])){
+					$salario['-']['Transporte'] = round(transportDiscount($salario) - (transportDiscount($salario) * (($salario['employee']['Non Worked'] + $salario['employee']['Non Attendance'])  / 30)), 2);
+					
+
+				}
+				else{
+					$salario['-']['Transporte'] = round(transportDiscount($salario) - (transportDiscount($salario) * ($salario['employee']['Non Worked'] / 30)), 2);
+				}
+
+				
+			}
+			
+			//Descuentos de sindicato
+			if ($row->syndicate == 1 || $row->syndicate == NULL){
+				$salario['-']['Sindicato'] = 10;
+			}
+			
+			//Desconto por alimentação
+			
+			if ($row->food != 0){
+				 $salario['-']['Alimentação'] = 67.8;
+				 $salario['-']['Alimentação'] = round($salario['-']['Alimentação'] - ($salario['-']['Alimentação'] * ($salario['employee']['Non Worked'] / 30)), 2);
+			}
+			
+		}		
+	}
+	
+	//Pagos recibidos durante el ultimo mes
+	
+	//SELECT
+	$sqlQuery = "SELECT ";
+	$sqlQuery .= "PAY.payment_id id, ";
+	$sqlQuery .= "PAY.ammount, ";
+	$sqlQuery .= "DATE_FORMAT(PAY.date, '%d/%m') date, ";
+	$sqlQuery .= "PT.type, ";
+	$sqlQuery .= "PAY.details ";
+
+	//FROM
+	$sqlQuery .= "FROM payment PAY ";
+
+	$sqlQuery .= "LEFT JOIN paymenttype PT ON PAY.paymenttype_id = PT.paymenttype_id ";
+
+	$sqlQuery .= "WHERE PAY.enabled = 1 ";
+	$sqlQuery .= "AND PAY.employee_id = ".$salario['employee']['employee_id'].' ';
+	
+	if (isset($month) && $month != ''){
+		$sqlQuery .= "AND month(PAY.date) = ".$month.' ';
+	}
+	
+	if (isset($year) && $year != ''){
+		$sqlQuery .= "AND year(PAY.date) = ".$year;
+	}
+	
+	
+		
+	$resultado = resultFromQuery($sqlQuery);
+	
+	while ($row = mysql_fetch_object($resultado)) {
+			
+		$salario['-'][$row->type. " ".$row->date][][$row->details] = $row->ammount;
+		
+		isset($salario['adelantos']) ? $salario['adelantos'] += $row->ammount : $salario['adelantos'] = $row->ammount;
+	}
+	
+	if ($salario['employee']['Worked Days'] > 0 && !isset($salario['employee']['Declined'])){
+		$salario['Total'] = array_sum($salario['+']) - (isset($salario['-']) ? array_sum($salario['-']) : 0) - (isset($salario['adelantos']) ?$salario['adelantos'] : 0);
+	}
+	else{
+		unset($salario['+']);
+		unset($salario['-']);
+		
+		$salario['+']['Salario Base'] = 0;
+		$salario['Total'] = 0;
+	}
+	
+	return $salario;
+}
+
+function transportDiscount($salario){
+	if ($salario['employee']['Worked Days'] > 0){
+		
+		$salarioneto = array_sum($salario['+']);
+
+		if ($salarioneto <= 1000){
+			$transportdiscount = 45.60;
+		}
+		elseif ($salarioneto > 1000 && $salarioneto <= 1200){
+			$transportdiscount = 50;
+		}
+		else{
+			$transportdiscount = 60;
+		}
+	}
+	else{
+		$transportdiscount = 0;
+	}
+	
+	//$transportdiscount = round($salario['+']['Salario Base'] * 0.06, 2);
+
+	return $transportdiscount;
+}
+
 	
 	
 ?>

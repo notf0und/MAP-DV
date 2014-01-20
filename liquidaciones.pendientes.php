@@ -6,8 +6,8 @@
   <div id="content-header">
     <div id="breadcrumb"> 
 		<a href="index.php" title="Home" class="tip-bottom"><i class="icon-home"></i> Home</a> 
-		<a href="liquidaciones.php" title="Liquidaciones" class="tip-bottom">Liquidaciones</a>
-		<a href="#" class="current">Liquidaciones Pendientes</a>
+		<a href="liquidaciones.php" title="Liquidaciones" class="tip-bottom">Liquidações</a>
+		<a href="#" class="current">Liquidações Pendentes</a>
 	</div>
   </div>
 <!--End-breadcrumbs-->
@@ -15,7 +15,7 @@
 	<div class="row-fluid">
         <div class="widget-box">
 			<div class="widget-title"> <span class="icon"><i class="icon-th"></i></span>
-				<h5>Liquidaciones Pendientes</h5>
+				<h5>Liquidações Pendentes</h5>
 			</div>
 			<form id="LiquidacionesForm" name="LiquidacionesForm" action="posts.php" method="post">
 			<div class="widget-content nopadding">
@@ -41,7 +41,7 @@
 <!--end-main-container-part-->
 <?php include "footer.php"; ?>
 <?php
-if ($_GET['liquidacion']==1){
+if (isset($_GET['liquidacion']) && $_GET['liquidacion']==1){
 	echo '<script languaje="javascript"> self.location="liquidaciones.mensual.reporte.php?filename='.$_GET['filename'].'"</script>';
 };
 ?>

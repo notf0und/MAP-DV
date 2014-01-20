@@ -8,12 +8,6 @@
 
     if (!$dbConnection) {
 		
-      // Produccion
-    	// $dbConnection = &mysql_dbConnect('davincimp.no-ip.info', 'dasamericas', 'root', '');
-      // Desarrollo
-      
-
-		
 		//Muestra opciones segun configuración de la terminal
 		$ldb = parse_ini_file("/home/sistemas/Documents/dasamericas/www/local-config.ini", true)['local_database'];
 		
@@ -189,10 +183,12 @@
  		//Prepara las columnas a mostrar
 		for ($i = 1; $i < dbFieldCount($result); $i++) {
 			$colname = dbFieldName($result,$i);
-			$table .= "\n\t".'<TH>' . dbFieldName($result,$i) . '</TH>';
+			if ($colname != 'decline'){
+				$table .= "\n\t".'<TH>' . dbFieldName($result,$i) . '</TH>';
+			}
 		}
 		if ($deletableRows) {
-			$table .= '<TH>Eliminar</TH>';
+			$table .= '<TH>Apagar</TH>';
 		}
 		if ($modifiableRows) {
 			$table .= '<TH>Modificar</TH>';
@@ -213,11 +209,28 @@
 						$table .= '<a href="#myModal" data-toggle="modal" class="" onclick="document.getElementById(\'modal-body\').innerHTML=\'<object id=foo name=foo type=text/html width=530 height=350 data=mediapension.admisiones.php?idmediapension='.$row->id.'></object>\'">Ver</a>';
 						$table .= '</TD>';
 						break;
+					case 'Nome Completo':
+						if (isset($row->decline) &&  $row->decline != ''){
+							$table .= '<TD><font color="red">' ;
+							$table .= $row->$colname;
+							$table .= '</font></TD>';							
+						}
+						else{
+							$table .= '<TD><font>';
+							$table .= $row->$colname;
+							$table .= '</font></TD>';
+						}
+						break;
+						
+					case 'decline':
+						break;
 					case 'Pagamentos':
 						$table .= '<TD>';
-						$table .= '<a href="funcionarios.pagamentos.php?employee_id='.$row->id.'">Balance de Salario</a>';
+						$table .= '<a href="funcionarios.pagamentos.php?employee_id='.$row->id.'">';
+						$table .= ($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 4) ? calcularSalario($row->id, date('n'), date('Y'))['Total'] : 'Balance de salario';
+						$table .= '</a>';
 						$table .= '</TD>';
-						break;
+						break;					
 					default:
 						$table .= '<TD>' . $row->$colname . '</TD>';
 						break;

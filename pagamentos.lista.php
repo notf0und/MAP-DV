@@ -66,7 +66,7 @@ $tablapagamentos = tableFromResult(resultFromQuery($sqlQuery), 'payment', true, 
 				</div>
 			</div>
         </div>
-		<form method="get" action="funcionarios.novo.php">
+		<form method="get" action="pagamentos.novo.php">
 			<button class="btn btn-success" type="submit">Novo...</button>
 		</form>      	
 	</div>

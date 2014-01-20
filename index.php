@@ -16,13 +16,17 @@
     <div class="quick-actions_homepage">
       <ul class="quick-actions">
 		  
-		<?php if (($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 2) || ($_SESSION["idusuarios_tipos"] == 3)) {?>
+		<?php if (($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 2) || ($_SESSION["idusuarios_tipos"] == 3) || ($_SESSION["idusuarios_tipos"] == 6)) {?>
         <li class="bg_lb span2"> <a href="mediapension.php"> <i class="icon-glass"></i>Meia-pensão</a> </li>
 		<?php } ?>
 		
-		<?php if ($_SESSION["idusuarios_tipos"] == 1 || $_SESSION["idusuarios_tipos"] == 3) {?>
+		<?php if ($_SESSION["idusuarios_tipos"] == 1 || $_SESSION["idusuarios_tipos"] == 3 || $_SESSION["idusuarios_tipos"] == 6) {?>
 		<li class="bg_lb span2"> <a href="hoteleria.php"> <i class="icon-download-alt"></i>Hotelaria</a></li>
-        <li class="bg_lb span2"> <a href="liquidaciones.php"> <i class="icon-list-ul"></i> Liquidações</a> </li>
+		<li class="bg_lb span2"> <a href="liquidaciones.php"> <i class="icon-list-ul"></i> Liquidações</a> </li>
+		<li class="bg_lr span2"> <a href="vouchers.conflictivos.php"> <i class="icon-tags"></i> Vouchers em conflito</a> </li>
+		<?php } ?>
+		
+		<?php if ($_SESSION["idusuarios_tipos"] == 1 || $_SESSION["idusuarios_tipos"] == 3) {?>
         <li class="bg_lb span2"> <a href="administradores.php"> <i class="icon-list-ul"></i> Administradores</a> </li>
 		<?php } ?>
 		
