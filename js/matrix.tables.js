@@ -34,14 +34,53 @@ $(document).ready(function(){
 				  $(this).text('Previsão: R$ ' + Total.toFixed(2)).fadeIn();
 				});
 				
-				
-
-
 
 				
 			}
 				
+						
+		},
+		"aoColumnDefs": [
+			{ "bSortable": false, "aTargets": [ 0 ] }
+		],
+		"aaSorting": [[ 1, 'asc' ]],
+		"bJQueryUI": true,
+		"sDom": "lfrtip",
+		"sPaginationType": "full_numbers",
+		
+		
+	} );
+	
+	//Prevision
+	//Brisas
+	$('#previsao').dataTable( {
+		"bDestroy" : true,
+		"fnDrawCallback": function ( oSettings ) {
+			/* Need to redo the counters if filtered or sorted */
+			if ( oSettings.bSorted || oSettings.bFiltered )
+			{
+
+				for ( var i=0, iLen=oSettings.aiDisplay.length ; i<iLen ; i++ )
+				{
+					$('td:eq(0)', oSettings.aoData[ oSettings.aiDisplay[i] ].nTr ).html( i+1 );
+				}
 				
+				var oTable = $('#previsao').dataTable();
+				var data = oTable._('td:nth-child(14)', {"filter": "applied"});
+				var Total = 0;
+				
+				for ( var i = 0; i<data.length; i++)
+				{
+					Total += data[i].replace(/<a\b[^>]*>/i,"").replace(/<\/a>/i,"")*1;
+				}
+
+				$("#totalSalarios").fadeOut(function() {
+				  $(this).text('Previsão: R$ ' + Total.toFixed(2)).fadeIn();
+				});
+				
+
+				
+			}
 				
 						
 		},

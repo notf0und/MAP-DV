@@ -4,7 +4,7 @@ $script_name = $_SERVER['SCRIPT_NAME'];
 
 //Lista con informacion detallada de los consumos
 $sqlQuery = " SELECT ";
-$sqlQuery .= " MPA.idmediapension, ";
+$sqlQuery .= " MPA.id id, ";
 $sqlQuery .= " DATE_FORMAT(MPA.data, '%d/%c - %H:%i') 'Data de admision', ";
 $sqlQuery .= " MPA.qtdedepax 'Pessoas', ";
 $sqlQuery .= " L.nombre 'Resto' ";
@@ -12,7 +12,13 @@ $sqlQuery .= " FROM mediapension_admisiones MPA ";
 $sqlQuery .= " LEFT JOIN locales L ON MPA.idlocales = L.idlocales ";
 $sqlQuery .= " WHERE MPA.idmediapension = ".$_GET["idmediapension"];
 $sqlQuery .= " ORDER BY MPA.data";
-$tablaconsumos = tableFromResult(resultFromQuery($sqlQuery), 'mediapension', false, false, 'posts.php', true);
+
+if ($_SESSION["idusuarios_tipos"] == 1){
+	$tablaconsumos = tableFromResult(resultFromQuery($sqlQuery), 'AdmisionesMP', true, false);
+}
+else{
+	$tablaconsumos = tableFromResult(resultFromQuery($sqlQuery), 'AdmisionesMP', false, false);
+}
 
 //Total de servicios
 $sqlQuery = " SELECT ";
@@ -51,7 +57,9 @@ while ($row = mysql_fetch_row($sqlResult)){
 </head>
 <body>
 <!--main-container-part-->
-<div id="content">
+		<form id="AdmisionesMPForm" name="AdmisionesMPForm" action="posts.php" method="post">
+			<input type="hidden" id="accion" name="accion" value="AdmisionesMPDelete" />
+
 			<div class="widget-box">
 				
 				<?php echo $tablaconsumos; ?>
@@ -62,10 +70,13 @@ while ($row = mysql_fetch_row($sqlResult)){
 				Serviços Restantes:<b>	<?php echo $serviciosrestantes; ?></b><br><br>
 				
 				DataIN :<b><?php echo $datain;?></b><br>
-				DataOUT :<b><?php echo $dataout;?></b>
+				DataOUT :<b><?php echo $dataout;?></b><br><br>
 			</div>
+		</form>
+			 
 			
-</div>
+			
+
 
 <!--end-main-container-part-->
 </body>

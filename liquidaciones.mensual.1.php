@@ -1,10 +1,21 @@
 <?php include "head.php"; 
 
-//cantidad de dias en el mes del año especificado 
-$numero = cal_days_in_month(CAL_GREGORIAN, $_SESSION["visualizarMes"], $_SESSION["visualizarAno"]);
+//desde-ate
+$desde =  isset($_SESSION['desde']) ? $_SESSION['desde'] : date('Y-m-01');
+$ate = isset($_SESSION['ate']) ? $_SESSION['ate'] : date('Y-m-t');
 
-$dataIN = $_SESSION["visualizarAno"]."-".$_SESSION["visualizarMes"]."-01";
-$dataOUT = $_SESSION["visualizarAno"]."-".$_SESSION["visualizarMes"]."-".$numero;
+$dataIN = $desde;
+$dataOUT = $ate;
+
+//desde-ate
+
+//cantidad de dias en el mes del año especificado 
+//$numero = cal_days_in_month(CAL_GREGORIAN, $_SESSION["visualizarMes"], $_SESSION["visualizarAno"]);
+
+//$dataIN = $_SESSION["visualizarAno"]."-".$_SESSION["visualizarMes"]."-01";
+//$dataOUT = $_SESSION["visualizarAno"]."-".$_SESSION["visualizarMes"]."-".$numero;
+
+
 
 $idresponsablesDePago = $_GET['idresponsablesDePago'];
 $id = $_GET['id'];
@@ -50,7 +61,11 @@ $row = siguienteResult($resultado);
 			<div class="widget-content nopadding">
 				<?php
 					$sqlQuery = "SELECT idmediapension id, Titular 'Nome PAX', numeroexterno '# Voucher', Q 'Qtde de PAX', DataIN, DataOUT, Agencia, Posada, N, M, Servicio, USD, Tarifa, NULL 'Detalles' FROM _temp_liquidaciones_mp";
-					echo tableFromResult(resultFromQuery($sqlQuery), 'VouchersMP', true, true, 'posts.php', true);
+					if ($_SESSION["idusuarios_tipos"] == 1 || $_SESSION["idusuarios_tipos"] == 3 ){
+						echo tableFromResult(resultFromQuery($sqlQuery), 'VouchersMP', true, true, 'posts.php', true);					}
+					elseif ($_SESSION["idusuarios_tipos"] == 6){
+						echo tableFromResult(resultFromQuery($sqlQuery), 'VouchersMP', false, true, 'posts.php', true);
+					}
 				?>
 			</div>
 			</form>
@@ -73,7 +88,11 @@ $row = siguienteResult($resultado);
 			<div class="widget-content nopadding">
 				<?php
 					$sqlQuery = "SELECT idhoteleria id, Titular 'Nome PAX', numeroexterno '# Voucher', Q 'Qtde de PAX', DataIN, DataOUT, Agencia, Posada, N, M, Servicio, USD, Tarifa FROM _temp_liquidaciones_htl";
-					echo tableFromResult(resultFromQuery($sqlQuery), 'VouchersHTL', true, true, 'posts.php', true);
+					if ($_SESSION["idusuarios_tipos"] == 1 || $_SESSION["idusuarios_tipos"] == 3 ){
+						echo tableFromResult(resultFromQuery($sqlQuery), 'VouchersHTL', true, true, 'posts.php', true);					}
+					elseif ($_SESSION["idusuarios_tipos"] == 6){
+						echo tableFromResult(resultFromQuery($sqlQuery), 'VouchersHTL', false, true, 'posts.php', true);
+					}
 				?>
 			</div>
 			</form>

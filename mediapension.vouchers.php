@@ -1,7 +1,21 @@
-<?php include "head.php"; 
+<?php 
+include "head.php"; 
 
-$sqlQuery = " SELECT MP.idmediapension id, H.titular 'Nome PAX', MP.numeroexterno '# Voucher', ";
-$sqlQuery .= " MP.qtdedepax 'Qtde de PAX', MP.dataIN, MP.dataOUT, ";
+$lock = '<form action="#" name="fLock" method="post" class="form-horizontal">';
+
+
+$sqlQuery = "SELECT MP.idmediapension id, H.titular 'Nome PAX', MP.numeroexterno '# Voucher', ";
+
+if ($_SESSION["idusuarios"] == 13){
+	$sqlQuery .= "MP.data 'Ingresado', ";
+}
+
+//Botón Transferir
+if ($_SESSION["idusuarios_tipos"] == 1){
+	$bTransfer = '<button class="btn btn-success">Transferir</button>';
+}
+
+$sqlQuery .= "MP.qtdedepax 'Qtde de PAX', MP.dataIN, MP.dataOUT, ";
 $sqlQuery .= " P.nombre 'Posada', O.nombre 'Operador', A.nombre 'Agencia'  ";
 $sqlQuery .= " , RDP.nombre 'Responsable', SS.nombre 'Serviço', NULL 'Detalles' ";
 $sqlQuery .= " FROM `mediapension` MP ";
@@ -12,7 +26,20 @@ $sqlQuery .= " LEFT JOIN operadoresturisticos O ON MP.idoperadoresturisticos = O
 $sqlQuery .= " LEFT JOIN responsablesDePago RDP ON MP.idresponsablesDePago = RDP.idresponsablesDePago ";
 $sqlQuery .= " LEFT JOIN servicios SS ON MP.idservicios = SS.idservicios ";
 $sqlQuery .= " WHERE 1 ";
-$sqlQuery .= " AND MP.idliquidaciones = 0 ";
+
+if(isset($_POST['mode']) && $_POST['mode'] == 'lock'){
+	$sqlQuery .= " AND MP.idliquidaciones <> 0 ";
+	$lock .= '<input type="hidden" id="mode" name="mode" value="unlock"/>';
+	$lock .= '<span class="label label-success" onclick="document.fLock.submit()">Ver vouchers sem liquidar</span>';
+}
+else{
+	$sqlQuery .= " AND MP.idliquidaciones = 0 ";
+	$lock .= '<input type="hidden" id="mode" name="mode" value="lock"/>';
+	$lock .= '<span class="label label-info" onclick="document.fLock.submit()">Ver vouchers já liquidados</span>';
+}
+$lock .= '</form>';
+	
+
 $sqlQuery .= " AND MP.habilitado = 1 ";
 
 if (isset($_POST['desde']) || isset($_POST['ate'])){
@@ -42,16 +69,30 @@ else{
 
 	$sqlQuery .= "AND month(MP.dataIN) >= month(curdate()) ";
 	$sqlQuery .= "AND month(MP.dataIN) <= month(curdate())";
-	//$sqlQuery .= "AND MP.dataIN >= '2013-11-25' ";
-	//$sqlQuery .= "AND MP.dataIN <= '2014-01-01' ";
 }
 
-if ($_SESSION["idusuarios_tipos"] == 1 || $_SESSION["idusuarios_tipos"] == 3 ){
-	$tablaVouchers = tableFromResult(resultFromQuery($sqlQuery), 'VouchersMP', true, true, 'posts.php', true);
+
+if(isset($_POST['mode']) && $_POST['mode'] == 'lock'){
+	if ($_SESSION["idusuarios_tipos"] == 1 || $_SESSION["idusuarios_tipos"] == 3 ){
+		$tablaVouchers = tableFromResult(resultFromQuery($sqlQuery), 'VouchersMP', false, false);
+	}
+	elseif ($_SESSION["idusuarios_tipos"] == 6){
+		$tablaVouchers = tableFromResult(resultFromQuery($sqlQuery), 'VouchersMP', false, false);
+	}
 }
-elseif ($_SESSION["idusuarios_tipos"] == 6){
-	$tablaVouchers = tableFromResult(resultFromQuery($sqlQuery), 'VouchersMP', false, true, 'posts.php', true);
+else{
+	if ($_SESSION["idusuarios_tipos"] == 1 || $_SESSION["idusuarios_tipos"] == 3 ){
+		$tablaVouchers = tableFromResult(resultFromQuery($sqlQuery), 'VouchersMP', true, true);
+		$bTransfer = '<a data-dismiss="modal" class="btn btn-primary" href="#">Transferir</a>';
+	}
+	elseif ($_SESSION["idusuarios_tipos"] == 6){
+		$tablaVouchers = tableFromResult(resultFromQuery($sqlQuery), 'VouchersMP', false, true);
+	}
 }
+
+
+
+
 	
 
 ?>
@@ -71,10 +112,11 @@ elseif ($_SESSION["idusuarios_tipos"] == 6){
   <div class="container-fluid">
 	  <div class="row-fluid">
 		  <div class="span12">
-			  
 			  <div class="widget-box">
 				  <div class="widget-title"> <span class="icon"> <i class="icon-align-justify"></i> </span>
-				      <h5>Data de pesquisa</h5>
+				      <h5>Data de pesquisa </h5>
+				      <?php echo $lock ?>
+				      
 				  </div>
 				  <div class="widget-content nopadding">
 					  <form action="#" method="post" class="form-horizontal">
@@ -115,13 +157,17 @@ elseif ($_SESSION["idusuarios_tipos"] == 6){
 							  </div>
 
 							  <!-- Start Modal -->
-							  <div id="myModal" class="modal hide">
+							  <div id="myModal" class="modal hide fade">
 								  <div class="modal-header">
 									  <button data-dismiss="modal" class="close" type="button">×</button>
 									  <h3>Detalle</h3>
 								  </div>
 								  <div class="modal-body" id="modal-body">
-									  <p>Here is the text coming you can put also image if you want…</p>
+									  <p></p>
+								  </div>
+								  <div class="modal-footer"> 
+									  <?php echo isset($bTransfer) ? $bTransfer : ''; ?> 
+									  <a data-dismiss="modal" class="btn" href="#">Fechar</a> 
 								  </div>
 							  </div>
 						  </form>

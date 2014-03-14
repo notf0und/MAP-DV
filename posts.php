@@ -1,11 +1,13 @@
 <?php 
 	include "lib/sessionLib.php";
-	if ($_SESSION["idusuarios"] == 13){
-		include "dBug.php";
-		new dBug($_POST);
-	}
-	//var_dump($_POST);
-	//die($_POST);
+	error_reporting(E_ALL);
+	ini_set('display_errors', TRUE);
+	ini_set('display_startup_errors', TRUE);
+	//include "dBug.php";
+	//new dBug($_POST);
+
+
+
 
 if (isset( $_POST['accion'] )) { 
 
@@ -49,7 +51,7 @@ if (isset( $_POST['accion'] )) {
 		$sql .= " WHERE 1 ";
 		$sql .= " AND username = '".$username."'";
 		$sql .= " AND password = '".md5($password)."'";
-
+		
 		$resultadoStringSQL = resultFromQuery($sql);		
 		
 		if ($row = siguienteResult($resultadoStringSQL)) {
@@ -58,13 +60,12 @@ if (isset( $_POST['accion'] )) {
 			$_SESSION["idusuarios"] = $row->idusuarios;		
 			$_SESSION["NombreCompleto"] = $row->NombreCompleto;
 			$_SESSION["login"] = 1;	
-			$_SESSION["idlocales"] = $idlocales;	
+			$_SESSION["idlocales"] = $idlocales;
 			/* BEGIN Chanchuyo | A continuacion se hara cun chanchuyo rapido para identificar a los locales ... ARREGLAR CON PRIORIDAD*/
-			$Sesion = parse_ini_file("./local-config.ini", true)[config];
 			
-			$_SESSION["idlocales_PRN_USER"] = $Sesion[terminal_user];
-			$_SESSION["idlocales_PRN_PASS"] = $Sesion[terminal_password];
-			$_SESSION["idlocales_PRN_TITULO"] = $Sesion[terminal_titulo];
+			$sql = "UPDATE usuarios set last_login = current_timestamp where idusuarios = ".$row->idusuarios;
+			$result = resultFromQuery($sql);
+			
 
 			bitacoras($_SESSION["idusuarios"], 'Login usuario: '.$_SESSION["username"]);
 			echo '<script languaje="javascript"> self.location="index.php"</script>';
@@ -72,6 +73,7 @@ if (isset( $_POST['accion'] )) {
 			bitacoras(0, 'Login incorrecto: user '.$username.' pass '.$password);
 			echo '<script languaje="javascript"> self.location="start.php?error=1"</script>';
 		}
+		
 	}
 
 	if ($_POST['accion'] == 'userChangePassword') {
@@ -362,7 +364,7 @@ if (isset( $_POST['accion'] )) {
 				
 				
 				if ($_SESSION["idusuarios"] == 13){
-					new dBug($resultadoStringSQL);
+				
 				}
 
 				while ($row = mysql_fetch_object($resultadoStringSQL)) {
@@ -394,7 +396,7 @@ if (isset( $_POST['accion'] )) {
 				
 				
 				if ($_SESSION["idusuarios"] == 13){
-					new dBug($resultadoStringSQL);
+					//new dBug($resultadoStringSQL);
 				}
 
 				while ($row = mysql_fetch_object($resultadoStringSQL)) {
@@ -655,13 +657,26 @@ if (isset( $_POST['accion'] )) {
 
 	}
 
+	if ($_POST['accion'] == 'AdmisionesMPDelete') {
+		$id = array_search('Apagar', $_POST['deleteRow']['id']);
+		
+		$sql = 'DELETE FROM mediapension_admisiones where id = '.$id;
+		
+		$result = resultFromQuery($sql);		
+
+		
+		bitacoras($_SESSION["idusuarios"], 'Apagada admisão '.$id);
+		echo '<script languaje="javascript"> top.location="mediapension.vouchers.php"</script>';	
+
+	}
+
 	if ($_POST['accion'] == 'admitirMediapension') {
 		
 		$referer = $_POST['referer'];
 
 		$idmediapension = $_POST['idmediapension'];
 		$numeroexterno = $_POST['numeroexterno'];//ok
-		$nomedopax = $_POST['nomedopax'];///WTF
+		$nomedopax = $_POST['nomedopax'];//ok
 		$idpaises = $_POST['idpaises'];//ok
 		$idoperadoresturisticos = $_POST['idoperadoresturisticos'];//ok
 		$idposadas = $_POST['idposadas'];//ok
@@ -669,13 +684,13 @@ if (isset( $_POST['accion'] )) {
 		$idhuespedes = $_POST['idhuespedes'];//ok
 		$idresponsablesDePago = $_POST['idresponsablesDePago'];//ok
 		$qtdedepax = $_POST['qtdedepax'];//ok
-		$qtdedepaxagora = $_POST['qtdedepaxagora'];///WTF
+		$qtdedepaxagora = isset($_POST['qtdedepaxagora']) ? $_POST['qtdedepaxagora'] : '';//ok//1
 		$dataIN = $_POST['dataIN'];//ok
 		$dataOUT = $_POST['dataOUT'];//ok
 		$qtdedecomidas = $_POST['qtdedecomidas'];//ok
 		$idservicios = $_POST['idservicios'];//ok
-		$mensajeinterno = $_POST['mensajeinterno'];//ok//1
-		$mensajegarcon = $_POST['mensajegarcon'];//ok//1
+		$mensajeinterno = isset($_POST['qtdedepaxagora']) ? $_POST['mensajeinterno'] : '';//ok//1
+		$mensajegarcon = isset($_POST['qtdedepaxagora']) ? $_POST['mensajegarcon'] : '';//ok//1
 		$idlocales = $_SESSION["idlocales"];//ok
 		
 		//Set default values for comboboxes
@@ -1025,7 +1040,7 @@ if (isset( $_POST['accion'] )) {
 				$table = 'address';	
 				$column = getColumns($table);
 				
-				$value = ['', $_POST['city_id'], $_POST['neightborhood'], $_POST['address'], $_POST['addressnumber'], $_POST['addressfloor'], $_POST['addressapartment']];
+				$value = array('', $_POST['city_id'], $_POST['neightborhood'], $_POST['address'], $_POST['addressnumber'], $_POST['addressfloor'], $_POST['addressapartment']);
 				
 				//if (isset($_POST['address_id']) && $_POST['address_id'] != ''){
 				if (isset($_POST[$table.'_id']) && $_POST[$table.'_id'] != ''){
@@ -1054,11 +1069,9 @@ if (isset( $_POST['accion'] )) {
 			$table = 'profile';
 			
 			$column = getColumns($table);
-			
-			
-			
-			$value = ['', $_POST['profile_firstname'], $_POST['profile_lastname'], $_POST['sex_id'], $birthdate, $birth_city_id, $_POST['fathername'], $_POST['mothername'], $_POST['civilstatus'], $_POST['marriedname'], $education_id, $address_id];
-			
+
+			$value = array('', $_POST['profile_firstname'], $_POST['profile_lastname'], $_POST['sex_id'], $birthdate, $birth_city_id, $_POST['fathername'], $_POST['mothername'], $_POST['civilstatus'], $_POST['marriedname'], $education_id, isset($address_id) ? $address_id : '');
+
 			if (isset($_POST[$table.'_id']) && $_POST[$table.'_id'] != ''){
 				$profile_id = $_POST[$table.'_id'];
 				$condition = $table.'_id = '.$profile_id;
@@ -1071,7 +1084,36 @@ if (isset( $_POST['accion'] )) {
 				$profile_id = mysql_insert_id();
 			}
 			
-			//FALTA PHONE
+			//PHONE
+			if ($_POST['phone1'] != ''){
+				
+				$table = 'phone_number';
+				$column = getColumns($table);
+				$value = array('', $_POST['phone1'], 5);
+				
+				$sql = 'SELECT * FROM profile_phone WHERE profile_id = '.$profile_id;
+				$result = resultFromQuery($sql);
+				
+				if ($row = siguienteResult($result)){
+					
+					$phone_number_id = $row->phone_number_id;
+					
+					$condition = $table.'_id = '.$phone_number_id;
+					$sqlQuery = updateQuery($table, $column, $value, $condition);
+					$resultado = resultFromQuery($sqlQuery);
+				}
+				else{
+					$sqlQuery = insertQuery($table, $column, $value);
+					$resultado = resultFromQuery($sqlQuery);
+					$phone_number_id = mysql_insert_id();
+					
+					$sql = "INSERT profile_phone(profile_id, phone_number_id) VALUES(";
+					$sql .= $profile_id.', '.$phone_number_id.')';
+					$result = resultFromQuery($sql);
+					
+				}
+			}
+				
 			
 			//Carteira de Trabalho
 			if ($_POST['carteiranumber'] != ''){
@@ -1083,7 +1125,7 @@ if (isset( $_POST['accion'] )) {
 				
 				$column = getColumns($table);
 				
-				$value = ['', $_POST['profile_id'], $_POST['carteiranumber'], $_POST['carteiraserie'], $carteiradate];
+				$value = array('', $_POST['profile_id'], $_POST['carteiranumber'], $_POST['carteiraserie'], $carteiradate);
 				
 				if (isset($_POST[$table.'_id']) && $_POST[$table.'_id'] != ''){
 					$workingcard_id = $_POST[$table.'_id'];
@@ -1104,7 +1146,7 @@ if (isset( $_POST['accion'] )) {
 				
 				$column = getColumns($table);
 				
-				$value = ['', $_POST['profile_id'], $_POST['cpfnumber']];
+				$value = array('', $_POST['profile_id'], $_POST['cpfnumber']);
 				
 				if (isset($_POST[$table.'_id']) && $_POST[$table.'_id'] != ''){
 					$cpfcard_id = $_POST[$table.'_id'];
@@ -1129,7 +1171,7 @@ if (isset( $_POST['accion'] )) {
 				
 				$column = getColumns($table);
 				
-				$value = ['', $_POST['profile_id'], $_POST['eleitornumber'], $_POST['eleitorzone'], $_POST['eleitorsection'], $eleitordate];
+				$value = array('', $_POST['profile_id'], $_POST['eleitornumber'], $_POST['eleitorzone'], $_POST['eleitorsection'], $eleitordate);
 				
 				if (isset($_POST[$table.'_id']) && $_POST[$table.'_id'] != ''){
 					$votingcard_id = $_POST[$table.'_id'];
@@ -1154,7 +1196,7 @@ if (isset( $_POST['accion'] )) {
 				
 				$column = getColumns($table);
 				
-				$value = ['', $_POST['profile_id'], $_POST['idnumber'], $_POST['idexpeditor'], $iddate];
+				$value = array('', $_POST['profile_id'], $_POST['idnumber'], $_POST['idexpeditor'], $iddate);
 				
 				if (isset($_POST[$table.'_id']) && $_POST[$table.'_id'] != ''){
 					$rgcard_id = $_POST[$table.'_id'];
@@ -1179,7 +1221,7 @@ if (isset( $_POST['accion'] )) {
 				
 				$column = getColumns($table);
 				
-				$value = ['', $_POST['profile_id'], $_POST['pisnumber'], $_POST['pisbanknumber'], $pisdate];
+				$value = array('', $_POST['profile_id'], $_POST['pisnumber'], $_POST['pisbanknumber'], $pisdate);
 				
 				if (isset($_POST[$table.'_id']) && $_POST[$table.'_id'] != ''){
 					$piscard_id = $_POST[$table.'_id'];
@@ -1201,7 +1243,7 @@ if (isset( $_POST['accion'] )) {
 				
 				$column = getColumns($table);
 				
-				$value = ['', $_POST['profile_id'], $_POST['milcertnumber'], $_POST['milcertserie'], $_POST['milcertcategory']];
+				$value = array('', $_POST['profile_id'], $_POST['milcertnumber'], $_POST['milcertserie'], $_POST['milcertcategory']);
 				
 				if (isset($_POST[$table.'_id']) && $_POST[$table.'_id'] != ''){
 					$militarycard_id = $_POST[$table.'_id'];
@@ -1227,7 +1269,7 @@ if (isset( $_POST['accion'] )) {
 				
 				$column = getColumns($table);
 				
-				$value = ['', $_POST['profile_id'], $_POST['habilitationnumber'], $_POST['habilitationcategory'], $habilitationdate, $habilitationvaliddate];
+				$value = array('', $_POST['profile_id'], $_POST['habilitationnumber'], $_POST['habilitationcategory'], $habilitationdate, $habilitationvaliddate);
 				
 				if (isset($_POST[$table.'_id']) && $_POST[$table.'_id'] != ''){
 					$habilitationcard_id = $_POST[$table.'_id'];
@@ -1242,11 +1284,116 @@ if (isset( $_POST['accion'] )) {
 				}
 			}
 			
+			//Clearance
+			if ($_POST['clearance'] != ''){
+				
+				$sql = "SET lc_time_names = 'pt_BR';";
+				setlocale(LC_ALL, 'pt_BR');
+				
+				resultFromQuery($sql);
+				
+				
+				$days = array(
+                1 => 'Segunda',
+                2 => 'Terça',
+                3 => 'Quarta',
+                4 => 'Quinta',
+                5 => 'Sexta',
+                6 => 'Sábado',
+                7 => 'Domingo');
+                
+				$table = 'clearance';
+				
+				$column = getColumns($table);
+				
+				$today = mb_convert_encoding(ucfirst(strftime("%A", strtotime('now'))), "UTF-8", "iso-8859-1");
+				
+				//Si el dia seleccionado es el mismo que el actual, establece la fecha
+				if ($today == $days[$_POST['clearance']]){
+					$clearance = date('Y-m-d', strtotime('now'));
+				}
+				//Sino busca la siguiente fecha en la que cae el dia de la semana selecionado
+				else{
+					$clearance = nextDay($days[$_POST['clearance']], date('Y-m-d', strtotime('now')));
+				}
+				
+				//Busca si la configuracion anterior del empleado no coincide con la seleccionada
+				$sqlQuery = "SELECT DAYNAME(valid_from) clearance, valid_from from clearance ";
+				$sqlQuery .= "WHERE 1 ";
+				$sqlQuery .= "AND employee_id = ".$_POST['employee_id']." ";
+				$sqlQuery .= "AND valid_from <= CURDATE() ";
+				$sqlQuery .= "ORDER BY valid_from DESC LIMIT 1;";
+				$resultadoStringSQL = resultFromQuery($sqlQuery);
+				
+				//Si devuelve algun valor
+				if ($row = siguienteResult($resultadoStringSQL)){
+					//Si el dia previo es distinto al seleccionado
+					if(ucfirst($row->clearance) != $days[$_POST['clearance']]){
+					
+						//Verificar si existe algun registro en los proximos 6 días
+						
+						$sqlQuery = "SELECT DAYNAME(valid_from) clearance, valid_from from clearance ";
+						$sqlQuery .= "WHERE 1 ";
+						$sqlQuery .= "AND employee_id = ".$_POST['employee_id']." ";
+						$sqlQuery .= "AND DATE(valid_from) BETWEEN CURDATE() + interval 1 day AND CURDATE() + interval 6 day ";
+						$sqlQuery .= "ORDER BY valid_from ASC LIMIT 1;";
+						
+						if ($row = siguienteResult($resultadoStringSQL)){
+							
+							if(ucfirst($row->clearance) != $days[$_POST['clearance']]){
+								//QUE HACER CUANDO LA FECHA PREVIA NI LA SIGUIENTE COINCIDEN E INTENTA INGRESAR OTRA?
+							}
+							else{
+								$value = array('', $_POST['employee_id'], $clearance, 'current_timestamp');
+
+								$sqlQuery = insertQuery($table, $column, $value);
+								$resultado = resultFromQuery($sqlQuery);
+								$clearance_id = mysql_insert_id();
+							}
+							
+						}
+						else{
+							$value = array('', $_POST['employee_id'], $clearance, 'current_timestamp');
+
+							$sqlQuery = insertQuery($table, $column, $value);
+							$resultado = resultFromQuery($sqlQuery);
+							$clearance_id = mysql_insert_id();
+						}
+					}	
+				}
+				else{
+					//Verificar si existe algun registro en los proximos 6 días
+						
+					$sqlQuery = "SELECT DAYNAME(valid_from) clearance, valid_from from clearance ";
+					$sqlQuery .= "WHERE 1 ";
+					$sqlQuery .= "AND employee_id = ".$_POST['employee_id']." ";
+					$sqlQuery .= "AND DATE(valid_from) BETWEEN CURDATE() + interval 1 day AND CURDATE() + interval 6 day ";
+					$sqlQuery .= "ORDER BY valid_from ASC LIMIT 1;";
+					$resultadoStringSQL = resultFromQuery($sqlQuery);
+						
+					if ($row = siguienteResult($resultadoStringSQL)){
+						if(ucfirst($row->clearance) != $days[$_POST['clearance']]){
+							//QUE HACER CUANDO NO HAY FECHA PREVIA Y LA SIGUIENTE NO COINCIDE CON LA QUE SE INTENTA INGRESAR?
+						}
+					}
+					else{
+						$value = array('', $_POST['employee_id'], $clearance, 'current_timestamp');
+						$sqlQuery = insertQuery($table, $column, $value);
+						$resultado = resultFromQuery($sqlQuery);
+						$clearance_id = mysql_insert_id();
+					}
+				}
+				//Sino busca si la anterior					
+			}
+			
+			
+			
 			//EMPLOYEE
 			//Validacion de fechas
 			$admissiondate = dateFormatMySQL($_POST['admissiondate']);
 			$contractdate = dateFormatMySQL($_POST['contractdate']);
 			$decline = dateFormatMySQL($_POST['decline']);
+
 			
 			//Conversion de , a .
 			$transportvalue = str_replace(',', '.', $_POST['transportvalue']);
@@ -1258,13 +1405,14 @@ if (isset( $_POST['accion'] )) {
 				
 			$column = getColumns($table);
 				
-			$value = ['', $_POST['profile_id'], $_POST['idempresa'], $_POST['jobcategory_id'], $_POST['bonussalary'], $admissiondate, $contractdate, $decline, $transportvalue, $_POST['traject'], $_POST['fromhour'], $_POST['tohour'], $_POST['intervalhour'], $_POST['experiencecontract'], $unhealthy];
+			$value = array('', $_POST['profile_id'], $_POST['idempresa'], $_POST['jobcategory_id'], $_POST['bonussalary'], $admissiondate, $contractdate, $decline, $transportvalue, $_POST['traject'], $_POST['fromhour'], $_POST['tohour'], $_POST['intervalhour'], $_POST['experiencecontract'], $unhealthy);
 				
 			if (isset($_POST[$table.'_id']) && $_POST[$table.'_id'] != ''){
 				$employee_id = $_POST[$table.'_id'];
 				$condition = $table.'_id = '.$employee_id;
 				$sqlQuery = updateQuery($table, $column, $value, $condition);
 				$resultado = resultFromQuery($sqlQuery);
+
 			}
 			else{
 				$sqlQuery = insertQuery($table, $column, $value);
@@ -1571,9 +1719,9 @@ if (isset( $_POST['accion'] )) {
 			$sql .= $_POST['idempresa'] != '' ? ', '.$_POST['idempresa'] : '';
 			$sql .= $_POST['jobcategory_id'] != '' ? ', '.$_POST['jobcategory_id'] : '';
 			$sql .= $_POST['bonussalary'] != '' ? ', '."'".$_POST['bonussalary']."'" : '';
-			$sql .= $admissiondate ? ', '."'".$admissiondate."'" : '';
-			$sql .= $contractdate ? ', '."'".$contractdate."'" : '';
-			$sql .= $decline ? ', '."'".$decline."'" : '';
+			$sql .= $_POST['admissiondate'] != '' ? ', '."'".$admissiondate."'" : '';
+			$sql .= $_POST['contractdate'] != '' ? ', '."'".$contractdate."'" : '';
+			$sql .= $_POST['decline'] != '' ? ', '."'".$decline."'" : '';
 			$sql .= $_POST['transport'] != 0 ? ', '."'".$transportvalue."'" : '';
 			$sql .= $_POST['traject'] != '' ? ', '."'".$_POST['traject']."'" : '';
 			$sql .= $_POST['fromhour'] != '' ? ', '."'".$_POST['fromhour']."'" : '';
@@ -1612,9 +1760,18 @@ if (isset( $_POST['accion'] )) {
 			$basesalary = $_POST['basesalary'];
 			$valid_from = $_POST['valid_from'];
 			
-			//Insert Base Salary
-			$sql = "INSERT basesalary (basesalary, valid_from, created) ";
+			//Insert Job Category
+			$sql = "INSERT jobcategory (name, created) ";
 			$sql .= "VALUES (";
+			$sql .= "'".$name."',";
+			$sql .= "current_timestamp) ";
+			$resultadoStringSQL = resultFromQuery($sql);		
+			$jobcategory_id = mysql_insert_id();
+			
+			//Insert Base Salary
+			$sql = "INSERT basesalary (jobcategory_id, basesalary, valid_from, created) ";
+			$sql .= "VALUES (";
+			$sql .= "'".$jobcategory_id."',";
 			$sql .= "'".$basesalary."',";
 			$sql .= "'".$valid_from."',";
 			$sql .= "current_timestamp) ";
@@ -1623,14 +1780,7 @@ if (isset( $_POST['accion'] )) {
 			
 			bitacoras($_SESSION["idusuarios"], 'Insertar Salario Base ID: '.$basesalary_id);
 			
-			//Insert Job Category
-			$sql = "INSERT jobcategory (name, basesalary_id, created) ";
-			$sql .= "VALUES (";
-			$sql .= "'".$name."',";
-			$sql .= "'".$basesalary_id."',";
-			$sql .= "current_timestamp) ";
-			$resultadoStringSQL = resultFromQuery($sql);		
-			$jobcategory_id = mysql_insert_id();
+			
 		}
 		
 		
@@ -1642,8 +1792,36 @@ if (isset( $_POST['accion'] )) {
 		if (isset($_POST['employee_id'])){
 			
 			//Validacion de fechas
-			$date = dateFormatMySQL($_POST['date']);
+			$date = (isset($_POST['date']) && $_POST['date'] != '') ? dateFormatMySQL($_POST['date']) : 'current_timestamp';
 			
+			$table = 'payment';	
+			$column = getColumns($table);
+			
+			$ammount = str_replace(',', '.', $_POST['ammount']);
+				
+			$value = array('', $_POST['employee_id'], $_POST['paymenttype_id'], $_POST['paymentmethod_id'], $ammount, $_POST['details'], $date);
+				
+			//if (isset($_POST['address_id']) && $_POST['address_id'] != ''){
+			if (isset($_POST[$table.'_id']) && $_POST[$table.'_id'] != ''){
+				$payment_id = $_POST[$table.'_id'];
+				$condition = $table.'_id = '.$payment_id;
+				$sqlQuery = updateQuery($table, $column, $value, $condition);
+				$resultado = resultFromQuery($sqlQuery);
+				bitacoras($_SESSION["idusuarios"], 'Editar Pagamento: '.$payment_id);
+			}
+			else{
+				$sqlQuery = insertQuery($table, $column, $value);
+				$resultado = resultFromQuery($sqlQuery);
+				$payment_id = mysql_insert_id();
+				bitacoras($_SESSION["idusuarios"], 'Insertar Pagamento: '.$payment_id);
+			}
+			
+			
+			
+			
+			
+			
+			/*
 			//Parametros a pasar
 			$sql = "INSERT payment(";
 			$sql .= "employee_id";
@@ -1666,7 +1844,9 @@ if (isset( $_POST['accion'] )) {
 			$resultadoStringSQL = resultFromQuery($sql);		
 			$payment_id = mysql_insert_id();
 			
+			
 			bitacoras($_SESSION["idusuarios"], 'Insertar Pagamento: '.$payment_id);
+			*/
 		}
 		
 		if ($_SESSION["idusuarios_tipos"] == 1 || $_SESSION["idusuarios_tipos"] == 4){
@@ -1675,6 +1855,15 @@ if (isset( $_POST['accion'] )) {
 		else{
 			echo '<script languaje="javascript"> self.location="funcionarios.lista.php"</script>';
 		}
+	}
+
+	if ($_POST['accion'] == 'paymentModify') {
+		
+		if (isset($_POST['id'])){
+			$_SESSION['payment_id'] = $_POST['id'];
+		}
+		
+		echo '<script languaje="javascript"> self.location="pagamentos.novo.php"</script>';
 	}
 
 	if ($_POST['accion'] == 'paymentDelete') {
@@ -1808,7 +1997,6 @@ if (isset( $_POST['accion'] )) {
 		echo '<script languaje="javascript"> self.location="'.$_SERVER['HTTP_REFERER'].'"</script>';
 	}
 
-
 	if ($_POST['accion'] == 'employeeNonAttendance') {
 		
 		$employee_id = $_POST['employee_id'];
@@ -1819,7 +2007,7 @@ if (isset( $_POST['accion'] )) {
 			$table = 'nonattendance';	
 			$column = getColumns($table);
 			
-			$value = ['', $_POST['employee_id'], $_POST['date'], 'current_timestamp'];
+			$value = array('', $_POST['employee_id'], $_POST['date'], 'current_timestamp');
 			
 			$sqlQuery = insertQuery($table, $column, $value);
 			
@@ -1830,6 +2018,300 @@ if (isset( $_POST['accion'] )) {
 		}
 	}
 		
+/* Ponto */
+	if ($_POST['accion'] == 'registrarPonto') {
+			
+		$senha = $_POST['senha'];
+		$senha2 = $_POST['senha2'];
+		$in_out = $_POST['in_out'];
+		
+		$config = parse_ini_file("local-config.ini", true);
+
+		$ldbcfg = $config['local_database'];
+		$cfg = $config['config'];
+		
+		$dblocal = mysqli_connect($ldbcfg['dbhost'], $ldbcfg['user'], $ldbcfg['password'], $ldbcfg['dbname']);
+		
+		if (mysqli_connect_errno())
+		{
+		 echo "Failed to connect to local MySQL: " . mysqli_connect_error();
+		}
+		
+		//Si la terminal esta configurada para trabajar con puntos
+		if ($cfg['point_station']){
+			//Si hay conexión a internet
+			if (checkConnection()){
+				
+				//Configuración del server
+				$rdbcfg = $config['remote_database'];
+					
+				//Conexión a la DB
+				$dbremote = mysqli_connect($rdbcfg['dbhost'], $rdbcfg['user'], $rdbcfg['password'], $rdbcfg['dbname'], 3306);
+				
+				if (mysqli_connect_errno())
+				{
+				 echo "Failed to connect to remote MySQL: " . mysqli_connect_error();
+				}
+				
+				////////////////////UPDATE-START//////////////////
+				//Verificar si hay puntos sin actualizar
+				$sql = "SELECT * FROM point WHERE updated = 0";
+
+				if (!$result = mysqli_query($dblocal, $sql)){
+					die('Error al verificar si existen actualizaciones en la base de datos:<br> ' . mysqli_error($dblocal));
+				}
+				
+				//Si hay puntos para actualizar
+				if ($row = mysqli_fetch_array($result)){
+			
+					$sql = "SELECT * FROM point WHERE updated = 0";					
+
+					if (!$result = mysqli_query($dblocal, $sql)){
+						die('Error al verificar si existen actualizaciones en la base de datos:<br> ' . mysqli_error($dblocal));
+					}
+					
+					//Prepara la cadena de inserción
+					$sql = "INSERT point (employee_id, date_time, in_out, updated) ";
+					$sql .= "VALUES ";
+						
+					//Todos los puntos sin actualizar
+					while($point = mysqli_fetch_array($result)){
+						
+						if (mb_substr($sql, -1) != ' ' && mb_substr($sql, -2) != ', '){
+							$sql  .= ', ';
+						}
+						$sql .= "(".$point['employee_id'].", ";
+						$sql .= "'".$point['date_time']."', ";
+						$sql .= $point['in_out'].", ";
+						$sql .= "1)";
+					}
+					
+					//Insert de puntos sin actualizar
+					if (!mysqli_query($dbremote, $sql)){
+						die('Error al insertar los puntos sin actualizar en la base de datos remota:<br> '.$sql.'<br>'. mysqli_error($dbremote));
+					}
+				
+					//Establece los puntos de la base de datos local como actualizados
+					$sql = "UPDATE point SET updated = 1";
+					
+					mysqli_query($dblocal, $sql);
+				}
+				////////////////////UPDATE-END////////////////////
+				
+				
+				//Obtiene el último punto ingresado por el empleado
+				$sql = "SELECT in_out FROM point WHERE employee_id = LPAD(".$senha.", 5, '0') ORDER by point_id DESC LIMIT 1";
+				
+				if (!$result = mysqli_query($dbremote, $sql)){
+					die('Error al seleccionar el ultimo punto registrado en la base de datos remota:<br> ' . mysqli_error($dbremote));
+				}
+				
+				//Si la consulta devolvio un resultado
+				if ($row = mysqli_fetch_array($result)){
+					
+					//La ultima accion tomada
+					$last_in_out = $row['in_out'];
+					
+					//Si la ultima accion es distinta de la ingresda
+					if ($last_in_out != $in_out){
+						
+						//Registra el punto
+						$sql = "INSERT point(employee_id, date_time, in_out, updated) ";
+						$sql .= "VALUES(LPAD(".$senha.", 5, '0'), NOW(), ".$in_out.", 1)";
+						
+						if (!$result = mysqli_query($dbremote, $sql)){
+							die('Error al insertar su punto en la base de datos remota:<br> ' . mysqli_error($dbremote));
+						}
+						
+						mysqli_close($dblocal);
+						mysqli_close($dbremote);
+						header('Location: ponto.php');
+					}
+					else if ($in_out == 0){
+						$trying = 'salida';
+						$nottrying = 'entrada';
+							
+						echo 'Su ultimo registro indica una '.$trying.', no puede registrar otra '.$trying.' sin generar una '.$nottrying.' primero.';
+						echo '<br><br>';
+						echo 'Aguarde unos segundos mientras lo redireccionamos a la pagina anterior';
+						mysqli_close($dblocal);
+						mysqli_close($dbremote);
+						header("Refresh: 5; url=ponto.php");
+					}
+					else{
+						$trying = 'entrada';
+						$nottrying = 'salida';
+						echo 'Su ultimo registro indica una '.$trying.', no puede registrar otra '.$trying.' sin generar una '.$nottrying.' primero.';
+						echo '<br><br>';
+						echo 'Aguarde unos segundos mientras lo redireccionamos a la pagina anterior';
+						mysqli_close($dblocal);
+						mysqli_close($dbremote);
+						header("Refresh: 5; url=ponto.php");
+					}
+				}
+				else{
+					if ($in_out == '0'){
+						echo 'Es su primera vez en el sistema, primero debe generar una entrada antes de una salida';
+						echo '<br><br>';
+						echo 'Aguarde unos segundos mientras lo redireccionamos a la pagina anterior';
+						mysqli_close($dblocal);
+						mysqli_close($dbremote);
+						header("Refresh: 5; url=ponto.php");
+					}
+					else{
+						$sql = "INSERT point(employee_id, date_time, in_out, updated) ";
+						$sql .= "VALUES(LPAD(".$senha.", 5, '0'), NOW(), ".$in_out.", 1)";
+
+						if (!$result = mysqli_query($dbremote, $sql)){
+							die('Error al insertar su punto en la base de datos remota:<br> ' . mysqli_error($dbremote));
+						}
+						
+						mysqli_close($dblocal);
+						mysqli_close($dbremote);
+						header('Location: ponto.php');
+					}
+				}
+			}	
+			/////////////////////////////SIN CONEXION/////////////////////////////
+			else{
+				$sql = "INSERT point(employee_id, date_time, in_out, updated) ";
+				$sql .= "VALUES(LPAD(".$senha.", 5, '0'), NOW(), ".$in_out.", 0)";
+
+				if (!$result = mysqli_query($dblocal, $sql)){
+					die('Error al insertar su punto en la base de datos local:<br> ' . mysqli_error($dblocal));
+				}
+				
+				mysqli_close($dblocal);
+				header('Location: ponto.php');
+			}
+		}
+		else{
+			
+			//Obtiene el último punto ingresado por el empleado, como su horario de salida
+			$sql = "SELECT P.date_time, P.in_out, E.tohour ";
+			$sql .= "FROM point P ";
+			$sql .= "left join employee E ON P.employee_id = E.employee_id ";
+			$sql .= "WHERE 1 ";
+			$sql .= "AND P.employee_id = LPAD(".$senha.", 5, '0') ";
+			$sql .= "ORDER by P.date_time ";
+			$sql.= "DESC LIMIT 1;";
+			
+			if (!$result = mysqli_query($dblocal, $sql)){
+				die('Error al seleccionar el ultimo punto registrado en la base de datos remota:<br> ' . mysqli_error($dblocal));
+			}
+				
+			//Si la consulta devolvio un resultado
+			if ($row = mysqli_fetch_array($result)){
+				
+				//La ultima accion tomada
+				$last_date_time = $row['date_time'];
+				$last_in_out = $row['in_out'];
+				$tohour = $row['tohour'];
+				
+				//Si la ultima acción corresponde a dias anteriores
+				if(date('Y-m-d H:i', strtotime($last_date_time)) < date("Y-m-d H:i", strtotime("now - 10 hours"))){
+					//Y su ultimo registro es una entrada
+					if ($last_in_out = $row['in_out']){
+						//marcar salida
+						$sql = "INSERT point(employee_id, date_time, in_out, updated) ";		
+						$sql .= "VALUES(LPAD(".$senha.", 5, '0'), '".date("Y-m-d ", strtotime($last_date_time)).date("H:i:s", strtotime($tohour))."', 0, 1)";
+						
+						if (!$result = mysqli_query($dblocal, $sql)){
+							die('Error al insertar su punto en la base de datos local:<br> ' . mysqli_error($dblocal));
+						}
+						
+						//Registra el punto
+						$sql = "INSERT point(employee_id, date_time, in_out, updated) ";		
+						$sql .= "VALUES(LPAD(".$senha.", 5, '0'), NOW(), 1, 1)";
+					
+						
+						if (!$result = mysqli_query($dblocal, $sql)){
+							die('Error al insertar su punto en la base de datos local:<br> ' . mysqli_error($dblocal));
+						}
+						
+						mysqli_close($dblocal);
+						header('Location: ponto.php');
+						
+					}
+				}
+				
+				//Si la ultima accion es distinta de la ingresda
+				if ($last_in_out != $in_out){
+					
+					//Registra el punto
+					$sql = "INSERT point(employee_id, date_time, in_out, updated) ";		
+					$sql .= "VALUES(LPAD(".$senha.", 5, '0'), NOW(), ".$in_out.", 1)";
+				
+					
+					if (!$result = mysqli_query($dblocal, $sql)){
+						die('Error al insertar su punto en la base de datos local:<br> ' . mysqli_error($dblocal));
+					}
+					mysqli_close($dblocal);
+					header('Location: ponto.php');
+					
+					
+				}
+				else if ($in_out == 0){
+					
+					$trying = 'salida';
+					$nottrying = 'entrada';
+							
+					echo 'Su ultimo registro indica una '.$trying.', no puede registrar otra '.$trying.' sin generar una '.$nottrying.' primero.';
+					echo '<br><br>';
+					echo 'Aguarde unos segundos mientras lo redireccionamos a la pagina anterior';
+					mysqli_close($dblocal);
+					header('Refresh: 5; URL=ponto.php');
+				}
+				else{
+					$trying = 'entrada';
+					$nottrying = 'saída';
+					echo 'Seu ultimo registro indica uma '.$trying.', não pode registrar uma '.$trying.' sem gerar uma '.$nottrying.' primero.';
+					echo '<br><br>';
+					echo 'Aguarde unos segundos mientras lo redireccionamos a la pagina anterior<br>';
+					mysqli_close($dblocal);
+					header('Refresh: 5; URL=ponto.php');
+				}
+			}
+			else{
+				if ($in_out == '0'){
+					echo 'Es su primera vez en el sistema, primero debe generar una entrada antes de una salida';
+					echo '<br><br>';
+					echo 'Aguarde un instante mientras lo redireccionamos a la pagina anterior';
+					mysqli_close($dblocal);
+					header('Refresh: 5; URL=ponto.php');
+				}
+				else{
+					$sql = "INSERT point(employee_id, date_time, in_out, updated) ";
+					$sql .= "VALUES(LPAD(".$senha.", 5, '0'), NOW(), 1, 1)";
+					
+					if (!$result = mysqli_query($dblocal, $sql)){
+						die('Error al insertar su punto en la base de datos local ( as server):<br> ' . mysqli_error($dblocal));
+					}
+					mysqli_close($dblocal);
+					header('Refresh: 5; URL=ponto.php');
+				}
+			}
+		}
+
+}
+
+	if ($_POST['accion'] == 'sendPointMessage'){
+
+		$employee_id = $_POST['employee_id'];
+		$data = $_POST['date'];
+		$message = $_POST['message'];
+		
+		$sql = "INSERT point_message(employee_id, data, message) VALUES(";
+		$sql .= $employee_id.", ";
+		$sql .= "'".$data."', ";
+		$sql .= "'".$message."') ";
+		
+		$resultadoStringSQL = resultFromQuery($sql);
+				
+		header('Location: funcionarios.pontos.php');
+	}
+
+
 /*Procesos*/
 
 	if ($_POST['accion'] == 'admitirPais') {
@@ -1958,7 +2440,7 @@ if (isset( $_GET['accion'])) {
 	}
 }
 
-if (!isset($_SESSION["idusuarios"])){
+if (!isset($_SESSION["idusuarios"]) && !strpos($_SERVER['HTTP_REFERER'], 'ponto.php')){
 	echo '<script languaje="javascript"> self.location="login.php"</script>';
 }
 
@@ -1974,10 +2456,13 @@ function updateQuery($table, $column, $value, $condition){
 			$sqlQuery  .= ', ';
 		}
 		
-		if ($value[$j] != '' && isset($value[$j])){
+		if (isset($value[$j]) && $value[$j] != ''){
 			
 			if (is_numeric($value[$j])){
 				$sqlQuery .= $val.' = '.$value[$j];
+			}
+			elseif($value[$j] == 'NULL'){
+				$sqlQuery .= $val.' = NULL';
 			}
 			else{
 				$sqlQuery .= $val." = '".$value[$j]."'";
@@ -2002,13 +2487,14 @@ function insertQuery($table, $column, $value){
 	
 	foreach ($column as $j => $val) {
 
-		
-		if (mb_substr($sqlQuery, -1) != '(' && mb_substr($sqlQuery, -2) != ', '){
-			$sqlQuery  .= ', ';
-		}
-		
 		if ($value[$j] != ''){
-			$sqlQuery .= $val;
+			if (isset($value[$j])){
+				$sqlQuery .= $val.', ';
+			}
+			elseif($value[$j] == 'NULL' || $value[$j] == "'NULL'" || $value[$j] == NULL){
+				$sqlQuery .= $val.', ';
+			}
+				
 		}
 	}
 	if (mb_substr($sqlQuery, -2) == ', '){
@@ -2027,6 +2513,9 @@ function insertQuery($table, $column, $value){
 			if (is_numeric($value[$j]) || $value[$j] == 'current_timestamp')
 			{
 				$sqlQuery .= $value[$j];
+			}
+			elseif($value[$j] == 'NULL'){
+				$sqlQuery .= $val.' = NULL';
 			}
 			else
 			{
@@ -2059,4 +2548,21 @@ function getColumns($table){
 	
 	return $column;
 }
+
+function checkConnection()
+{
+    //Initiates a socket connection
+    $conn = @fsockopen("davincimp.no-ip.info", 8080, $errno, $errstr, 30);
+    if ($conn)
+    {
+        $status = 1; 
+        fclose($conn);
+    }
+    else
+    {
+        $status = 0;
+    }
+    return $status;
+}
+
 ?> 

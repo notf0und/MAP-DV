@@ -62,13 +62,17 @@ if(!($con = ssh2_connect("localhost", 22))){
     echo "fail: unable to establish connection\n";
 } else {
     // try to authenticate with username root, password secretpassword
-    if(!ssh2_auth_password($con, $_SESSION["idlocales_PRN_USER"], $_SESSION["idlocales_PRN_PASS"])) {
+    
+    $localcfg = parse_ini_file("./local-config.ini", true);
+	$localcfg = $localcfg['config'];   
+    
+    if(!ssh2_auth_password($con, $localcfg['terminal_user'], $localcfg['terminal_password'])) {
         echo "fail: unable to authenticate\n";
     } else {
         // allright, we're in!
         // echo "okay: logged in...\n";
         // execute a command
-        if (!($stream = ssh2_exec($con, "echo ".$_SESSION["idlocales_PRN_TITULO"].". > /dev/lp0" ))) {
+        if (!($stream = ssh2_exec($con, "echo ".$localcfg['terminal_titulo'].". > /dev/lp0" ))) {
             echo "fail: unable to execute command\n";
         } else {
 			ssh2_exec($con, "echo ................................ > /dev/lp0");

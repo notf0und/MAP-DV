@@ -9,8 +9,8 @@
     if (!$dbConnection) {
 		
 		//Muestra opciones segun configuración de la terminal
-		$ldb = parse_ini_file("/home/sistemas/Documents/dasamericas/www/local-config.ini", true)['local_database'];
-		
+		$ldb = parse_ini_file("local-config.ini", true);
+		$ldb = $ldb['local_database'];
 
     	$dbConnection = mysql_dbConnect($ldb['dbhost'], $ldb['dbname'], $ldb['user'], $ldb['password']);
     }
@@ -210,8 +210,13 @@
 						$table .= '</TD>';
 						break;
 					case 'Nome Completo':
-						if (isset($row->decline) &&  $row->decline != ''){
+						if (isset($row->decline) &&  $row->decline != '' && date('Y-m-d', strtotime($row->decline)) < date('Y-m-d', strtotime('now')) ){
 							$table .= '<TD><font color="red">' ;
+							$table .= $row->$colname;
+							$table .= '</font></TD>';							
+						}
+						elseif (isset($row->decline) &&  ($row->decline != '' && date('Y-m-d', strtotime($row->decline)) >= date('Y-m-d', strtotime('now'))) ){
+							$table .= '<TD><font color="#FF5900">' ;
 							$table .= $row->$colname;
 							$table .= '</font></TD>';							
 						}
@@ -227,7 +232,9 @@
 					case 'Pagamentos':
 						$table .= '<TD>';
 						$table .= '<a href="funcionarios.pagamentos.php?employee_id='.$row->id.'">';
-						$table .= ($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 4) ? calcularSalario($row->id, date('n'), date('Y'))['Total'] : 'Balance de salario';
+						$salario = calcularSalario($row->id, date('n'), date('Y'));
+						$salario = $salario['Total'];
+						$table .= ($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 4) ? $salario : 'Balance de salario';
 						$table .= '</a>';
 						$table .= '</TD>';
 						break;					

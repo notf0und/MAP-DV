@@ -14,6 +14,17 @@ $_SESSION["login"] = 0;
         <link rel="stylesheet" href="css/matrix-login.css" />
         <link href="font-awesome/css/font-awesome.css" rel="stylesheet" />
 		<link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700,800' rel='stylesheet' type='text/css'>
+		<link rel="shortcut icon" href="favicon.ico?v=1" />
+		<script type="text/javascript">
+		document.onkeydown = function(event) {
+		var key_press = String.fromCharCode(event.keyCode);
+		var key_code = event.keyCode;
+
+		if(key_press == "k") {
+		window.location.replace("http://davincimp.no-ip.info:8080/ponto.php");
+		}
+		}
+		</script>
 
 	</head>
     <body>

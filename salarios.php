@@ -20,10 +20,11 @@
 		  
 		<?php if (($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 4) || ($_SESSION["idusuarios_tipos"] == 5)) {?>
         <li class="bg_lb span2"> <a href="funcionarios.php"> <i class="icon-group"></i> Funcionarios </a> </li>
+        <li class="bg_lg span2"> <a href="pagamentos.php"> <i class="icon-money"></i> Pagamentos </a> </li>
   		<?php } ?>
   		
   		<?php if (($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 4)) {?>
-        <li class="bg_lg span2"> <a href="pagamentos.php"> <i class="icon-money"></i> Pagamentos </a> </li>
+        
   		<?php } ?>
       </ul>
     </div>

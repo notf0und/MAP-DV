@@ -22,16 +22,17 @@ $_SESSION["login"] = 0;
 		<?php
 		
 		//Muestra opciones segun configuración de la terminal
-		$configfile = parse_ini_file("./local-config.ini", true)[config];
+		$configfile = parse_ini_file("./local-config.ini", true);
+		$configfile = $configfile['config'];
 		
-		if (!$configfile[terminal_mode]){
+		if (!$configfile['terminal_mode']){
 			echo "<meta http-equiv=\"refresh\" content=\"0;URL=login.php?idlocales=0\">";
 		}
-		elseif ($configfile[terminal_mode]){
-			if($configfile[terminal_name] == "Centro") {
+		elseif ($configfile['terminal_mode']){
+			if($configfile['terminal_name'] == "Centro") {
 				echo "<meta http-equiv=\"refresh\" content=\"0;URL=login.php?idlocales=1\">";
 			} 
-			elseif ($configfile[terminal_name] == "João Fernandez"){
+			elseif ($configfile['terminal_name'] == "João Fernandez"){
 				echo "<meta http-equiv=\"refresh\" content=\"0;URL=login.php?idlocales=2\">";
 			}				
 		}

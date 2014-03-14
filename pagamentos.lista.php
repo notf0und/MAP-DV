@@ -27,7 +27,7 @@ $sqlQuery .= "LEFT JOIN paymentmethod PM ON PAY.paymentmethod_id = PM.paymentmet
 
 $sqlQuery .= "WHERE enabled = 1 ";
 
-$tablapagamentos = tableFromResult(resultFromQuery($sqlQuery), 'payment', true, false, 'posts.php', true);
+$tablapagamentos = tableFromResult(resultFromQuery($sqlQuery), 'payment', true, true, 'posts.php', true);
 ?>	
 
 <!--main-container-part-->

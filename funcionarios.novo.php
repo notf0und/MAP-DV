@@ -2,6 +2,9 @@
 include "head.php";
 $idlocales = $_SESSION["idlocales"];
 
+$sql = 'SET lc_time_names = "pt_BR"';
+resultFromQuery($sql);
+
 if (isset($_SESSION['employee'])){
 	$edit = true;
 	$employee_id = $_SESSION['employee'];
@@ -82,6 +85,7 @@ if (isset($_SESSION['employee'])){
 	//Union de employee con jobcategory
 	$sqlQuery .= "LEFT JOIN jobcategory JC ON E.jobcategory_id = JC.jobcategory_id ";
 	
+	
 	//Union de jobcategory con base salary
 	$sqlQuery .= "LEFT JOIN basesalary BS ON JC.jobcategory_id = BS.jobcategory_id ";
 
@@ -129,9 +133,8 @@ if (isset($_SESSION['employee'])){
 	
 	//AQUI VA LA DOCUMENTACION
 	
-	
 	//WHERE
-	$sqlQuery .= "WHERE E.employee_id = ".$employee_id;
+	$sqlQuery .= "WHERE E.employee_id = ".$employee_id." ";
 	
 	$resultadoStringSQL = resultFromQuery($sqlQuery);
 
@@ -163,7 +166,7 @@ if (isset($_SESSION['employee'])){
 		$carteiradate = $row->carteiradate;
 		$cpfcard_id = $row->cpfcard_id;
 		$cpfnumber = $row->cpfnumber;
-		echo $cpfnumber;
+		//echo $cpfnumber;
 		$votingcard_id = $row->votingcard_id;
 		$eleitornumber = $row->eleitornumber;
 		$eleitorzone = $row->eleitorzone;
@@ -201,8 +204,36 @@ if (isset($_SESSION['employee'])){
 		$experiencecontract = $row->experiencecontract;
 		$unhealthy = $row->unhealthy;
 	}
+	
+	$sqlQuery = "SELECT DAYNAME(valid_from) clearance from clearance ";
+	$sqlQuery .= "WHERE 1 ";
+	$sqlQuery .= "AND employee_id = ".$employee_id." ";
+	$sqlQuery .= "AND DATE(valid_from) <= CURDATE() ORDER BY valid_from DESC LIMIT 1;";
+	$resultadoStringSQL = resultFromQuery($sqlQuery);
+
+	if ($row = siguienteResult($resultadoStringSQL)){
+		$clearance = $row->clearance;
+	}
+	else{
+		
+		$sqlQuery = "SELECT DAYNAME(valid_from) clearance, valid_from from clearance ";
+		$sqlQuery .= "WHERE 1 ";
+		$sqlQuery .= "AND employee_id = ".$employee_id." ";
+		$sqlQuery .= "AND DATE(valid_from) BETWEEN CURDATE() + interval 1 day AND CURDATE() + interval 6 day ";
+		$sqlQuery .= "ORDER BY valid_from ASC LIMIT 1;";
+		
+		$resultadoStringSQL = resultFromQuery($sqlQuery);
+		
+		if ($row = siguienteResult($resultadoStringSQL)){
+			$clearance = $row->clearance;
+			$msgclearance = '<br><br>A patrir do día '.date('d/m', strtotime($row->valid_from));
+		}
+	}
 	unset($_SESSION['employee']);
 }
+
+isset($clearance) ? $day = ucfirst($clearance) : $day = 'Domingo';
+$dropdown = dayDropdown('clearance', $day);
 
 ?>
 <meta http-equiv="Cache-control" content="no-cache">
@@ -821,7 +852,18 @@ if (isset($_SESSION['employee'])){
 								  
 								  <!--Interval-->  
 								  <input type="text" id="mask-intervalhours" name="intervalhour" placeholder="Horas de intervalo" class="span4 mask text" value="<?php echo isset($intervalhour) ? ltrim($intervalhour, 0) : '' ?>"><br>
-									
+								  
+								  </div>
+								</div>
+								
+								<!--Clearance-->  
+								<div class="control-group">
+									<label class="control-label">Folga</label>
+									<div class="controls">
+
+								  <?php echo isset($dropdown) ? $dropdown : dayDropdown('clearance', 'Domingo'); ?>
+								  
+								  <?php echo isset($msgclearance) ? $msgclearance : ''; ?>
 							  </div>
 								</div>
 							
