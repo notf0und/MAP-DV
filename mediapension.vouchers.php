@@ -165,10 +165,7 @@ else{
 								  <div class="modal-body" id="modal-body">
 									  <p></p>
 								  </div>
-								  <div class="modal-footer"> 
-									  <?php echo isset($bTransfer) ? $bTransfer : ''; ?> 
-									  <a data-dismiss="modal" class="btn" href="#">Fechar</a> 
-								  </div>
+
 							  </div>
 						  </form>
 						  

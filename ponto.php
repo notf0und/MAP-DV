@@ -86,12 +86,31 @@ if ($row = siguienteResult($result)){
 <script type="text/javascript" src="lib/lib.js"></script>
 
 <?php if ($ps || !$tm) {?>
-<script type="text/javascript">
+<script type="text/javascript">	
 document.onkeydown = function(event) {
+
+	$("#senha").focusin(function(){
+	    console.log('focusInput got the focus');
+	});
+	
+	$("#senha").focusout(function(){
+	    console.log('focusInput lost focus');
+	    
+	    jQuery.post("getEmployeeName.php", {
+						employee_id:$("#senha").val(),
+					}, function(data, textStatus){
+							$('#res').html(data);
+							$('#res').css('color','red');
+					});
+	    
+	});
+	
 var key_press = String.fromCharCode(event.keyCode);
 var key_code = event.keyCode;
 
 if(key_press == "a" || key_press == "1"){
+	
+	
 	$('#myModal').modal('show');
 	if($('#myModal').hasClass('in') == false){
 		$("#in_out").val("1");
@@ -137,7 +156,6 @@ if(key_press == "a" || key_press == "1"){
 	}
 }
 }
-
 </script>
 <?php }?>
 
@@ -170,6 +188,7 @@ if(key_press == "a" || key_press == "1"){
 			<div class="modal-header">
 				<button data-dismiss="modal" class="close" type="button">×</button>
 				<h3>Registro de entrada/saída</h3>
+				<span id="res"></span>
 			</div>
 			
 			<form id='inputform' method="post" action="posts.php">

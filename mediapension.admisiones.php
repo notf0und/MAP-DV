@@ -36,6 +36,11 @@ while ($row = mysql_fetch_row($sqlResult)){
 	$serviciosrestantes = $totalcomidas - $serviciosconsumidos;
 }
 
+$bTransfer = '<form method="post" action="mediapension.admisiones.transferir.php">';
+$bTransfer .= '<input type="hidden" id="idmediapension" name="idmediapension" value="'.$_GET["idmediapension"].'" />';
+$bTransfer .= '<button class="btn btn-info icon-ok-circle" type="submit" value="add">Transferir</button>';
+$bTransfer .= '</form>';
+
 ?>
 <html lang="en">
 <head>
@@ -72,7 +77,10 @@ while ($row = mysql_fetch_row($sqlResult)){
 				DataIN :<b><?php echo $datain;?></b><br>
 				DataOUT :<b><?php echo $dataout;?></b><br><br>
 			</div>
+			
+			
 		</form>
+		<?php echo isset($bTransfer) ? $bTransfer : ''; ?>
 			 
 			
 			

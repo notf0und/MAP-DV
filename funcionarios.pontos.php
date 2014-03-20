@@ -12,6 +12,7 @@ $sql .= " FROM ";
 $sql .= "(SELECT  point_id, employee_id, date_time, in_out ";
 $sql .= "FROM point ";
 $sql .= "WHERE date(date_time) = curdate() ";
+$sql .= "AND date_time < now() + interval 1 minute ";
 $sql .= "ORDER BY TIME(date_time) DESC) as temp ";
 $sql .= "LEFT JOIN employee E ON temp.employee_id = E.employee_id ";
 $sql .= "LEFT JOIN profile P ON E.profile_id = P.profile_id ";

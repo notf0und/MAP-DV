@@ -29,11 +29,7 @@
 		<?php if (isset($_SESSION["idusuarios_tipos"]) && ($_SESSION["idusuarios_tipos"] == 1 || $_SESSION["idusuarios_tipos"] == 3)) {?>
         <li class="bg_lb span2"> <a href="administradores.php"> <i class="icon-list-ul"></i> Administradores</a> </li>
 		<?php } ?>
-		
-		<?php if (isset($_SESSION["idusuarios_tipos"]) && ($_SESSION["idusuarios_tipos"] == 7)) {?>
-        <li class="bg_lg span2"> <a href="administradores.php"> <i class="icon-signin"></i> Marcar Entrada</a> </li>
-        <li class="bg_lr span2"> <a href="administradores.php"> <i class="icon-signout"></i> Marcar Saída</a> </li>
-		<?php } ?>
+
 		
       </ul>
     </div>
@@ -55,6 +51,18 @@
 
       </ul>
     </div>
+
+    <div class="quick-actions_homepage">
+      <ul class="quick-actions">
+		  
+		  <?php if (isset($_SESSION["idusuarios_tipos"]) && $_SESSION["idusuarios_tipos"] == 1) {?>
+			  <li class="bg_ly span2"> <a href="sigda.php"> <i class="icon-github"></i> Sistema</a> </li>
+		  <?php }?>
+
+
+      </ul>
+    </div>
+
 <!--End-Action boxes-->    
 
 
