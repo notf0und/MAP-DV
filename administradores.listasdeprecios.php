@@ -22,7 +22,7 @@
 			<div class="widget-content nopadding">
 				<?php
 					$sqlQuery = " SELECT LDP.idlistasdeprecios 'ID' , LDP.nombre 'Nombre' ";
-					$sqlQuery .= " , RDP.plural 'Responsables', LDP.VigenciaIN, LDP.VigenciaOUT  ";
+					$sqlQuery .= " , RDP.plural 'Responsables', LDP.VigenciaIN, LDP.VigenciaOUT, LDP.mindays 'Mínimo días'  ";
 					$sqlQuery .= ", CONCAT ('<a  class=btn href=administradores.listasdeprecios.precios.paso01.php?id=', LDP.idlistasdeprecios ,'>Administrar precios</a>') 'Adm. precios.'";
 					// $sqlQuery .= " ()  ";
 					$sqlQuery .= " FROM `listasdeprecios` LDP ";

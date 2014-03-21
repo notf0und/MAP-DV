@@ -240,6 +240,7 @@ function insertoBloqueDeMediapension($idresponsablesDePago, $id, $dataIN, $dataO
 	$sql .= " FROM responsablesDePago "; 
 	$sql .= " WHERE 1 "; 
 	$sql .= " AND idresponsablesDePago = ".$idresponsablesDePago;
+	
 	 
 	$resultadoResponsables= resultFromQuery($sql);	
 
@@ -264,7 +265,6 @@ function insertoBloqueDeMediapension($idresponsablesDePago, $id, $dataIN, $dataO
 	$sql .= " 	AND MP.id".$tabla." = ".$id;
 	$sql .= " 	AND MP.idresponsablesDePago = ".$idresponsablesDePago;
 
-
 	$resultado = resultFromQuery($sql);	
 	
 	while ($row = siguienteResult($resultado)) {
@@ -280,9 +280,10 @@ function insertoBloqueDeMediapension($idresponsablesDePago, $id, $dataIN, $dataO
 			$data = $fechaActual;
 			$idposadas = $row->idposadas;
 			$idservicios = $row->idservicios;
+			$mindays = $row->N;
 			//$precio = valordiaria($fechaActual, $row->idposadas, $row->idservicios); // Version antigua
 
-			$precio = valordiaria($data, $idresponsablesDePago, $id, $idservicios, $idposadas);
+			$precio = valordiaria($data, $idresponsablesDePago, $id, $idservicios, $idposadas, false, $mindays);
 			
 			mysql_query("LOCK TABLES _temp_liquidaciones_mp_cuentas WRITE;");
 			
@@ -812,7 +813,7 @@ function admitirServicio($idmediapension, $qtdedepaxagora, $precio, $idlocales=0
 	return $idadmision;
 }
 
-function valordiaria($data, $idresponsablesDePago, $id, $idservicios, $idposadas, $hoteleria = false){
+function valordiaria($data, $idresponsablesDePago, $id, $idservicios, $idposadas, $hoteleria = false, $mindays = false){
 	/*
 	Si la siguiente consulta viene vacia, es porque la posada no tiene una lista de precios particualar para media pension 
 	y va a usar los precios genericos. Osea los estan para idposadas = 0.
@@ -853,36 +854,75 @@ function valordiaria($data, $idresponsablesDePago, $id, $idservicios, $idposadas
 	$sql .= " AND LDP.idresponsablesDePago = ".$idresponsablesDePago;
 	$sql .= " AND LDP.iditem = ".$id;
 	$sql .= " AND SLDP.idservicios = ".$idservicios;
+	
+	
 	//echo $idposadas.'<br>';
 	isset($hoteleria) && $hoteleria == true ? $sql .= " AND SLDP.idposadas_internas = ".$idposadas : '';
 	//$sql .= " AND SLDP.idposadas_internas = ".$idposadas;
 	$sql .= " AND  '".$data."' BETWEEN LDP.VigenciaIN AND LDP.VigenciaOUT ";
+	isset($mindays) ? $sql .= "AND LDP.mindays < ".$mindays." ORDER BY LDP.mindays DESC LIMIT 1" : '';
 	/*
 	echo "<hr><font color='white'>";
 	echo $sql;
 	echo "</font>";
 	*/
 	
-	
+
 	$resultado = mysql_fetch_array(resultFromQuery($sql));	
 	
 	if ($resultado[0] == null){
-	$sql = "SELECT SLDP.precio precio FROM listasdeprecios LDP ";
-	$sql .= " LEFT JOIN servicios_listasdeprecios SLDP ON LDP.idlistasdeprecios = SLDP.idlistasdeprecios ";
-	$sql .= " WHERE 1 ";
-	$sql .= " AND LDP.idresponsablesDePago = ".$idresponsablesDePago;
-	$sql .= " AND LDP.iditem = 0";
-	$sql .= " AND SLDP.idservicios = ".$idservicios;
-	isset($hoteleria) && $hoteleria == true ? $sql .= " AND SLDP.idposadas_internas = ".$idposadas : '';
-	$sql .= " AND  '".$data."'  BETWEEN LDP.VigenciaIN AND LDP.VigenciaOUT ";
-	/*
-	echo "<hr><font color='green'>";
-	echo $sql;
-	echo "</font>";
-	*/
-		$resultado = mysql_fetch_array(resultFromQuery($sql));		
-	}
+		
+		if ($idresponsablesDePago == 2){
+			
+			$sql = "SELECT SLDP.precio precio FROM listasdeprecios LDP ";
+			$sql .= " LEFT JOIN servicios_listasdeprecios SLDP ON LDP.idlistasdeprecios = SLDP.idlistasdeprecios ";
+			$sql .= " LEFT JOIN grupos_precios GP ON LDP.idlistasdeprecios = GP.idlistasdeprecios ";
+			$sql .= " WHERE 1 ";
+			$sql .= " AND LDP.idresponsablesDePago = ".$idresponsablesDePago;
+			$sql .= " AND LDP.iditem = 92";
+			$sql .= " AND GP.idelement = ".$id;
+			$sql .= " AND SLDP.idservicios = ".$idservicios;
+			$sql .= " AND  '".$data."' BETWEEN LDP.VigenciaIN AND LDP.VigenciaOUT ";
+			isset($mindays) ? $sql .= "AND LDP.mindays <= ".$mindays." ORDER BY LDP.mindays DESC LIMIT 1" : '';
+			echo $sql.'<br><br>';
 
+			$resultado = mysql_fetch_array(resultFromQuery($sql));
+			
+			if ($resultado[0] == null){
+				$sql = "SELECT SLDP.precio precio FROM listasdeprecios LDP ";
+				$sql .= " LEFT JOIN servicios_listasdeprecios SLDP ON LDP.idlistasdeprecios = SLDP.idlistasdeprecios ";
+				$sql .= " WHERE 1 ";
+				$sql .= " AND LDP.idresponsablesDePago = ".$idresponsablesDePago;
+				$sql .= " AND LDP.iditem = 0";
+				$sql .= " AND SLDP.idservicios = ".$idservicios;
+				isset($hoteleria) && $hoteleria == true ? $sql .= " AND SLDP.idposadas_internas = ".$idposadas : '';
+				$sql .= " AND  '".$data."'  BETWEEN LDP.VigenciaIN AND LDP.VigenciaOUT ";
+				/*
+				echo "<hr><font color='green'>";
+				echo $sql;
+				echo "</font>";
+				*/
+				$resultado = mysql_fetch_array(resultFromQuery($sql));	
+			}
+		}
+		else{
+
+			$sql = "SELECT SLDP.precio precio FROM listasdeprecios LDP ";
+			$sql .= " LEFT JOIN servicios_listasdeprecios SLDP ON LDP.idlistasdeprecios = SLDP.idlistasdeprecios ";
+			$sql .= " WHERE 1 ";
+			$sql .= " AND LDP.idresponsablesDePago = ".$idresponsablesDePago;
+			$sql .= " AND LDP.iditem = 0";
+			$sql .= " AND SLDP.idservicios = ".$idservicios;
+			isset($hoteleria) && $hoteleria == true ? $sql .= " AND SLDP.idposadas_internas = ".$idposadas : '';
+			$sql .= " AND  '".$data."'  BETWEEN LDP.VigenciaIN AND LDP.VigenciaOUT ";
+			/*
+			echo "<hr><font color='green'>";
+			echo $sql;
+			echo "</font>";
+			*/
+			$resultado = mysql_fetch_array(resultFromQuery($sql));		
+		}
+	}
 	if ($resultado[0] == null){
 		$valor = 0;
 	}else{

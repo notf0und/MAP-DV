@@ -16,6 +16,7 @@ if (isset($_SESSION['idlistasdeprecios'])){
 		$VigenciaOUT = $row->VigenciaOUT;
 		$idresponsablesDePago = $row->idresponsablesDePago;
 		$iditem = $row->iditem;
+		$mindays = $row->mindays;
 	}
 }
 ?>
@@ -43,6 +44,7 @@ if (isset($_SESSION['idlistasdeprecios'])){
 				<div class="widget-content nopadding">
 					<input type="hidden" id="accion" name="accion" value="admitirListasdeprecios" />
 					<input type="hidden" id="idlistasdeprecios" name="idlistasdeprecios" value="<?php echo $idlistasdeprecios;?>" />
+					<input type="hidden" id="iditem" name="iditem" value="<?php echo $iditem;?>" />
 					<div class="control-group">
 						<label class="control-label">Nome</label>
 						<div class="controls">
@@ -65,6 +67,12 @@ if (isset($_SESSION['idlistasdeprecios'])){
 								<input id="VigenciaOUT" name="VigenciaOUT" type="text" class="span11"  required="true" value="<?php echo isset($VigenciaOUT) ? $VigenciaOUT : '';?>" />
 								<span class="add-on"><i class="icon-th"></i></span> 
 							</div>
+						</div>
+					</div>
+					<div class="control-group">
+						<label class="control-label">Mínimo días</label>
+						<div class="controls">
+							<input id="mindays" name="mindays" type="text" class="span3" placeholder="Qtde mínima de días" required="true" value="<?php echo isset($mindays) ? $mindays : '';?>"/>
 						</div>
 					</div>
 					<div class="control-group">

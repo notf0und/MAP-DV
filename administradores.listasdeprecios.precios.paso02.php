@@ -17,6 +17,7 @@ if (isset($_GET['id'])){
 		$idresponsablesDePago = $row->idresponsablesDePago;
 		$iditem = $row->iditem;
 		
+		
 		// Selecciono tabla del resposable de Pago
 		
 		$sql = " SELECT idresponsablesDePago, nombre, tabla, plural ";

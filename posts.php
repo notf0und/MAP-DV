@@ -292,6 +292,7 @@ if (isset( $_POST['accion'] )) {
 		$VigenciaOUT = $_POST['VigenciaOUT'];
 		$idresponsablesDePago = $_POST['idresponsablesDePago'];
 		$iditem = $_POST['iditem'];
+		$mindays = $_POST['mindays'];
 
 		if ($idlistasdeprecios > -1) {
 
@@ -301,7 +302,8 @@ if (isset( $_POST['accion'] )) {
 			$sql .= " VigenciaIN = '".$VigenciaIN."',";
 			$sql .= " VigenciaOUT = '".$VigenciaOUT."',";
 			$sql .= " idresponsablesDePago = '".$idresponsablesDePago."',";
-			$sql .= " iditem = '".$iditem."'";
+			$sql .= " iditem = '".$iditem."',";
+			$sql .= " mindays = '".$mindays."' ";
 			$sql .= "where idlistasdeprecios = ".$idlistasdeprecios;
 			$resultadoStringSQL = resultFromQuery($sql);		
 
@@ -311,12 +313,13 @@ if (isset( $_POST['accion'] )) {
 		} else {
 		
 			//INSERT AGENCIAS
-			$sql = "insert listasdeprecios (nombre, VigenciaIN, VigenciaOUT, idresponsablesDePago, iditem) values (";
+			$sql = "insert listasdeprecios (nombre, VigenciaIN, VigenciaOUT, idresponsablesDePago, iditem, created) values (";
 			$sql .= "'".$nombre."',";
 			$sql .= "'".$VigenciaIN."',";
 			$sql .= "'".$VigenciaOUT."',";
 			$sql .= "'".$idresponsablesDePago."',";
-			$sql .= "'".$iditem."') ";
+			$sql .= "'".$iditem."' ";
+			$sql .= "CURDATE()) ";
 			$resultadoStringSQL = resultFromQuery($sql);		
 			$idlistasdeprecios = mysql_insert_id();
 
@@ -329,6 +332,7 @@ if (isset( $_POST['accion'] )) {
 
 	if ($_POST['accion'] == 'admitirPrecios01') {
 
+
 		$idlistasdeprecios = $_POST['idlistasdeprecios'];
 		$iditem = $_POST['iditem'];
 
@@ -340,10 +344,46 @@ if (isset( $_POST['accion'] )) {
 			$resultadoStringSQL = resultFromQuery($sql);		
 
 			bitacoras($_SESSION["idusuarios"], 'Modificacion de Listas de precios: ID '.$idlistasdeprecios);
-			echo '<script languaje="javascript"> self.location="administradores.listasdeprecios.precios.paso02.php?id='.$idlistasdeprecios.'"</script>';
 			
-		}
+			$sql = 'SELECT * FROM listasdeprecios ';
+			$sql .= "WHERE idlistasdeprecios = ".$idlistasdeprecios;
+			$resultadoStringSQL = resultFromQuery($sql);
+			
+			if ($row = siguienteResult($resultadoStringSQL)){
+				
+				if ($row->idresponsablesDePago == 2 && is_array($iditem)){
+					//insertar elementos en la tabla
+				}
+
+				if ($row->idresponsablesDePago == 2 && $iditem == 92){
+
+					echo '<script languaje="javascript"> self.location="administradores.listasdeprecios.precios.paso01-1.php?id='.$idlistasdeprecios.'"</script>';
+					
+				}
+				else{
+
+					echo '<script languaje="javascript"> self.location="administradores.listasdeprecios.precios.paso02.php?id='.$idlistasdeprecios.'"</script>';
+				}
+					
+			}
+		}	
+	}
+
+	if ($_POST['accion'] == 'admitirPrecios01-1') {
 		
+		$idlistasdeprecios = $_POST['idlistasdeprecios'];
+		$iditem = $_POST['iditem'];		
+		
+		$sql = "delete from grupos_precios where idlistasdeprecios = ".$idlistasdeprecios;
+		$resultadoStringSQL = resultFromQuery($sql);
+		
+		for ($i =0; $i < count($iditem); $i++){
+			$sql = "INSERT grupos_precios(idlistasdeprecios, idelement)";
+			$sql .= "VALUES(".$idlistasdeprecios.', '.$iditem[$i].')';
+			$resultadoStringSQL = resultFromQuery($sql);
+		}
+		echo '<script languaje="javascript"> self.location="administradores.listasdeprecios.precios.paso02.php?id='.$idlistasdeprecios.'"</script>';
+					
 	}
 
 	if ($_POST['accion'] == 'admitirPrecios02') {
