@@ -860,7 +860,7 @@ function valordiaria($data, $idresponsablesDePago, $id, $idservicios, $idposadas
 	isset($hoteleria) && $hoteleria == true ? $sql .= " AND SLDP.idposadas_internas = ".$idposadas : '';
 	//$sql .= " AND SLDP.idposadas_internas = ".$idposadas;
 	$sql .= " AND  '".$data."' BETWEEN LDP.VigenciaIN AND LDP.VigenciaOUT ";
-	isset($mindays) ? $sql .= "AND LDP.mindays < ".$mindays." ORDER BY LDP.mindays DESC LIMIT 1" : '';
+	isset($mindays) && $mindays != '' ? $sql .= "AND LDP.mindays < ".$mindays." ORDER BY LDP.mindays DESC LIMIT 1" : '';
 	/*
 	echo "<hr><font color='white'>";
 	echo $sql;
@@ -884,7 +884,6 @@ function valordiaria($data, $idresponsablesDePago, $id, $idservicios, $idposadas
 			$sql .= " AND SLDP.idservicios = ".$idservicios;
 			$sql .= " AND  '".$data."' BETWEEN LDP.VigenciaIN AND LDP.VigenciaOUT ";
 			isset($mindays) ? $sql .= "AND LDP.mindays <= ".$mindays." ORDER BY LDP.mindays DESC LIMIT 1" : '';
-			echo $sql.'<br><br>';
 
 			$resultado = mysql_fetch_array(resultFromQuery($sql));
 			

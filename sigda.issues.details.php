@@ -5,6 +5,7 @@ for ($i = 0; $i < count($_SESSION['issues']); $i++){
 	
 	if ($_SESSION['issues'][$i]['number'] == $_GET['issue']){
 		$issue = $_SESSION['issues'];
+		$link = '<a href="sigda.open-issues.php" title="Abertas" class="tip-bottom">Abertas</a>';
 	}
 	
 }
@@ -13,6 +14,7 @@ for ($i = 0; $i < count($_SESSION['closed-issues']); $i++){
 	
 	if ($_SESSION['closed-issues'][$i]['number'] == $_GET['issue']){
 		$issue = $_SESSION['closed-issues'];
+		$link = '<a href="sigda.closed-issues.php" title="Fechadas" class="tip-bottom">Fechadas</a>';
 	}
 }
 
@@ -65,9 +67,10 @@ if (isset($issue) && $issue != ''){
 <!--breadcrumbs-->
 	<div id="content-header">
 		<div id="breadcrumb"> 
-			<a href="index.php" title="Home" class="tip-bottom"><i class="icon-home"></i> Home</a> 
-			<a href="sistema.php" title="Liquidaciones" class="tip-bottom">Sistema</a>
-			<a href="sigda.issues.php" title="Questiões do Sistema" class="tip-bottom">Questiões</a>
+			<a href="index.php" title="Home" class="tip-bottom"><i class="icon-home"></i> Início</a> 
+			<a href="sigda.php" title="Sistema" class="tip-bottom">Sistema</a>
+			<a href="sigda.issues.php" title="Questiões do Sistema" class="tip-bottom">Questões</a>
+			<?php echo $link ?>
 			<a href="#" class="current">Detalhes</a>
 		</div>
 	</div>

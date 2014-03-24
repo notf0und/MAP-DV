@@ -64,9 +64,10 @@ $issueslist .= '</div>';
 <!--breadcrumbs-->
 	<div id="content-header">
 		<div id="breadcrumb"> 
-			<a href="index.php" title="Home" class="tip-bottom"><i class="icon-home"></i> Home</a> 
+			<a href="index.php" title="Home" class="tip-bottom"><i class="icon-home"></i> Início</a> 
 			<a href="sigda.php" title="Sistema" class="tip-bottom">Sistema</a>
-			<a href="#" class="current">Questiões Fechadas</a>
+			<a href="sigda.issues.php" title="Questões" class="tip-bottom">Questões</a>
+			<a href="#" class="current">Fechadas</a>
 		</div>
 	</div>
 <!--End-breadcrumbs-->

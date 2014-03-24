@@ -16,9 +16,7 @@
   <div class="container-fluid">
     <div class="quick-actions_homepage">
       <ul class="quick-actions">
-		<li class="bg_lr span2"> <a href="sigda.issues.new.php"> <i class="icon-plus"></i> Nova </a> </li>
-        <li class="bg_lb span2"> <a href="sigda.issues.php"> <i class="icon-folder-open"></i> Abertas </a> </li>
-        <li class="bg_lg span2"> <a href="sigda.closed-issues.php"> <i class="icon-folder-close"></i> Fechadas </a> </li>
+		<li class="bg_ly span2"> <a href="sigda.issues.php"> <i class="icon-warning-sign"></i> Questões </a> </li>
       </ul>
     </div>
 <!--End-Action boxes-->    

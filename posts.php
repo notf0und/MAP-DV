@@ -700,12 +700,27 @@ if (isset( $_POST['accion'] )) {
 	if ($_POST['accion'] == 'AdmisionesMPDelete') {
 		$id = array_search('Apagar', $_POST['deleteRow']['id']);
 		
-		$sql = 'DELETE FROM mediapension_admisiones where id = '.$id;
+		//$sql = 'DELETE FROM mediapension_admisiones where id = '.$id;
+		$sql = 'UPDATE mediapension_admisiones SET habilitado = 0 where id = '.$id;
 		
 		$result = resultFromQuery($sql);		
 
 		
 		bitacoras($_SESSION["idusuarios"], 'Apagada admisão '.$id);
+		echo '<script languaje="javascript"> top.location="mediapension.vouchers.php"</script>';	
+
+	}
+	
+	if ($_POST['accion'] == 'AdmisionesMPTransfer') {
+		
+		//$sql = 'DELETE FROM mediapension_admisiones where id = '.$id;
+		$sql = 'UPDATE mediapension_admisiones ';
+		$sql .= 'SET idmediapension = '.$_POST['To'];
+		$sql .= ' where idmediapension = '.$_POST['From'];
+		
+		$result = resultFromQuery($sql);		
+		
+		bitacoras($_SESSION["idusuarios"], 'Transferidas admisões do voucher '.$_POST['From'].' para '.$_POST['To']);
 		echo '<script languaje="javascript"> top.location="mediapension.vouchers.php"</script>';	
 
 	}
@@ -2466,7 +2481,16 @@ if (isset( $_POST['accion'] )) {
 		}
 	}
 
+/* SIGDA */
+	if ($_POST['accion'] == 'newIssue') {
+		//$client->api('issue')->create('notf0und', 'MAP-DV', array('title' => $_POST['title'], 'body' => $_POST['body']));
+		echo '<script languaje="javascript"> top.location="sigda.issues.php"</script>';
+	}
+
 }
+
+
+
 
 /* Limpiar sesion */
 
