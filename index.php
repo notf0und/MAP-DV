@@ -40,7 +40,7 @@
 			  <li class="bg_lg span2"> <a href="reservas.php"> <i class="icon-calendar"></i> Reservas</a> </li>
 		  <?php }?>
 		  
-		<?php if (isset($_SESSION["idusuarios_tipos"]) && (($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 4) || ($_SESSION["idusuarios_tipos"] == 5) )) {?>
+		<?php if (isset($_SESSION["idusuarios_tipos"]) && (($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 4) || ($_SESSION["idusuarios_tipos"] == 5) || ($_SESSION["idusuarios_tipos"] == 8) )) {?>
         <li class="bg_lo span2"> <a href="salarios.php"> <i class="icon-sitemap"></i> Área Contable </a> </li>
   		<?php }?>
   		

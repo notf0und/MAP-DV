@@ -1904,7 +1904,10 @@ if (isset( $_POST['accion'] )) {
 			*/
 		}
 		
-		if ($_SESSION["idusuarios_tipos"] == 1 || $_SESSION["idusuarios_tipos"] == 4){
+		if ($_POST['accept'] == 'continue') {
+			echo '<script languaje="javascript"> self.location="pagamentos.novo.php?employee_id='.$_POST['employee_id'].'"</script>';
+		}
+		elseif ($_SESSION["idusuarios_tipos"] == 1 || $_SESSION["idusuarios_tipos"] == 4 || $_SESSION["idusuarios_tipos"] == 8){
 			echo '<script languaje="javascript"> self.location="pagamentos.php"</script>';
 		}
 		else{
@@ -2483,7 +2486,9 @@ if (isset( $_POST['accion'] )) {
 
 /* SIGDA */
 	if ($_POST['accion'] == 'newIssue') {
-		//$client->api('issue')->create('notf0und', 'MAP-DV', array('title' => $_POST['title'], 'body' => $_POST['body']));
+		
+		$params = array('title' => $_POST['title'], 'body' => $_POST['body']);
+		$client->api('issue')->create('notf0und', 'MAP-DV', $params);
 		echo '<script languaje="javascript"> top.location="sigda.issues.php"</script>';
 	}
 

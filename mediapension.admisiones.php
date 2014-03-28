@@ -16,12 +16,12 @@ $sqlQuery .= " L.nombre 'Resto' ";
 $sqlQuery .= " FROM mediapension_admisiones MPA ";
 $sqlQuery .= " LEFT JOIN locales L ON MPA.idlocales = L.idlocales ";
 $sqlQuery .= " WHERE MPA.idmediapension = ".$_GET["idmediapension"];
-if ($_SESSION["idusuarios_tipos"] != 1){
+if ($_SESSION["idusuarios_tipos"] != 1 || $_SESSION["idusuarios_tipos"] != 6){
 	$sqlQuery .= " AND MPA.habilitado = 1 ";
 }
 $sqlQuery .= " ORDER BY MPA.data";
 
-if ($_SESSION["idusuarios_tipos"] == 1){
+if ($_SESSION["idusuarios_tipos"] == 1 || $_SESSION["idusuarios_tipos"] == 6){
 	$tablaconsumos = tableFromResult(resultFromQuery($sqlQuery), 'AdmisionesMP', true, false);
 }
 else{
@@ -34,7 +34,7 @@ $sqlQuery .= " MP.qtdedecomidas, SUM(MPA.qtdedepax), MP.dataIN, MP.dataOUT";
 $sqlQuery .= " FROM mediapension MP";
 $sqlQuery .= " LEFT JOIN mediapension_admisiones MPA ON MP.idmediapension = MPA.idmediapension";
 $sqlQuery .= " WHERE MP.idmediapension = ".$_GET["idmediapension"];
-if ($_SESSION["idusuarios_tipos"] != 1){
+if ($_SESSION["idusuarios_tipos"] != 1 ){
 	$sqlQuery .= " AND MPA.habilitado = 1 ";
 }
 $sqlResult = resultFromQuery($sqlQuery);
@@ -47,7 +47,7 @@ while ($row = mysql_fetch_row($sqlResult)){
 	$serviciosrestantes = $totalcomidas - $serviciosconsumidos;
 }
 
-if ($_SESSION["idusuarios_tipos"] == 1){
+if ($_SESSION["idusuarios_tipos"] == 1 || $_SESSION["idusuarios_tipos"] == 6){
 	$bTransfer = '<form method="post" action="mediapension.admisiones.transferir.php">';
 	$bTransfer .= '<input type="hidden" id="idmediapension" name="idmediapension" value="'.$_GET["idmediapension"].'" />';
 	$bTransfer .= '<button class="btn btn-info icon-ok-circle" type="submit" value="add">Transferir</button>';

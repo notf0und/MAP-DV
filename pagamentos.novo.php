@@ -2,6 +2,11 @@
 include "head.php";
 
 //
+if (isset($_REQUEST['employee_id'])){
+	$employee_id = $_REQUEST['employee_id'];
+}
+
+
 if (isset($_SESSION['payment_id'])){
 	
 	$payment_id = $_SESSION['payment_id'];
@@ -28,7 +33,7 @@ $sqlQuery .= "CONCAT(P.firstname, ' ', P.lastname) ";
 $sqlQuery .= "FROM employee E ";
 $sqlQuery .= "LEFT JOIN profile P ON E.profile_id = P.profile_id ";
 $resultado = resultFromQuery($sqlQuery);
-$comboemployee = comboFromArray('employee_id', $resultado, isset($employee_id) ? $employee_id : $_POST['employee_id'], '', '', false, 'span4 m-wrap');
+$comboemployee = comboFromArray('employee_id', $resultado, isset($employee_id) ? $employee_id : '', '', '', false, 'span4 m-wrap');
 
 //PAYMENT TYPE COMBO
 $sqlQuery = "SELECT paymenttype_id, ";
@@ -193,7 +198,8 @@ $combopaymentmethod = comboFromArray('paymentmethod_id', $resultado, isset($paym
 						
 
 						<div class="control-group">
-							<br><button class="btn btn-success" type="submit">Aceitar</button>
+							<br><button class="btn btn-success" type="submit" name="accept" value="exit">Aceitar</button>
+							<br><button class="btn btn-success" type="submit" name="accept" value="continue">Adicionar mais um</button>
 							<br><br>
 						</div>
 						<div id="status"></div>

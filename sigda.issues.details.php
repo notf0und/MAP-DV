@@ -9,15 +9,15 @@ for ($i = 0; $i < count($_SESSION['issues']); $i++){
 	}
 	
 }
-
-for ($i = 0; $i < count($_SESSION['closed-issues']); $i++){
-	
-	if ($_SESSION['closed-issues'][$i]['number'] == $_GET['issue']){
-		$issue = $_SESSION['closed-issues'];
-		$link = '<a href="sigda.closed-issues.php" title="Fechadas" class="tip-bottom">Fechadas</a>';
+if (isset($_SESSION['closed-issues'])){
+	for ($i = 0; $i < count($_SESSION['closed-issues']); $i++){
+		
+		if ($_SESSION['closed-issues'][$i]['number'] == $_GET['issue']){
+			$issue = $_SESSION['closed-issues'];
+			$link = '<a href="sigda.closed-issues.php" title="Fechadas" class="tip-bottom">Fechadas</a>';
+		}
 	}
 }
-
 
 if (isset($issue) && $issue != ''){
 

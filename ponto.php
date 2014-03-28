@@ -88,13 +88,8 @@ if ($row = siguienteResult($result)){
 <?php if ($ps || !$tm) {?>
 <script type="text/javascript">	
 document.onkeydown = function(event) {
-
-	$("#senha").focusin(function(){
-	    console.log('focusInput got the focus');
-	});
 	
 	$("#senha").focusout(function(){
-	    console.log('focusInput lost focus');
 	    
 	    jQuery.post("getEmployeeName.php", {
 						employee_id:$("#senha").val(),
