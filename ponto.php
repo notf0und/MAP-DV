@@ -2,10 +2,10 @@
 
 include_once "lib/sessionLib.php";
 
-$ps = parse_ini_file("local-config.ini", true);
-$ps = $ps['config'];
-$tm = $ps['terminal_mode'];
-$ps = $ps['point_station'];
+$inifile = parse_ini_file("local-config.ini", true);
+$configfile = $inifile['config'];
+$tm = $configfile['terminal_mode'];
+$ps = $configfile['point_station'];
 
 $sql = "SELECT PT.point_id, ";
 $sql .= "E.employee_id employee_id, ";
@@ -20,18 +20,38 @@ $sql .= "AND PT.date_time < now() + interval 1 minute ";
 $sql .= "ORDER BY PT.point_id ";
 $sql .= "DESC LIMIT 1";
 
-$configfile = parse_ini_file("./local-config.ini", true);
-$configfile = $configfile['config'];
+if ($ps){
+	if (checkConnection()){
+		$db = $inifile['remote_database'];
+		
+	}
+	else{
+		$db = $inifile['local_database'];		
+	}
+}
+else{
+	$db = $inifile['local_database'];
+}
 
 
+//Conexión a la DB
+$database = mysqli_connect($db['dbhost'], $db['user'], $db['password'], $db['dbname'], 3306);
+		
+if (mysqli_connect_errno()){
+	echo "Failed to connect to remote MySQL: " . mysqli_connect_error();
 
-$result = resultFromQuery($sql);
-if ($row = siguienteResult($result)){
+}
+				
+if (!$result = mysqli_query($database, $sql)){
+	die('Error al verificar si existen actualizaciones en la base de datos:<br> ' . mysqli_error($database));
+}
+
+if ($row = mysqli_fetch_array($result)){
 	
-	$employee_id = $row->employee_id;
-	$funcionario = $row->Funcionario;
-	$hora = $row->Hora;
-	$status = $row->Status;
+	$employee_id = $row['employee_id'];
+	$funcionario = $row['Funcionario'];
+	$hora = $row['Hora'];
+	$status = $row['Status'];
 	
 	if ($status == 1){
 		$status = 'Entrada';
@@ -45,11 +65,14 @@ if ($row = siguienteResult($result)){
 
 	$sql = "SELECT point_message_id, message from point_message where date(data) = curdate() AND employee_id = ".$employee_id;
 
-	$result = resultFromQuery($sql);
+	if (!$result = mysqli_query($database, $sql)){
+		die('Error al verificar mensajes en la base de datos:<br> ' . mysqli_error($database));
+	}
+	
 	$i = 1;
-	while ($row = siguienteResult($result)){
+	while ($row = mysqli_fetch_array($result)){
 		
-		$message = $row->message;
+		$message = $row['message'];
 		$string .= "\r\nMessagem ".$i++.": <b>".$message."</b>";
 	}
 	

@@ -1473,4 +1473,21 @@ function nextDay($dayname, $date){
 	
 	
 }
+
+function checkConnection()
+{
+    //Initiates a socket connection
+    $conn = @fsockopen("davincimp.no-ip.info", 8080, $errno, $errstr, 30);
+    if ($conn)
+    {
+        $status = 1; 
+        fclose($conn);
+    }
+    else
+    {
+        $status = 0;
+    }
+    return $status;
+}
+
 ?>
