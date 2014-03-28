@@ -18,7 +18,7 @@
     <div class="quick-actions_homepage">
       <ul class="quick-actions">
 		  
-		<?php if (($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 4) || ($_SESSION["idusuarios_tipos"] == 5)) {?>
+		<?php if (($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 4) || ($_SESSION["idusuarios_tipos"] == 5) || ($_SESSION["idusuarios_tipos"] == 9)) {?>
         <li class="bg_lb span2"> <a href="funcionarios.php"> <i class="icon-group"></i> Funcionarios </a> </li>
   		<?php } ?>
   		
