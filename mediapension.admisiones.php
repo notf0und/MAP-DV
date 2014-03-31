@@ -16,7 +16,7 @@ $sqlQuery .= " L.nombre 'Resto' ";
 $sqlQuery .= " FROM mediapension_admisiones MPA ";
 $sqlQuery .= " LEFT JOIN locales L ON MPA.idlocales = L.idlocales ";
 $sqlQuery .= " WHERE MPA.idmediapension = ".$_GET["idmediapension"];
-if ($_SESSION["idusuarios_tipos"] != 1 || $_SESSION["idusuarios_tipos"] != 6){
+if ($_SESSION["idusuarios_tipos"] != 1){
 	$sqlQuery .= " AND MPA.habilitado = 1 ";
 }
 $sqlQuery .= " ORDER BY MPA.data";

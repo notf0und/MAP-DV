@@ -41,6 +41,10 @@ if (mysqli_connect_errno()){
 	echo "Failed to connect to remote MySQL: " . mysqli_connect_error();
 
 }
+// Set charset
+if (!$database->set_charset("utf8")) {
+    echo("Error loading character set utf8: ".$mysqli->error);
+}
 				
 if (!$result = mysqli_query($database, $sql)){
 	die('Error al verificar si existen actualizaciones en la base de datos:<br> ' . mysqli_error($database));
@@ -79,6 +83,7 @@ if ($row = mysqli_fetch_array($result)){
 	$string .= "</PRE>";
 
 }
+$database->close();
 ?>
 
 
