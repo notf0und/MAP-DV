@@ -66,17 +66,44 @@ if (isset($_GET['id'])){
 								
 								
 							<?php
+							// Carga lista de los operadores, posadas, agencias o balcon
 							$sqlQuery = " SELECT id".$tabla.", nombre FROM ".$tabla." where id".$tabla." > 0";
 							$resultado = mysql_query ($sqlQuery);
+							
+							//Carga la lista de los elementos seleccionados
+							$sql = 'SELECT idelement FROM  grupos_precios WHERE idlistasdeprecios = '.$idlistasdeprecios; 
+							$rs = mysql_query ($sql);
+							
+							for ($i=0; $i < mysql_num_rows($rs); $i++){
+								$l[] = mysql_fetch_row($rs);
+							}
 
 							while ($linea=mysql_fetch_row($resultado)) {
-							echo ("<option value=".$linea[0]);
-							echo (">".$linea[1]."</option>\n");
+								$selected = 0;
+								
+								foreach($l as $v) {
+									if ($v[0] == $linea[0]){
+										$selected = 1;
+									}
+									elseif ($selected != 1){
+										$selected = 0;
+									}
+								}
+								
+								if ($selected){
+									echo ("<option value=".$linea[0].' selected');
+								}
+								else{
+									echo ("<option value=".$linea[0]);
+								}
+								echo (">".$linea[1]."</option>\n");
 							}
 							
 							
 							?> 
-							</select>							
+							</select>	
+
+				
 						</div>
 					</div>
 					<div id="status"></div>

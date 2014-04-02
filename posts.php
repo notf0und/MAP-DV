@@ -318,7 +318,7 @@ if (isset( $_POST['accion'] )) {
 			$sql .= "'".$VigenciaIN."',";
 			$sql .= "'".$VigenciaOUT."',";
 			$sql .= "'".$idresponsablesDePago."',";
-			$sql .= "'".$iditem."' ";
+			$sql .= "'".$iditem."', ";
 			$sql .= "CURDATE()) ";
 			$resultadoStringSQL = resultFromQuery($sql);		
 			$idlistasdeprecios = mysql_insert_id();

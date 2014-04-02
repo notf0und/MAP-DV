@@ -309,31 +309,6 @@ function comboDetails($employee_id, $month, $year, $salario){
  * 						which could then be use to construct the confirmation URL and Email.
  * 						On Failure it returns false
 */
-function comboDate($mode = false, $selected = false){
-	
-	$combo = '';
-	
-	if (isset($mode) && $mode == 'month'){
-		
-		for ($i=1; $i<=12; $i++){
-			$combo .= '<option value="'.$i.'" ';
-			$combo .= isset($selected) && $i==$selected ? 'selected' : '';
-			$combo .= '>'.$i.'</option>';
-			$combo .= "\r\n";
-		}
-	}	
-	elseif (isset($mode) && $mode == 'year'){
-		
-		for ($i=2013; $i<=2014; $i++){
-			$combo .= '<option value="'.$i.'" ';
-			$combo .= isset($selected) && $i==$selected ? 'selected' : '';
-			$combo .= '>'.$i.'</option>';
-			$combo .= "\r\n";
-		}
-	}
-	return $combo;
-}
-
 function horasTrabajadas($employee_id, $month, $year){
 
 	$HTML = '<table class="table table-bordered">';

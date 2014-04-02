@@ -861,6 +861,7 @@ function valordiaria($data, $idresponsablesDePago, $id, $idservicios, $idposadas
 	//$sql .= " AND SLDP.idposadas_internas = ".$idposadas;
 	$sql .= " AND  '".$data."' BETWEEN LDP.VigenciaIN AND LDP.VigenciaOUT ";
 	isset($mindays) && $mindays != '' ? $sql .= "AND LDP.mindays < ".$mindays." ORDER BY LDP.mindays DESC LIMIT 1" : '';
+	
 	/*
 	echo "<hr><font color='white'>";
 	echo $sql;
@@ -871,6 +872,7 @@ function valordiaria($data, $idresponsablesDePago, $id, $idservicios, $idposadas
 	$resultado = mysql_fetch_array(resultFromQuery($sql));	
 	
 	if ($resultado[0] == null){
+		
 		
 		if ($idresponsablesDePago == 2){
 			
@@ -884,10 +886,11 @@ function valordiaria($data, $idresponsablesDePago, $id, $idservicios, $idposadas
 			$sql .= " AND SLDP.idservicios = ".$idservicios;
 			$sql .= " AND  '".$data."' BETWEEN LDP.VigenciaIN AND LDP.VigenciaOUT ";
 			isset($mindays) ? $sql .= "AND LDP.mindays <= ".$mindays." ORDER BY LDP.mindays DESC LIMIT 1" : '';
-
+				
 			$resultado = mysql_fetch_array(resultFromQuery($sql));
 			
 			if ($resultado[0] == null){
+
 				$sql = "SELECT SLDP.precio precio FROM listasdeprecios LDP ";
 				$sql .= " LEFT JOIN servicios_listasdeprecios SLDP ON LDP.idlistasdeprecios = SLDP.idlistasdeprecios ";
 				$sql .= " WHERE 1 ";
@@ -902,6 +905,18 @@ function valordiaria($data, $idresponsablesDePago, $id, $idservicios, $idposadas
 				echo "</font>";
 				*/
 				$resultado = mysql_fetch_array(resultFromQuery($sql));	
+				
+				if ($resultado[0] == null){
+					$sql = "SELECT SLDP.precio precio FROM listasdeprecios LDP ";
+					$sql .= " LEFT JOIN servicios_listasdeprecios SLDP ON LDP.idlistasdeprecios = SLDP.idlistasdeprecios ";
+					$sql .= " WHERE 1 ";
+					$sql .= " AND LDP.idresponsablesDePago = ".$idresponsablesDePago;
+					$sql .= " AND LDP.iditem = 0";
+					$sql .= " AND SLDP.idservicios = ".$idservicios;
+					isset($hoteleria) && $hoteleria == true ? $sql .= " AND SLDP.idposadas_internas = ".$idposadas : '';
+					$sql .= " AND  '".$data."'  BETWEEN LDP.VigenciaIN AND LDP.VigenciaOUT ";
+				
+				}
 			}
 		}
 		else{
@@ -1488,6 +1503,31 @@ function checkConnection()
         $status = 0;
     }
     return $status;
+}
+
+function comboDate($mode = false, $selected = false){
+	
+	$combo = '';
+	
+	if (isset($mode) && $mode == 'month'){
+		
+		for ($i=1; $i<=12; $i++){
+			$combo .= '<option value="'.$i.'" ';
+			$combo .= isset($selected) && $i==$selected ? 'selected' : '';
+			$combo .= '>'.$i.'</option>';
+			$combo .= "\r\n";
+		}
+	}	
+	elseif (isset($mode) && $mode == 'year'){
+		
+		for ($i=2013; $i<=2014; $i++){
+			$combo .= '<option value="'.$i.'" ';
+			$combo .= isset($selected) && $i==$selected ? 'selected' : '';
+			$combo .= '>'.$i.'</option>';
+			$combo .= "\r\n";
+		}
+	}
+	return $combo;
 }
 
 ?>
