@@ -22,195 +22,8 @@ else{
 $sqlcondition = "AND (MP.dataIN BETWEEN ";
 $sqlcondition .= "'".$_SESSION['desde']."' ";
 $sqlcondition .= "AND '".$_SESSION["ate"]."') ";
-//desde-ate
 
 
-if (isset($_GET['mes'])){
-	$_SESSION["visualizarMes"] = $_GET['mes'];
-}
-if (isset($_GET['ano'])){
-	$_SESSION["visualizarAno"] = $_GET['ano'];
-}
-//ComboDiaFrom
-$comboDiaFrom = isset($_SESSION["visualizarDiaFrom"]) ? comboDate('day',  $_SESSION["visualizarDiaFrom"]) : comboDate('month');
-
-//ComboMes
-$comboMes = isset($_SESSION["visualizarMes"]) ? comboDate('month',  $_SESSION["visualizarMes"]) : comboDate('month');
-
-//ComboYear
-$comboYear = isset($_SESSION["visualizarAno"]) ? comboDate('year',  $_SESSION["visualizarAno"]) : comboDate('year');
-
-//Function comboDate
-function comboDate($selection, $selected=false){
-	$sqlQuery = 'SELECT '.$selection.'(min(data)) min, '.$selection.'(max(data)) max ';
-	$sqlQuery .= 'FROM mediapension ';
-	$sqlQuery .= 'WHERE habilitado = 1 ';
-	$sqlQuery .= 'AND idliquidaciones = 0;';
-	
-	$result = resultFromQuery($sqlQuery);
-
-	while ($row = siguienteResult($result)) {	
-			$min = $row->min;
-			$max = $row->max;
-	}
-
-	$combo = '';
-	if ($min > $max){
-		for ($i=$min; $i<=12; $i++){
-			
-			$combo .= '<option value="'.$i.'" ';
-			$combo .= isset($selected) && $i==$selected ? 'selected' : '';
-			$combo .= '>'.$i.'</option>';
-			$combo .= "\r\n";
-		}
-		
-		for ($i=1; $i<=$max; $i++){
-			
-			$combo .= '<option value="'.$i.'" ';
-			$combo .= isset($selected) && $i==$selected ? 'selected' : '';
-			$combo .= '>'.$i.'</option>';
-			$combo .= "\r\n";
-			
-		}
-		
-		
-	}
-	else{
-		
-		for ($i=$min; $i<=$max; $i++){
-			
-			$combo .= '<option value="'.$i.'" ';
-			$combo .= isset($selected) && $i==$selected ? 'selected' : '';
-			$combo .= '>'.$i.'</option>';
-			$combo .= "\r\n";
-			
-		}
-	}
-	return $combo;
-}
-
-/////////////////////////////////////////////////////////////////////
-/*
-if (isset($_GET['accion']) && $_GET['accion'] == 'liquidacion'){
-	
-	$resumen = '<div class="row-fluid">';
-	$resumen .= "\n\t".'<div class="container-fluid">';
-	$resumen .= "\n\t\t".'<h4>Resumo de responsávels encontrados:</h4>';
-			
-	$sql = "SELECT idresponsablesDePago, nombre, tabla FROM responsablesDePago ";
-	$resultadoResponsables= resultFromQuery($sql);	
-
-	while ($rowLine = siguienteResult($resultadoResponsables)) {
-				
-		$tabla = $rowLine->tabla;
-		$nombre = $rowLine->nombre;
-		$idresponsablesDePago = $rowLine->idresponsablesDePago;
-
-		// CONSULTO HOTELERIA Y MEDIAPENSION PARA HACER UN DISTINCT DE idoperadoresturisticos
-		$sqlResponsable = 'SELECT MP.id'.$tabla.' ID, O.nombre ';
-		$sqlResponsable .= 'FROM mediapension MP  ';
-		$sqlResponsable .= 'LEFT JOIN '.$tabla.' O ON MP.id'.$tabla.' = O.id'.$tabla.' ';
-		$sqlResponsable .= 'WHERE 1 ';
-		$sqlResponsable .= 'AND idresponsablesDePago = '.$idresponsablesDePago.' ';
-		$sqlResponsable .= 'AND idliquidaciones = 0 ';
-		$sqlResponsable .= 'AND habilitado = 1 ';
-		//condition
-		if (isset($_POST['desde']) || isset($_POST['ate'])){
-	
-			$title = (isset($_POST['desde']) && $_POST['desde'] != '') ? $_POST['desde'] : date('Y-m-01');
-			$title .= (isset($_POST['ate']) && $_POST['ate'] != '') ? ' / '.$_POST['ate'] : date('/Y-m-t');
-			
-			$sqlcondition = "AND (MP.dataIN BETWEEN ";
-			$sqlcondition .= (isset($_POST['desde']) && $_POST['desde'] != '') ? "'".dateFormatMySQL($_POST['desde'])."' " : "DATE_FORMAT(NOW() ,'%Y-%m-01')";//* AND MP.dataIN >= '".dateFormatMySQL($_POST['desde'])."' " : '';
-			$sqlcondition .= (isset($_POST['ate']) && $_POST['ate'] != '') ? "AND '".dateFormatMySQL($_POST['ate'])."') " : 'AND CURDATE())';
-
-		}
-		else{
-			$title = "Ultimo mes";
-
-			$sqlcondition = "AND MONTH(MP.dataIN) = MONTH(curdate()) ";
-			$sqlcondition = "AND YEAR(MP.dataIN) = YEAR(curdate()) ";
-		}
-	
-		$sqlResponsable .= $sqlcondition;
-		
-		//$sqlResponsable .= 'AND MONTH(MP.DataIN) = '.$_SESSION["visualizarMes"].' ';
-		//$sqlResponsable .= 'AND YEAR(MP.DataIN) = '.$_SESSION["visualizarAno"].') ';
-		
-		$sqlResponsable .= 'UNION  ';
-		$sqlResponsable .= 'SELECT HTL.id'.$tabla.' ID, O.nombre ';
-		$sqlResponsable .= 'FROM hoteleria HTL ';
-		$sqlResponsable .= 'LEFT JOIN '.$tabla.' O ON HTL.id'.$tabla.' = O.id'.$tabla.' ';
-		$sqlResponsable .= 'WHERE 1 ';
-		$sqlResponsable .= 'AND idresponsablesDePago = '.$idresponsablesDePago.' ';
-		$sqlResponsable .= 'AND idliquidaciones = 0 ';
-		$sqlResponsable .= 'AND habilitado = 1 ';
-		
-		//condition
-		if (isset($_POST['desde']) || isset($_POST['ate'])){
-	
-			$title = (isset($_POST['desde']) && $_POST['desde'] != '') ? $_POST['desde'] : date('Y-m-01');
-			$title .= (isset($_POST['ate']) && $_POST['ate'] != '') ? ' / '.$_POST['ate'] : date('/Y-m-t');
-			
-			$sqlcondition = "AND (HTL.dataIN BETWEEN ";
-			$sqlcondition .= (isset($_POST['desde']) && $_POST['desde'] != '') ? "'".dateFormatMySQL($_POST['desde'])."' " : "DATE_FORMAT(NOW() ,'%Y-%m-01')";//* AND MP.dataIN >= '".dateFormatMySQL($_POST['desde'])."' " : '';
-			$sqlcondition .= (isset($_POST['ate']) && $_POST['ate'] != '') ? "AND '".dateFormatMySQL($_POST['ate'])."') " : 'AND CURDATE())';
-
-		}
-		else{
-			$title = "Ultimo mes";
-
-			$sqlcondition = "AND MONTH(HTL.dataIN) = MONTH(curdate()) ";
-			$sqlcondition = "AND YEAR(HTL.dataIN) = YEAR(curdate()) ";
-		}
-		
-		$sqlResponsable .= $sqlcondition;
-		
-		//$sqlResponsable .= 'AND MONTH(HTL.DataIN) = '.$_SESSION["visualizarMes"].' ';
-		//$sqlResponsable .= 'AND YEAR(HTL.DataIN) = '.$_SESSION["visualizarAno"].') ';
-		
-		$sqlResponsable .= 'ORDER BY nombre;';
-				
-//		echo $sqlResponsable;
-//////////
-		$sqlResponsable = ' SELECT DISTINCT(MP.idoperadoresturisticos), O.nombre ';
-		$sqlResponsable .= ' FROM mediapension MP ';
-		$sqlResponsable .= ' LEFT JOIN operadoresturisticos O ON MP.idoperadoresturisticos = O.idoperadoresturisticos ';
-		$sqlResponsable .= ' WHERE 1 ';
-		$sqlResponsable .= ' AND idresponsablesDePago = 1 ';
-		$sqlResponsable .= ' AND idliquidaciones = 0 ';
-		$sqlResponsable .= " AND ".$_SESSION["visualizarMes"]." BETWEEN MONTH(MP.DataIN) AND MONTH(MP.DataOUT)";
-		echo $sqlResponsable;
-/////////
-		if ($resultadoResponsable = resultFromQuery($sqlResponsable)){
-			
-			$titulo = $nombre; // Operador - Posada - Agencia - Venta por Balcon
-			
-			$resumen .= "\n\t\t".'<div class="widget-box">';
-			$resumen .= "\n\t\t\t".'<div class="widget-title"> <span class="icon"><i class="icon-th"></i></span>';
-			$resumen .= "\n\t\t\t\t".'<h5>'.$titulo.'</h5><br>';
-			$resumen .= "\n\t\t\t".'</div>';
-
-			while ($rowLineResponsable = siguienteResult($resultadoResponsable)) {
-				
-				$resumen .= "\n\t\t\t".'<div class="widget-content nopadding">';
-				$resumen .= "\n\t\t\t\t".'<table>';
-				$resumen .= "\n\t\t\t\t\t".'<tr>';
-				$resumen .= "\n\t\t\t\t\t\t".'<td width="200">'.$rowLineResponsable->nombre.'</td>';
-				$resumen .= "\n\t\t\t\t\t\t".'<td><a href="liquidaciones.mensual.1.php?idresponsablesDePago='.$idresponsablesDePago.'&id='.$rowLineResponsable->ID.'">Ver liquidacion</a></td>';
-				$resumen .= "\n\t\t\t\t\t".'</tr>';
-				$resumen .= "\n\t\t\t\t".'</table>';
-				$resumen .= "\n\t\t\t".'</div>';
-			}
-			
-			$resumen .= "\n\t\t".'</div>';
-		}
-	}
-	
-	$resumen .= "\n\t".'</div>';
-	$resumen .= "\n".'</div>';
-}
-*/
 if (isset($_POST['accion']) && $_POST['accion'] == 'liquidacion'){
 	
 	$resumen = '<div class="row-fluid">';
@@ -253,10 +66,7 @@ if (isset($_POST['accion']) && $_POST['accion'] == 'liquidacion'){
 		}
 	
 		$sqlResponsable .= $sqlcondition;
-		/*
-		$sqlResponsable .= 'AND MONTH(MP.DataIN) = '.$_SESSION["visualizarMes"].' ';
-		$sqlResponsable .= 'AND YEAR(MP.DataIN) = '.$_SESSION["visualizarAno"].') ';
-		*/
+
 		$sqlResponsable .= 'UNION  ';
 		$sqlResponsable .= 'SELECT HTL.id'.$tabla.' ID, O.nombre ';
 		$sqlResponsable .= 'FROM hoteleria HTL ';
@@ -285,23 +95,9 @@ if (isset($_POST['accion']) && $_POST['accion'] == 'liquidacion'){
 		}
 		
 		$sqlResponsable .= $sqlcondition;
-		/*
-		$sqlResponsable .= 'AND MONTH(HTL.DataIN) = '.$_SESSION["visualizarMes"].' ';
-		$sqlResponsable .= 'AND YEAR(HTL.DataIN) = '.$_SESSION["visualizarAno"].') ';
-		*/
+
 		$sqlResponsable .= 'ORDER BY nombre;';
 		
-//		echo $sqlResponsable;
-/*		
-		$sqlResponsable = ' SELECT DISTINCT(MP.idoperadoresturisticos), O.nombre ';
-		$sqlResponsable .= ' FROM mediapension MP ';
-		$sqlResponsable .= ' LEFT JOIN operadoresturisticos O ON MP.idoperadoresturisticos = O.idoperadoresturisticos ';
-		$sqlResponsable .= ' WHERE 1 ';
-		$sqlResponsable .= ' AND idresponsablesDePago = 1 ';
-		$sqlResponsable .= ' AND idliquidaciones = 0 ';
-		$sqlResponsable .= " AND ".$_SESSION["visualizarMes"]." BETWEEN MONTH(MP.DataIN) AND MONTH(MP.DataOUT)";
-		echo $sqlResponsable;
-*/
 		if ($resultadoResponsable = resultFromQuery($sqlResponsable)){
 			
 			$titulo = $nombre; // Operador - Posada - Agencia - Venta por Balcon

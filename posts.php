@@ -392,20 +392,57 @@ if (isset( $_POST['accion'] )) {
 		$iditem = $_POST['iditem'];
 
 		if ($idlistasdeprecios > -1) {
+			
+			$sql = "SELECT * FROM listasdeprecios WHERE idlistasdeprecios = ".$idlistasdeprecios;
+			$result = resultFromQuery($sql);
+			
+			if ($row = mysql_fetch_object($result)){
+				
+				if($row->idresponsablesDePago == 2){
+					
+					for($i=1;$i<6;$i++){
+						$precio = $_POST['0_'.$i];
+						$idservicios = $i;
+						$idposadas_internas = 0;
+						$resultado = guardarPrecio($idlistasdeprecios, $idservicios, $precio, $idposadas_internas);
+					}
+					echo 'POSADA ';
+				
+				}
+				else{
+					$sql = "SELECT * FROM servicios";
+					$result = resultFromQuery($sql);
+					
+					$totalservicios = mysql_num_rows($result);
+					
+					for($i=1;$i<$totalservicios;$i++){
+						
+						$precio = $_POST[$row->idposadas.'_'.$i];
+						$idservicios = $i;
+						$idposadas_internas = $row->idposadas;
+						$resultado = guardarPrecio($idlistasdeprecios, $idservicios, $precio, $idposadas_internas);
+					}
+					echo 'NO POSADA: '.$totalservicios;
+
+				}
+				
+			}
 
 			// aca tengo que hacer ese splitloco y guardarPrecio($idlistasdeprecios, $idservicios, $precio) segun corresponda
 			// Todavia esta rigida la parte de posadas involucradas 
 			// si el iditem es igual a 0 solo cargo MP else recorr del 1 al 4 que son las podasas internas ... ESTO ESTA MAL ... mojorarlo.
-
+			
+			
+			
+			
+			
+			
+			
+			/*
 			if ($iditem == 0){
 
 				$sqlPosadas = " SELECT * FROM posadas WHERE idposadas < 5 ";
 				$resultadoStringSQL = resultFromQuery($sqlPosadas);
-				
-				
-				if ($_SESSION["idusuarios"] == 13){
-				
-				}
 
 				while ($row = mysql_fetch_object($resultadoStringSQL)) {
 
@@ -434,11 +471,6 @@ if (isset( $_POST['accion'] )) {
 				$sqlPosadas = " SELECT * FROM posadas WHERE idposadas < 5 ";
 				$resultadoStringSQL = resultFromQuery($sqlPosadas);
 				
-				
-				if ($_SESSION["idusuarios"] == 13){
-					//new dBug($resultadoStringSQL);
-				}
-
 				while ($row = mysql_fetch_object($resultadoStringSQL)) {
 				
 					if ($row->idposadas==0){
@@ -464,7 +496,16 @@ if (isset( $_POST['accion'] )) {
 				}
 				
 			}
-
+			*/
+			
+			
+			
+			
+			
+			
+			
+			
+			
 	/*
 			$sql = "update listasdeprecios set ";
 			$sql .= " iditem = '".$iditem."'";
