@@ -3,11 +3,13 @@
 include "head.php"; 
 
 //SELECT
-$sql = 'SELECT JC.jobcategory_id id, CONCAT("<A HREF=funcionarios.categorias.edit.php?jobcategory_id=", JC.jobcategory_id, ">", JC.name, "</A>") Nome, CONCAT("R$ ", BS.basesalary) "Salario Base" ';
+$sql = 'SELECT JC.jobcategory_id id, CONCAT("<A HREF=funcionarios.categorias.edit.php?jobcategory_id=", JC.jobcategory_id, ">", JC.name, "</A>") Nome ';
 $sql .= "FROM jobcategory JC ";
-$sql .= "LEFT JOIN basesalary BS ON JC.jobcategory_id = BS.jobcategory_id WHERE JC.jobcategory_id > 0; ";
+$sql .= "WHERE JC.jobcategory_id > 0; ";
 
 $result = resultFromQuery($sql);
+
+echo $sql;
 
 $tablacategorias = tableFromResult($result, 'jobcategory', false, false, 'posts.php', true);
 ?>	

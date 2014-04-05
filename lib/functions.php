@@ -1182,11 +1182,7 @@ function calcularSalario($employee_id, $month = false, $year = false){
 
 	$sqlQuery .= "LEFT JOIN jobcategory JC ON E.jobcategory_id = JC.jobcategory_id ";
 	
-	$sqlQuery .= "LEFT JOIN basesalary BS ON E.jobcategory_id = BS.jobcategory_id ";
-	$sqlQuery .= "AND MONTH(BS.valid_from) <=  ".$month." ";
-	$sqlQuery .= "AND YEAR(BS.valid_from) <=  ".$year." ";
-	
-	
+	$sqlQuery .= "LEFT JOIN basesalary BS ON BS.basesalary_id = (select basesalary_id from basesalary where jobcategory_id = E.jobcategory_id AND MONTH(valid_from) <= ".$month." AND YEAR(valid_from) <= ".$year." ORDER by valid_from DESC LIMIT 1)";
 	
 	$sqlQuery .= "LEFT JOIN profile P ON E.profile_id = P.profile_id ";
 	
@@ -1201,7 +1197,7 @@ function calcularSalario($employee_id, $month = false, $year = false){
 	
 	//WHERE
 	$sqlQuery .= "WHERE E.employee_id = ".$salario['employee']['employee_id'].' ';
-
+	
 	//Execute query
 	$resultado = resultFromQuery($sqlQuery);	
 	
