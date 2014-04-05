@@ -362,11 +362,107 @@ function horasTrabajadas($employee_id, $month, $year){
 		$idsalida = $row->idsalida;
 		
 		if (!isset($prev_data)){
+			
+			//Buscar si hay falta el primer dia
+			$sql = 'SELECT * FROM employee where employee_id = '.$employee_id;
+			$remployee = resultFromQuery($sql);
+			if ($rowemployee = siguienteResult($remployee)){
+				if(date('Y-m-d', strtotime($rowemployee->admission)) < date('Y-m-d', strtotime($row->data))){
+					if (date('d', strtotime($row->data)) - date('1', strtotime($row->data)) >= 1){
+						
+						//////////////////////////////////
+						$dstart = date('1', strtotime($row->data));
+						$dend = date('d', strtotime($row->data));
+						
+						for ($i = $dstart; $i < $dend; $i++) {
+							
+							if (strlen($i) < 2){
+								$i = '0'.$i;
+							}
+							
+							$sql = "SELECT DAYNAME(valid_from) clearance, ";
+							$sql .= "DAYNAME('".date('Y-m-', strtotime($row->data)).$i."') todayname ";
+							$sql .= "FROM clearance ";
+							$sql .= "WHERE 1 ";
+							$sql .= "AND employee_id = ".$employee_id." ";
+							$sql .= "AND valid_from <= '".date('Y-m-', strtotime($row->data)).$i."' ";
+							$sql .= "ORDER BY valid_from DESC ";
+							$sql .= "LIMIT 1 ";
+							
+							$rclearance = resultFromQuery($sql);
+							
+							if ($rowclearance = siguienteResult($rclearance)){
+								
+								$text = '';
+								
+								if($rowclearance->clearance != $rowclearance->todayname){
+									
+									//buscar feriados
+									$sql = "SELECT * ";
+									$sql .= "FROM holiday ";
+									$sql .= "WHERE 1 ";
+									$sql .= "AND day = '".date('Y-m-', strtotime($row->data)).$i."'";
+									$rholiday = resultFromQuery($sql);
+
+									if ($rowholiday = siguienteResult($rholiday)){
+										$motive = 'Feriado';
+										$HTML .= '<tr>';
+										$HTML .= '<td><p align="center">'.$i.'</p></td>';
+									}
+									else{
+										$motive = 'Ausente';
+										$HTML .= '<tr>';
+										$HTML .= '<td><p align="center" style="color:red">'.$i.'</p></td>';
+									}
+								}
+								else{
+									$motive = 'Folga';
+									
+									$HTML .= '<tr>';
+									$HTML .= '<td><p align="center">'.$i.'</p></td>';
+									
+									
+								}
+								
+								
+								
+							}
+							else{
+								$motive = 'Ausente ou dia de folga sem registrar';
+								$HTML .= '<tr>';
+								$HTML .= '<td><p align="center" style="color:red">'.$i.'</p></td>';
+							
+							}
+							
+							$HTML .= '<td><p align="center">'.$motive.'</p></td>';
+							$HTML .= '<td><p align="center">'.$motive.'</p></td>';
+							$HTML .= '<td><p align="center">'.$motive.'</p></td>';
+
+							$HTML .= '<td><p align="center">0:00</p></td>';
+							$HTML .= '</tr>';
+							
+							
+							
+							
+							
+
+						}
+						
+						//////////////////////////////////
+
+					}
+					
+					
+				}
+				
+				
+			}
+			
 			$prev_data = $row->data;
 		}
-			
+
 		//Si hay mas de un dia de diferencia entre la ultima vez que marcó
-		if (date('d', strtotime($row->data)) - date('d', strtotime($prev_data)) >= 2){
+		if (date('d', strtotime($row->data)) - date('d', strtotime($prev_data)) > 1){
 			//
 			$dstart = date('d', strtotime($prev_data)) + 1;
 			$dend = date('d', strtotime($row->data));
@@ -498,6 +594,7 @@ function horasTrabajadas($employee_id, $month, $year){
 			
 		}
 		else{
+				
 			$prev_data = $row->data;
 			
 			$sql = "SET sql_mode = 'NO_UNSIGNED_SUBTRACTION'";
@@ -507,8 +604,7 @@ function horasTrabajadas($employee_id, $month, $year){
 			$sql .= "FROM point ";
 			$sql .= "WHERE 1 AND employee_id = ".$employee_id." ";
 			$sql .= "AND DATE(date_time) = '".$row->data."'";
-		
-
+			
 
 			$resultado = resultFromQuery($sql);
 			
