@@ -2116,6 +2116,27 @@ if (isset( $_POST['accion'] )) {
 			echo '<script languaje="javascript"> self.location="funcionarios.lista.php"</script>';
 		}
 	}
+
+	if ($_POST['accion'] == 'newBaseSalary') {
+		
+		$jobcategory_id = $_POST['jobcategory_id'];
+		$basesalary = $_POST['basesalary'];
+		$valid_from = $_POST['valid_from'];
+		
+		$sql = "INSERT basesalary(jobcategory_id, basesalary, valid_from, created) VALUES(";
+		$sql .= $jobcategory_id.', ';
+		$sql .= "'".$basesalary."', ";
+		$sql .= "'".$valid_from."', ";
+		$sql .= "'".date('Y-m-d H:i:s')."');";
+		
+		$result = resultFromQuery($sql);
+		$basesalary_id = mysql_insert_id();
+		
+		bitacoras($_SESSION["idusuarios"], 'Insertar salario base:'.$basesalary_id);
+
+		header('Location: funcionarios.categorias.edit.php?jobcategory_id='.$jobcategory_id);
+
+	}
 		
 /* Ponto */
 	if ($_POST['accion'] == 'registrarPonto') {

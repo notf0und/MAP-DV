@@ -88,7 +88,8 @@ if (isset($jobcategory_id)){
         </div>
 		
 		
-		<form method="get" action="newJobcategory.php">
+		<form method="get" action="newBaseSalary.php">
+			<input type="hidden" id="jobcategory_id" name="jobcategory_id" value="<?php echo isset($jobcategory_id) ? $jobcategory_id : ''?>"/>
 			<button class="btn btn-success" type="submit">Novo...</button>
 		</form>      	
 	</div>

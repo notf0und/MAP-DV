@@ -1181,7 +1181,13 @@ function calcularSalario($employee_id, $month = false, $year = false){
 	$sqlQuery .= "FROM employee E ";
 
 	$sqlQuery .= "LEFT JOIN jobcategory JC ON E.jobcategory_id = JC.jobcategory_id ";
+	
 	$sqlQuery .= "LEFT JOIN basesalary BS ON E.jobcategory_id = BS.jobcategory_id ";
+	$sqlQuery .= "AND MONTH(BS.valid_from) <=  ".$month." ";
+	$sqlQuery .= "AND YEAR(BS.valid_from) <=  ".$year." ";
+	
+	
+	
 	$sqlQuery .= "LEFT JOIN profile P ON E.profile_id = P.profile_id ";
 	
 	//Select latest food
