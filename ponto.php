@@ -1,5 +1,6 @@
 <?php
 
+
 include_once "lib/sessionLib.php";
 
 $inifile = parse_ini_file("local-config.ini", true);
@@ -113,7 +114,7 @@ $database->close();
 
 <script type="text/javascript" src="lib/lib.js"></script>
 
-<?php if ($ps || !$tm) {?>
+<?php if (strpos($_SERVER['HTTP_USER_AGENT'], 'MAP-DV') !== false) {?>
 <script type="text/javascript">	
 document.onkeydown = function(event) {
 	
@@ -232,7 +233,7 @@ if(key_press == "a" || key_press == "1"){
 			
 		</div>
 		<!--End modal-->
-		 <?php if ($ps || !$tm) {?>
+		 <?php if (strpos($_SERVER['HTTP_USER_AGENT'], 'MAP-DV') !== false) {?>
 			 <div class="quick-actions_homepage">
 				 <ul class="quick-actions">
 					 <li class="bg_lg span5"> <a href="#"> <i class="icon-signin"></i> Marcar Entrada <h2>1</h2></a> </li>
@@ -250,7 +251,7 @@ if(key_press == "a" || key_press == "1"){
 			 <button class="btn btn-success">Saír <h5>+</h5></button>
 		 <?php }else{ ?>
 			 <h2>Imposible registar seu ponto pela internet</h2>
-			 <p>Se você esta recebendo esta messagem, por favor se comunicar com o <code>Departamento de Sistemas</code></p>
+			 <p>Se você esta recebendo esta messagem, por favor se comunicar com o <code>Escritorio (22) 2623-7098</code></p>
 
 		 <?php } ?>
     
