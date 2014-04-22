@@ -995,7 +995,7 @@ if (isset( $_POST['accion'] )) {
 
 	if ($_POST['accion'] == 'liquidacionCrear') {
 		$liquidacion = liquidacionCrear($_POST['ID'], $_POST['idresponsablesDepago'], $_POST['titulo']);
-		echo '<script languaje="javascript"> self.location="liquidaciones.pendientes.php?liquidacion=1&filename='.$_POST['nombre'].' - '.$_POST['titulo'].'"</script>';
+		echo '<script languaje="javascript"> self.location="liquidaciones.pendientes.php?liquidacion=1&filename='.$_POST['titulo'].'&idresponsablesDepago='.$_POST['idresponsablesDepago'].'&id='.$_POST['ID'].'"</script>';
 	}
 
 	if ($_POST['accion'] == 'LiquidacionesDelete') {
@@ -1418,6 +1418,7 @@ if (isset( $_POST['accion'] )) {
 				$sqlQuery .= "WHERE 1 ";
 				$sqlQuery .= "AND employee_id = ".$_POST['employee_id']." ";
 				$sqlQuery .= "AND valid_from <= CURDATE() ";
+				$sqlQuery .= "AND permanent = 1 ";
 				$sqlQuery .= "ORDER BY valid_from DESC LIMIT 1;";
 				$resultadoStringSQL = resultFromQuery($sqlQuery);
 				
@@ -1431,6 +1432,7 @@ if (isset( $_POST['accion'] )) {
 						$sqlQuery = "SELECT DAYNAME(valid_from) clearance, valid_from from clearance ";
 						$sqlQuery .= "WHERE 1 ";
 						$sqlQuery .= "AND employee_id = ".$_POST['employee_id']." ";
+						$sqlQuery .= "AND permanent = 1 ";
 						$sqlQuery .= "AND DATE(valid_from) BETWEEN CURDATE() + interval 1 day AND CURDATE() + interval 6 day ";
 						$sqlQuery .= "ORDER BY valid_from ASC LIMIT 1;";
 						
@@ -1440,7 +1442,7 @@ if (isset( $_POST['accion'] )) {
 								//QUE HACER CUANDO LA FECHA PREVIA NI LA SIGUIENTE COINCIDEN E INTENTA INGRESAR OTRA?
 							}
 							else{
-								$value = array('', $_POST['employee_id'], $clearance, 'current_timestamp');
+								$value = array('', $_POST['employee_id'], $clearance, 1, 'current_timestamp');
 
 								$sqlQuery = insertQuery($table, $column, $value);
 								$resultado = resultFromQuery($sqlQuery);
@@ -1449,7 +1451,7 @@ if (isset( $_POST['accion'] )) {
 							
 						}
 						else{
-							$value = array('', $_POST['employee_id'], $clearance, 'current_timestamp');
+							$value = array('', $_POST['employee_id'], $clearance, 1, 'current_timestamp');
 
 							$sqlQuery = insertQuery($table, $column, $value);
 							$resultado = resultFromQuery($sqlQuery);
@@ -1463,6 +1465,7 @@ if (isset( $_POST['accion'] )) {
 					$sqlQuery = "SELECT DAYNAME(valid_from) clearance, valid_from from clearance ";
 					$sqlQuery .= "WHERE 1 ";
 					$sqlQuery .= "AND employee_id = ".$_POST['employee_id']." ";
+					$sqlQuery .= "AND permanent = 1 ";
 					$sqlQuery .= "AND DATE(valid_from) BETWEEN CURDATE() + interval 1 day AND CURDATE() + interval 6 day ";
 					$sqlQuery .= "ORDER BY valid_from ASC LIMIT 1;";
 					$resultadoStringSQL = resultFromQuery($sqlQuery);
@@ -1473,7 +1476,7 @@ if (isset( $_POST['accion'] )) {
 						}
 					}
 					else{
-						$value = array('', $_POST['employee_id'], $clearance, 'current_timestamp');
+						$value = array('', $_POST['employee_id'], $clearance, 1, 'current_timestamp');
 						$sqlQuery = insertQuery($table, $column, $value);
 						$resultado = resultFromQuery($sqlQuery);
 						$clearance_id = mysql_insert_id();
@@ -2317,7 +2320,7 @@ if (isset( $_POST['accion'] )) {
 			$sql.= "DESC LIMIT 1;";
 			
 			if (!$result = mysqli_query($dblocal, $sql)){
-				die('Error al seleccionar el ultimo punto registrado en la base de datos remota:<br> ' . mysqli_error($dblocal));
+				die('Error al seleccionar el ultimo punto registrado en la base de datos local:<br> ' . mysqli_error($dblocal));
 			}
 				
 			//Si la consulta devolvio un resultado
@@ -2337,7 +2340,7 @@ if (isset( $_POST['accion'] )) {
 						$sql .= "VALUES(LPAD(".$senha.", 5, '0'), '".date("Y-m-d ", strtotime($last_date_time)).date("H:i:s", strtotime($tohour))."', 0, 1)";
 						
 						if (!$result = mysqli_query($dblocal, $sql)){
-							die('Error al insertar su punto en la base de datos local:<br> ' . mysqli_error($dblocal));
+							die('Error al marcar la salida previa en la base de datos local con la sentencia:<br> '.$sql.'<br>'. mysqli_error($dblocal));
 						}
 						
 						//Registra el punto
@@ -2346,7 +2349,7 @@ if (isset( $_POST['accion'] )) {
 					
 						
 						if (!$result = mysqli_query($dblocal, $sql)){
-							die('Error al insertar su punto en la base de datos local:<br> ' . mysqli_error($dblocal));
+							die('Error al registrar el punto en la base de datos local con la sentencia:<br> '.$sql.'<br>'. mysqli_error($dblocal));
 						}
 						
 						mysqli_close($dblocal);
@@ -2364,7 +2367,7 @@ if (isset( $_POST['accion'] )) {
 				
 					
 					if (!$result = mysqli_query($dblocal, $sql)){
-						die('Error al insertar su punto en la base de datos local:<br> ' . mysqli_error($dblocal));
+						die('Error al insertar su punto en la base de datos local con la sentencia:<br> '.$sql.'<br>'. mysqli_error($dblocal));
 					}
 					mysqli_close($dblocal);
 					header('Location: ponto.php');

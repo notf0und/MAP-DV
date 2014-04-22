@@ -234,6 +234,23 @@ function liquidacionServicios($idresponsablesDePago, $id, $dataIN, $dataOUT){
 
 }
 
+function liquidacionServiciosReview($idresponsablesDePago, $id, $idliquidaciones){
+
+	eliminarTablesLiquidacionesMP();//DROP table _temp_liquidaciones_mp
+	crearTablesLiquidacionesMP();// CREATE table _temp_liquidaciones_mp
+	insertoBloqueDeMediapensionReview($idresponsablesDePago, $id, $idliquidaciones);
+
+	eliminarTablesLiquidacionesHTL();
+	crearTablesLiquidacionesHTL();
+	insertoBloqueDeHoteleriaReview($idresponsablesDePago, $id, $idliquidaciones);
+
+	eliminarTablesLiquidacionesFINAL();
+	crearTablesLiquidacionesFINAL();
+	unionTablesLiquidacionesFINAL();
+
+}
+
+
 function insertoBloqueDeMediapension($idresponsablesDePago, $id, $dataIN, $dataOUT){
 	
 	$sql = " SELECT idresponsablesDePago, nombre, tabla ";
@@ -242,7 +259,7 @@ function insertoBloqueDeMediapension($idresponsablesDePago, $id, $dataIN, $dataO
 	$sql .= " AND idresponsablesDePago = ".$idresponsablesDePago;
 	
 	 
-	$resultadoResponsables= resultFromQuery($sql);	
+	$resultadoResponsables = resultFromQuery($sql);	
 
 	if ($rowLine = siguienteResult($resultadoResponsables)) {	
 		$tabla = $rowLine->tabla;
@@ -264,6 +281,107 @@ function insertoBloqueDeMediapension($idresponsablesDePago, $id, $dataIN, $dataO
 	$sql .= " 	AND MP.habilitado = 1";
 	$sql .= " 	AND MP.id".$tabla." = ".$id;
 	$sql .= " 	AND MP.idresponsablesDePago = ".$idresponsablesDePago;
+	
+	$resultado = resultFromQuery($sql);	
+	
+	while ($row = siguienteResult($resultado)) {
+		// echo 'idmediapension : '.$row->idmediapension.' - data: '.$row->DataIN.' - ('.$row->N.' Noches - '.$row->Q.' Q - '.$row->M.' MP) <br>';
+		// Inserto en tabla temporal para saber las diferencias en los precios que pueda llegar a existir
+		$start = strtotime($row->DataIN);
+		$end = strtotime($row->DataOUT.' -1 day');
+		
+		for ($i=$start;$i<=$end;$i = $i + 86400 ){
+			
+
+			$fechaActual = date("Y-m-d",$i);
+			$data = $fechaActual;
+			$idposadas = $row->idposadas;
+			$idservicios = $row->idservicios;
+			$mindays = $row->N;
+			//$precio = valordiaria($fechaActual, $row->idposadas, $row->idservicios); // Version antigua
+
+			$precio = valordiaria($data, $idresponsablesDePago, $id, $idservicios, $idposadas, false, $mindays);
+			
+			mysql_query("LOCK TABLES _temp_liquidaciones_mp_cuentas WRITE;");
+			
+			$sql = " INSERT INTO _temp_liquidaciones_mp_cuentas (data, precio) VALUES (";
+			$sql .= " '".$fechaActual."',";
+			$sql .= " ".$precio."";
+			$sql .= " ); ";
+			
+			$resultadoInsertLine = resultFromQuery($sql);
+			
+			mysql_query("UNLOCK TABLES;");
+			
+		}
+		
+		//hago un disctinct de los valores
+
+		$sql = " SELECT count(*) Noches, precio, MIN(data) AS min, MAX(data) AS max, SUM(precio) AS Total ";
+		$sql .= " FROM  `_temp_liquidaciones_mp_cuentas` ";
+		$sql .= " GROUP BY precio ";
+		$resultadoDISTINCT= resultFromQuery($sql);	
+
+		//e inserto SUM de cada distinct
+		while ($rowLine = siguienteResult($resultadoDISTINCT)) {
+			$sql = " INSERT INTO _temp_liquidaciones_mp (idmediapension, Titular, Q, Agencia, Posada, DataIN, DataOUT, numeroexterno, N, M, Servicio, USD, Tarifa) VALUES (";
+			$sql .= " ".$row->idmediapension.",";
+			$sql .= " '".$row->Titular."',";
+			$sql .= " ".$row->Q.",";
+			$sql .= " '".$row->Agencia."',";
+			$sql .= " '".$row->Posada."',";
+			$sql .= " '".$rowLine->min."',";
+			$sql .= " '".$rowLine->max."',";
+			$sql .= " '".$row->numeroexterno."',";
+			$sql .= " ".$rowLine->Noches.",";
+			$sql .= " ".$rowLine->Noches*$row->Q.",";
+			$sql .= " '".$row->Servicio."',";
+		if($row->hoteleria){
+			$sql .= " 0,";
+			$sql .= " 0";
+		}else{
+			$sql .= " ".$rowLine->Total*$row->Q.",";
+			$sql .= " ".$rowLine->precio."";
+		}
+			$sql .= " ) ";
+			$resultadoInsertLine = resultFromQuery($sql);	
+		
+		}
+		// borrar lineas
+		$sql = " TRUNCATE _temp_liquidaciones_mp_cuentas ";
+		$resultadoTRUNCATE = resultFromQuery($sql);	
+	
+	}
+	
+
+}
+
+function insertoBloqueDeMediapensionReview($idresponsablesDePago, $id, $idliquidaciones){
+	
+	$sql = " SELECT idresponsablesDePago, nombre, tabla ";
+	$sql .= " FROM responsablesDePago "; 
+	$sql .= " WHERE 1 "; 
+	$sql .= " AND idresponsablesDePago = ".$idresponsablesDePago;
+	
+	 
+	$resultadoResponsables = resultFromQuery($sql);	
+
+	if ($rowLine = siguienteResult($resultadoResponsables)) {	
+		$tabla = $rowLine->tabla;
+		$nombre = $rowLine->nombre;
+	}
+
+	$sql = "SELECT  MP.idmediapension, H.Titular 'Titular', MP.qtdedepax 'Q', A.Nombre 'Agencia', P.Nombre 'Posada', P.idposadas 'idposadas', MP.DataIN 'DataIN', MP.DataOUT 'DataOUT', MP.numeroexterno, MP.hoteleria ,  ";
+	$sql .= " 	DATEDIFF(MP.DataOUT, MP.DataIN) 'N', (MP.qtdedepax*DATEDIFF(MP.DataOUT, MP.DataIN)) 'M', S.Nombre 'Servicio', S.idservicios 'idservicios' ";
+	$sql .= " 	FROM `mediapension` MP  ";
+	$sql .= " 	LEFT JOIN huespedes H ON MP.idhuespedes = H.idhuespedes  ";
+	$sql .= " 	LEFT JOIN agencias A ON MP.idagencias = A.idagencias  ";
+	$sql .= " 	LEFT JOIN posadas P ON MP.idposadas = P.idposadas  ";
+	$sql .= " 	LEFT JOIN servicios S ON MP.idservicios = S.idservicios  ";
+	$sql .= " 	WHERE 1  ";
+	//$sql .= "AND (MP.dataIN BETWEEN '2014-01-16' AND '2014-01-31') ";
+	//$sql .= " 	AND MP.DataIN >= '".$dataIN."' AND MP.DataIN <= '".$dataOUT."'	 "; // las consultas en la fecha, no son un error, sino que se toma con la fecha de salida de la media pension.
+	$sql .= " 	AND MP.idliquidaciones = ".$idliquidaciones;
 	
 	$resultado = resultFromQuery($sql);	
 	
@@ -369,6 +487,90 @@ function insertoBloqueDeHoteleria($idresponsablesDePago, $id, $dataIN, $dataOUT)
 
 	$sql .= "AND HTL.id".$tabla." = ".$id.' ';
 	$sql .= "AND HTL.idresponsablesDePago = ".$idresponsablesDePago;
+	
+	$resultado = resultFromQuery($sql);	
+
+	while ($row = siguienteResult($resultado)) {
+		// echo 'idmediapension : '.$row->idmediapension.' - data: '.$row->DataIN.' - ('.$row->N.' Noches - '.$row->Q.' Q - '.$row->M.' MP) <br>';
+		// Inserto en tabla temporal para saber las diferencias en los precios que pueda llegar a existir
+		$start = strtotime($row->DataIN);
+		$end = strtotime($row->DataOUT.' -1 day');
+		for ( $i = $start; $i <= $end; $i += 86400 ){
+
+			$fechaActual = date("Y-m-d",$i);
+			$data = $fechaActual;
+			$idposadas = $row->idposadas;
+			$idservicios = $row->idservicios;
+			//$precio = valordiaria($fechaActual, $row->idposadas, $row->idservicios); // Version antigua
+			$precio = valordiaria($data, $idresponsablesDePago, $id, $idservicios, $idposadas, true);
+
+			$sql = " INSERT INTO _temp_liquidaciones_htl_cuentas (data, precio) VALUES (";
+			$sql .= " '".$fechaActual."',";
+			$sql .= " ".$precio."";
+			$sql .= " ) ";
+			$resultadoInsertLine = resultFromQuery($sql);	
+
+		}
+		//hago un disctinct de los valores
+
+		$sql = " SELECT count(*) Noches, precio, MIN(data) AS min, MAX(data) AS max, SUM(precio) AS Total ";
+		$sql .= " FROM  `_temp_liquidaciones_htl_cuentas` ";
+		$sql .= " GROUP BY precio ";
+		$resultadoDISTINCT= resultFromQuery($sql);	
+
+		//e inserto SUM de cada distinct
+		while ($rowLine = siguienteResult($resultadoDISTINCT)) {
+			$sql = " INSERT INTO _temp_liquidaciones_htl (idhoteleria, Titular, Q, Agencia, Posada, DataIN, DataOUT, numeroexterno, N, M, Servicio, USD, Tarifa) VALUES (";
+			$sql .= " ".$row->idhoteleria.",";
+			$sql .= " '".$row->Titular."',";
+			$sql .= " ".$row->Q.",";
+			$sql .= " '".$row->Agencia."',";
+			$sql .= " '".$row->Posada."',";
+			$sql .= " '".$rowLine->min."',";
+			$sql .= " '".$rowLine->max."',";
+			$sql .= " '".$row->numeroexterno."',";
+			$sql .= " ".$rowLine->Noches.",";
+			$sql .= " ".$rowLine->Noches*$row->Q.",";
+			$sql .= " '".$row->Servicio."',";
+			$sql .= " ".$rowLine->Total.",";
+			$sql .= " ".$rowLine->precio."";
+			$sql .= " ) ";
+			$resultadoInsertLine = resultFromQuery($sql);	
+		
+		}
+		// borrar lineas
+		$sql = " TRUNCATE _temp_liquidaciones_htl_cuentas ";
+		$resultadoTRUNCATE = resultFromQuery($sql);	
+	
+	}
+	
+
+}
+
+function insertoBloqueDeHoteleriaReview($idresponsablesDePago, $id, $idliquidaciones){
+
+	$sql = " SELECT idresponsablesDePago, nombre, tabla ";
+	$sql .= " FROM responsablesDePago "; 
+	$sql .= "WHERE 1 "; 
+	$sql .= " AND idresponsablesDePago = ".$idresponsablesDePago;
+	 
+	$resultadoResponsables= resultFromQuery($sql);	
+
+	if ($rowLine = siguienteResult($resultadoResponsables)) {	
+		$tabla = $rowLine->tabla;
+		$nombre = $rowLine->nombre;
+	}
+
+	$sql = " 	SELECT HTL.idhoteleria, H.Titular 'Titular', HTL.qtdedepax 'Q', A.Nombre 'Agencia', P.Nombre 'Posada', P.idposadas 'idposadas', HTL.DataIN 'DataIN', HTL.DataOUT 'DataOUT', HTL.numeroexterno,  ";
+	$sql .= " 	DATEDIFF(HTL.DataOUT, HTL.DataIN) 'N', (HTL.qtdedepax*DATEDIFF(HTL.DataOUT, HTL.DataIN)) 'M', S.Nombre 'Servicio', S.idservicios 'idservicios' ";
+	$sql .= " 	FROM `hoteleria` HTL  ";
+	$sql .= " 	LEFT JOIN huespedes H ON HTL.idhuespedes = H.idhuespedes  ";
+	$sql .= " 	LEFT JOIN agencias A ON HTL.idagencias = A.idagencias  ";
+	$sql .= " 	LEFT JOIN posadas P ON HTL.idposadas = P.idposadas  ";
+	$sql .= " 	LEFT JOIN servicios S ON HTL.idservicios = S.idservicios  ";
+	$sql .= " 	WHERE 1  ";
+	$sql .= "AND HTL.idliquidaciones = ".$idliquidaciones;  
+
 	
 	$resultado = resultFromQuery($sql);	
 

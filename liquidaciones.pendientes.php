@@ -21,7 +21,7 @@
 			<div class="widget-content nopadding">
 				<?php
 					$sqlQuery = " SELECT L.idliquidaciones 'ID', L.fecha Fecha, DATA.nombre Responsable, ";
-					$sqlQuery .= " L.titulo 'Titulo', L.importeMP 'USD MP', L.importeHTL 'USD HTL', L.importeMP+L.importeHTL 'USD Total', LE.nombre 'Estados' ";
+					$sqlQuery .= " CONCAT('<a href=liquidaciones.review.php?idliquidaciones=', L.idliquidaciones, '>', L.titulo, '</a>') 'Titulo', L.importeMP 'USD MP', L.importeHTL 'USD HTL', L.importeMP+L.importeHTL 'USD Total', LE.nombre 'Estados' ";
 					$sqlQuery .= " FROM `liquidaciones` L";
 					$sqlQuery .= " LEFT JOIN operadoresturisticos DATA ON L.responsable = DATA.idoperadoresturisticos ";
 					$sqlQuery .= " LEFT JOIN liquidaciones_estados LE ON L.idestados = LE.idestados ";
