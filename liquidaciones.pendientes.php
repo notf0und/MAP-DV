@@ -42,6 +42,6 @@
 <?php include "footer.php"; ?>
 <?php
 if (isset($_GET['liquidacion']) && $_GET['liquidacion']==1){
-	echo '<script languaje="javascript"> self.location="liquidaciones.mensual.reporte.php?filename='.$_GET['filename'].'"</script>';
+	echo '<script languaje="javascript"> self.location="liquidaciones-xls.php?filename='.$_GET['filename'].'&idresponsablesDepago='.$_GET['idresponsablesDepago'].'&id='.$_GET['id'].'"</script>';
 };
 ?>
