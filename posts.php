@@ -73,7 +73,6 @@ if (isset( $_POST['accion'] )) {
 			bitacoras(0, 'Login incorrecto: user '.$username.' pass '.$password);
 			echo '<script languaje="javascript"> self.location="start.php?error=1"</script>';
 		}
-		
 	}
 
 	if ($_POST['accion'] == 'userChangePassword') {
@@ -128,7 +127,9 @@ if (isset( $_POST['accion'] )) {
 		//INSERT AGENCIA
 		$sql = "insert agencias (nombre) values (";
 		$sql .= "'".$nomedoagencia."') ";
-		$resultadoStringSQL = resultFromQuery($sql);		
+		$resultadoStringSQL = resultFromQuery($sql);
+		
+		bitacoras($_SESSION["idusuarios"], 'Insertada agencia: id '.$idagencias.' - '.$nomedoagencia);		
 
 		echo '<script languaje="javascript"> self.location="mediapension.php"</script>';
 	}
@@ -533,6 +534,7 @@ if (isset( $_POST['accion'] )) {
 			$sql .= "WHERE idservicios = ".$_POST['idservicios']." ";
 			
 			$result = resultFromQuery($sql);
+			bitacoras($_SESSION["idusuarios"], 'Actualizar servicio: ID '.$idservicios);
 		}
 		else{ //INSERT
 			$sql = "SELECT MAX(idservicios) as 'idservicios' FROM servicios; ";
@@ -547,6 +549,7 @@ if (isset( $_POST['accion'] )) {
 			$sql .= $_POST['ComidasDiarias'].") ";
 			
 			$result = resultFromQuery($sql);
+			bitacoras($_SESSION["idusuarios"], 'Insertar servicio: ID '.$idservicios);
 						
 		}
 				
@@ -682,6 +685,7 @@ if (isset( $_POST['accion'] )) {
 		
 		$sql = "update hoteleria set habilitado = 0 where 1 and idhoteleria = ".$_POST['id'];
 		$resultadoStringSQL = resultFromQuery($sql);
+		bitacoras($_SESSION["idusuarios"], 'Apagado voucher HTL: ID '.$idservicios);
 		echo '<script languaje="javascript"> self.location="hoteleria.vouchers.php"</script>';
 	}
 		
@@ -761,7 +765,7 @@ if (isset( $_POST['accion'] )) {
 		
 		$result = resultFromQuery($sql);		
 		
-		bitacoras($_SESSION["idusuarios"], 'Transferidas admisões do voucher '.$_POST['From'].' para '.$_POST['To']);
+		bitacoras($_SESSION["idusuarios"], 'Transferidas admisões do voucher '.$_POST['From'].' para o voucher '.$_POST['To']);
 		echo '<script languaje="javascript"> top.location="mediapension.vouchers.php"</script>';	
 
 	}
@@ -871,12 +875,12 @@ if (isset( $_POST['accion'] )) {
 			
 			if ($qtdedepaxagora)
 			{ 
-			bitacoras($_SESSION["idusuarios"], 'Insertar admision x '.$qtdedepaxagora);
-			//INSERT MEDIAPENSION ADMICION
-			$datadiaria = date("Y-m-d");
-			//$precio = valordiaria($datadiaria, $idposadas, $idservicios);
-			$precio = 0;
-			$idadmision = admitirServicio($idmediapension, $qtdedepaxagora, $precio, $idlocales);
+				bitacoras($_SESSION["idusuarios"], 'Insertar admision x '.$qtdedepaxagora);
+				//INSERT MEDIAPENSION ADMICION
+				$datadiaria = date("Y-m-d");
+				//$precio = valordiaria($datadiaria, $idposadas, $idservicios);
+				$precio = 0;
+				$idadmision = admitirServicio($idmediapension, $qtdedepaxagora, $precio, $idlocales);
 			}
 	
 		}
@@ -1914,38 +1918,6 @@ if (isset( $_POST['accion'] )) {
 				$payment_id = mysql_insert_id();
 				bitacoras($_SESSION["idusuarios"], 'Insertar Pagamento: '.$payment_id);
 			}
-			
-			
-			
-			
-			
-			
-			/*
-			//Parametros a pasar
-			$sql = "INSERT payment(";
-			$sql .= "employee_id";
-			$sql .= $_POST['paymenttype_id'] != 0 ? ', paymenttype_id' : '';
-			$sql .= $_POST['paymentmethod_id'] != 0 ? ', paymentmethod_id' : '';
-			$sql .= $_POST['ammount'] != '' ? ', ammount' : '';
-			$sql .= $_POST['details'] != '' ? ', details' : '';
-			$sql .= ", date) ";
-			
-			//Valores a pasar
-			$sql .= "VALUES (";
-			$sql .= $_POST['employee_id'];
-			$sql .= $_POST['paymenttype_id'] != 0 ? ', '.$_POST['paymenttype_id'] : '';
-			$sql .= $_POST['paymentmethod_id'] != 0 ? ', '.$_POST['paymentmethod_id'] : '';
-			$sql .= $_POST['ammount'] != '' ? ', '.$_POST['ammount'] : '';
-			$sql .= $_POST['details'] != '' ? ", '".$_POST['details']."'" : '';
-			$sql .= $_POST['date'] != '' ? ", '".$date."') " : ", current_timestamp) ";
-				
-			
-			$resultadoStringSQL = resultFromQuery($sql);		
-			$payment_id = mysql_insert_id();
-			
-			
-			bitacoras($_SESSION["idusuarios"], 'Insertar Pagamento: '.$payment_id);
-			*/
 		}
 		
 		if ($_POST['accept'] == 'continue') {
@@ -2430,6 +2402,8 @@ if (isset( $_POST['accion'] )) {
 		$sql .= "'".$message."') ";
 		
 		$resultadoStringSQL = resultFromQuery($sql);
+		
+		bitacoras($_SESSION["idusuarios"], 'Mensaje de ponto enviado: ID '.mysql_insert_id());
 				
 		header('Location: funcionarios.pontos.php');
 	}
