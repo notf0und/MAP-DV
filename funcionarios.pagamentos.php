@@ -296,371 +296,7 @@ function comboDetails($employee_id, $month, $year, $salario){
 	}*/
 	return $element;
 }
-/**
- * Generate a combobox with a date list
- * 
- * Method to generate a selection box of a date (month, year or a list of available vouchers on mediapension table) 
- * 
- * @access public
- * @api
- *
- * @param string|bool $mode
- * @return array|bool On Success it returns an array(email,username,user_id,hash)
- * 						which could then be use to construct the confirmation URL and Email.
- * 						On Failure it returns false
-*/
-function horasTrabajadas($employee_id, $month, $year){
 
-	$HTML = '<table class="table table-bordered">';
-	$HTML .= '<thead>';
-	$HTML .= '<tr>';
-    $HTML .= '<th>Día</th>';
-    $HTML .= '<th>Entrada</th>';
-    $HTML .= '<th>Intervalo</th>';
-    $HTML .= '<th>Saída</th>';
-    $HTML .= '<th>Trabalhado</th>';
-    $HTML .= '</tr>';
-    $HTML .= '</thead>';
-    $HTML .= '<tbody>';
-    
-    $sql = "SELECT entrada.employee_id, ";
-    $sql .= "DATE(entrada.date_time) data, ";
-    $sql .= "MIN(entrada.point_id) identrada, ";
-    $sql .= "MAX(salida.point_id) idsalida, ";
-    $sql .= "TIME_FORMAT(TIME(MIN(entrada.date_time)), '%H:%i') entrada,  ";
-    $sql .= "TIME_FORMAT(TIME(MAX(salida.date_time)), '%H:%i') salida ";
-    
-    $sql .= "FROM point AS entrada ";
-    
-    $sql .= "LEFT JOIN point AS salida ";
-    $sql .= "ON entrada.employee_id = salida.employee_id ";
-    $sql .= "AND DATE(entrada.date_time) = DATE(salida.date_time) ";
-
-    $sql .= "WHERE 1 ";
-    $sql .= "AND DATE(entrada.date_time) = DATE(salida.date_time) ";
-    $sql .= "AND entrada.employee_id = ".$employee_id." ";
-    $sql .= "AND salida.in_out = 0 ";
-    $sql .= "AND MONTH(entrada.date_time) = ".$month." ";
-    $sql .= "AND YEAR(entrada.date_time) = ".$year." ";
-    
-    $sql .= "GROUP BY DATE(entrada.date_time)";
-    
-    $result = resultFromQuery($sql);
-    
-    /*
-    $sql = "SELECT employee_id, ";
-    $sql .= "DATE(date_time) AS date, ";
-    $sql .= "SUM(UNIX_TIMESTAMP(date_time)*(1-2*in_out))/3600 AS hours_worked ";
-    $sql .= "FROM point ";
-    $sql .= "WHERE 1 AND employee_id = ".$employee_id." ";
-    $sql .= "GROUP BY date(date_time)";
-    */
-    $hs = 0;
-    while ($row = siguienteResult($result)){
-		
-		$identrada = $row->identrada;
-		$idsalida = $row->idsalida;
-		
-		if (!isset($prev_data)){
-			
-			//Buscar si hay falta el primer dia
-			$sql = 'SELECT * FROM employee where employee_id = '.$employee_id;
-			$remployee = resultFromQuery($sql);
-			if ($rowemployee = siguienteResult($remployee)){
-				if(date('Y-m-d', strtotime($rowemployee->admission)) < date('Y-m-d', strtotime($row->data))){
-					if (date('d', strtotime($row->data)) - date('1', strtotime($row->data)) >= 1){
-						
-						//////////////////////////////////
-						$dstart = date('1', strtotime($row->data));
-						$dend = date('d', strtotime($row->data));
-						
-						for ($i = $dstart; $i < $dend; $i++) {
-							
-							if (strlen($i) < 2){
-								$i = '0'.$i;
-							}
-							
-							$sql = "SELECT DAYNAME(valid_from) clearance, ";
-							$sql .= "DAYNAME('".date('Y-m-', strtotime($row->data)).$i."') todayname ";
-							$sql .= "FROM clearance ";
-							$sql .= "WHERE 1 ";
-							$sql .= "AND employee_id = ".$employee_id." ";
-							$sql .= "AND valid_from <= '".date('Y-m-', strtotime($row->data)).$i."' ";
-							$sql .= "ORDER BY valid_from DESC ";
-							$sql .= "LIMIT 1 ";
-							
-							$rclearance = resultFromQuery($sql);
-							
-							if ($rowclearance = siguienteResult($rclearance)){
-								
-								$text = '';
-								
-								if($rowclearance->clearance != $rowclearance->todayname){
-									
-									//buscar feriados
-									$sql = "SELECT * ";
-									$sql .= "FROM holiday ";
-									$sql .= "WHERE 1 ";
-									$sql .= "AND day = '".date('Y-m-', strtotime($row->data)).$i."'";
-									$rholiday = resultFromQuery($sql);
-
-									if ($rowholiday = siguienteResult($rholiday)){
-										$motive = 'Feriado';
-										$HTML .= '<tr>';
-										$HTML .= '<td><p align="center">'.$i.'</p></td>';
-									}
-									else{
-										$motive = 'Ausente';
-										$HTML .= '<tr>';
-										$HTML .= '<td><p align="center" style="color:red">'.$i.'</p></td>';
-									}
-								}
-								else{
-									$motive = 'Folga';
-									
-									$HTML .= '<tr>';
-									$HTML .= '<td><p align="center">'.$i.'</p></td>';
-									
-									
-								}
-								
-								
-								
-							}
-							else{
-								$motive = 'Ausente ou dia de folga sem registrar';
-								$HTML .= '<tr>';
-								$HTML .= '<td><p align="center" style="color:red">'.$i.'</p></td>';
-							
-							}
-							
-							$HTML .= '<td><p align="center">'.$motive.'</p></td>';
-							$HTML .= '<td><p align="center">'.$motive.'</p></td>';
-							$HTML .= '<td><p align="center">'.$motive.'</p></td>';
-
-							$HTML .= '<td><p align="center">0:00</p></td>';
-							$HTML .= '</tr>';
-							
-							
-							
-							
-							
-
-						}
-						
-						//////////////////////////////////
-
-					}
-					
-					
-				}
-				
-				
-			}
-			
-			$prev_data = $row->data;
-		}
-
-		//Si hay mas de un dia de diferencia entre la ultima vez que marcó
-		if (date('d', strtotime($row->data)) - date('d', strtotime($prev_data)) > 1){
-			//
-			$dstart = date('d', strtotime($prev_data)) + 1;
-			$dend = date('d', strtotime($row->data));
-			
-			for ($i = $dstart; $i < $dend; $i++) {
-				
-				if (strlen($i) < 2){
-					$i = '0'.$i;
-				}
-				
-				$sql = "SELECT DAYNAME(valid_from) clearance, ";
-				$sql .= "DAYNAME('".date('Y-m-', strtotime($row->data)).$i."') todayname ";
-				$sql .= "FROM clearance ";
-				$sql .= "WHERE 1 ";
-				$sql .= "AND employee_id = ".$employee_id." ";
-				$sql .= "AND valid_from <= '".date('Y-m-', strtotime($row->data)).$i."' ";
-				$sql .= "ORDER BY valid_from DESC ";
-				$sql .= "LIMIT 1 ";
-				
-				$rclearance = resultFromQuery($sql);
-				
-				if ($rowclearance = siguienteResult($rclearance)){
-					
-					$text = '';
-					
-					if($rowclearance->clearance != $rowclearance->todayname){
-						
-						//buscar feriados
-						$sql = "SELECT * ";
-						$sql .= "FROM holiday ";
-						$sql .= "WHERE 1 ";
-						$sql .= "AND day = '".date('Y-m-', strtotime($row->data)).$i."'";
-						$rholiday = resultFromQuery($sql);
-
-						if ($rowholiday = siguienteResult($rholiday)){
-							$motive = 'Feriado';
-							$HTML .= '<tr>';
-							$HTML .= '<td><p align="center">'.$i.'</p></td>';
-						}
-						else{
-							$motive = 'Ausente';
-							$HTML .= '<tr>';
-							$HTML .= '<td><p align="center" style="color:red">'.$i.'</p></td>';
-						}
-					}
-					else{
-						$motive = 'Folga';
-						
-						$HTML .= '<tr>';
-						$HTML .= '<td><p align="center">'.$i.'</p></td>';
-						
-						
-					}
-					
-					
-					
-				}
-				else{
-					$motive = 'Ausente ou dia de folga sem registrar';
-					$HTML .= '<tr>';
-					$HTML .= '<td><p align="center" style="color:red">'.$i.'</p></td>';
-				
-				}
-				
-				$HTML .= '<td><p align="center">'.$motive.'</p></td>';
-				$HTML .= '<td><p align="center">'.$motive.'</p></td>';
-				$HTML .= '<td><p align="center">'.$motive.'</p></td>';
-
-				$HTML .= '<td><p align="center">0:00</p></td>';
-				$HTML .= '</tr>';
-				
-				
-				
-				
-				
-
-			}
-			
-			$sql = "SET sql_mode = 'NO_UNSIGNED_SUBTRACTION'";
-			resultFromQuery($sql);
-			
-			$sql = "SELECT SUM(UNIX_TIMESTAMP(date_time)*(1-2*in_out))/3600 AS hours_worked ";
-			$sql .= "FROM point ";
-			$sql .= "WHERE 1 AND employee_id = ".$employee_id." ";
-			$sql .= "AND DATE(date_time) = '".$row->data."'";
-		
-
-
-			$resultado = resultFromQuery($sql);
-			
-			if($hsworked = siguienteResult($resultado)){
-				
-				if ($hsworked->hours_worked > 0){
-					
-					$data = date_format(date_create_from_format('Y-m-d', $row->data), 'd');
-					
-					$HTML .= '<tr>';
-					$HTML .= '<td><p align="center">'.$data.'</p></td>';
-					$HTML .= '<td><p align="center">'.$row->entrada.'</p></td>';
-					
-					
-					$sql = "SELECT SUM(UNIX_TIMESTAMP(date_time)*(1-2*in_out))/3600 AS intervalo ";
-					$sql .= "FROM point ";
-					$sql .= "WHERE 1 AND employee_id = ".$employee_id." ";
-					$sql .= "AND DATE(date_time) = '".$row->data."'";
-					$sql .= "AND point_id > '".$identrada."'";
-					$sql .= "AND point_id < '".$idsalida."'";
-					
-					$resultintervalo = resultFromQuery($sql);
-			
-			
-					if($intervalo = siguienteResult($resultintervalo)){
-						$HTML .= '<td><p align="center">'.intHourstoNormal($intervalo->intervalo).'</p></td>';
-					}
-					else{
-						$HTML .= '<td></td>';
-					}
-
-					$HTML .= '<td><p align="center">'.$row->salida.'</p></td>';
-					$HTML .= '<td><p align="center">'.intHourstoNormal($hsworked->hours_worked).'</p></td>';
-					$HTML .= '</tr>';
-					$hs += $hsworked->hours_worked;
-				}
-			}
-			
-			$prev_data = date('Y-m-d', strtotime($row->data));
-
-			
-			
-		}
-		else{
-				
-			$prev_data = $row->data;
-			
-			$sql = "SET sql_mode = 'NO_UNSIGNED_SUBTRACTION'";
-			resultFromQuery($sql);
-			
-			$sql = "SELECT SUM(UNIX_TIMESTAMP(date_time)*(1-2*in_out))/3600 AS hours_worked ";
-			$sql .= "FROM point ";
-			$sql .= "WHERE 1 AND employee_id = ".$employee_id." ";
-			$sql .= "AND DATE(date_time) = '".$row->data."'";
-			
-
-			$resultado = resultFromQuery($sql);
-			
-			if($hsworked = siguienteResult($resultado)){
-				
-				if ($hsworked->hours_worked > 0){
-					
-					$data = date_format(date_create_from_format('Y-m-d', $row->data), 'd');
-					
-					$HTML .= '<tr>';
-					$HTML .= '<td><p align="center">'.$data.'</p></td>';
-					$HTML .= '<td><p align="center">'.$row->entrada.'</p></td>';
-					
-					
-					$sql = "SELECT SUM(UNIX_TIMESTAMP(date_time)*(1-2*in_out))/3600 AS intervalo ";
-					$sql .= "FROM point ";
-					$sql .= "WHERE 1 AND employee_id = ".$employee_id." ";
-					$sql .= "AND DATE(date_time) = '".$row->data."'";
-					$sql .= "AND point_id > '".$identrada."'";
-					$sql .= "AND point_id < '".$idsalida."'";
-					
-					$resultintervalo = resultFromQuery($sql);
-			
-			
-					if($intervalo = siguienteResult($resultintervalo)){
-						$HTML .= '<td><p align="center">'.intHourstoNormal($intervalo->intervalo).'</p></td>';
-					}
-					else{
-						$HTML .= '<td></td>';
-					}
-
-					$HTML .= '<td><p align="center">'.$row->salida.'</p></td>';
-					$HTML .= '<td><p align="center">'.intHourstoNormal($hsworked->hours_worked).'</p></td>';
-					$HTML .= '</tr>';
-					$hs += $hsworked->hours_worked;
-				}
-			}
-		}		
-	}
-	
-	$HTML .= '<tr>';
-	$HTML .= '<td><strong><p align="center">TOTAL</p></strong></td>';
-	$HTML .= '<td></td>';
-	$HTML .= '<td></td>';
-	$HTML .= '<td></td>';
-	$HTML .= '<td><strong><p align="center">'.intHourstoNormal($hs).'</p></strong></td>';
-	$HTML .= '</tr>';
-	
-	$HTML .= '</tbody>';
-    $HTML .= '</table>';
-	
-	return $HTML;
-	
-	
-	
-}
 
 function intHourstoNormal($int){
 	$int = abs($int);
@@ -676,12 +312,421 @@ function intHourstoNormal($int){
 	
 }
 	
+function bolsadehoras($employee_id, $month, $year){
+	
+	////////////STEP - 1//////////////////
+	$sql = "SELECT fromhour 'Entrada', ";
+	$sql .= "intervalhour 'Descanso', ";
+	$sql .= "tohour 'Salida', ";
+	$sql .= "SEC_TO_TIME(SUM(TIME_TO_SEC(tohour) - TIME_TO_SEC(fromhour) - TIME_TO_SEC(intervalhour) ) ) AS 'Carga' ";
+	$sql .= "FROM employee ";
+	$sql .= "WHERE 1 ";
+	$sql .= "AND employee_id = ".$employee_id.";";
+	
+	$result = resultFromQuery($sql);
+	
+	$row = siguienteResult($result);
+		
+	$code = "<code>";
+	$code .= "Entrada: ".$row->Entrada."<br>";
+	$code .= "Descanso: ".$row->Descanso."<br>";
+	$code .= "Salida: ".$row->Salida."<br>";
+	
+	//Si la carga que devuelve es negativa, es porque el empleado trabaja en un dia y sale en el otro
+	if ($row->Carga < 0){
+		//consultar la carga de una forma diferente
+		$sql = "select SEC_TO_TIME(SUM(TIME_TO_SEC('24:00') - TIME_TO_SEC(fromhour)) + SUM(TIME_TO_SEC(tohour) - TIME_TO_SEC('00:00') - TIME_TO_SEC(intervalhour))) as Carga ";
+		$sql .= "FROM employee ";
+		$sql .= "WHERE 1 ";
+		$sql .= "AND employee_id = ".$employee_id.";";
+		
+		$result = resultFromQuery($sql);
+		$row = siguienteResult($result);
+		
+		$carga = $row->Carga;
+		$carganegativa = 1;
+		
+		$code .= "Carga negativa: ".$row->Carga."<br>";
+		
+
+	}
+	else{
+		$carga = $row->Carga;
+		$code .= "Carga positiva: ".$row->Carga."<br>";
+	}
+	
+	$carga = date('H:i', strtotime($carga));
+	$point = daysforPoint($employee_id, $month, $year);
+	$sum = false;
+	
+	$sql = "SELECT entrada.employee_id, ";
+		$sql .= "DATE(entrada.date_time) data, ";
+		$sql .= "MIN(entrada.point_id) identrada, ";
+		$sql .= "MAX(salida.point_id) idsalida, ";
+		$sql .= "TIME_FORMAT(TIME(MIN(entrada.date_time)), '%H:%i') entrada,  ";
+		$sql .= "TIME_FORMAT(TIME(MAX(salida.date_time)), '%H:%i') salida ";
+		
+		$sql .= "FROM point AS entrada ";
+		
+		$sql .= "LEFT JOIN point AS salida ";
+		$sql .= "ON entrada.employee_id = salida.employee_id ";
+		$sql .= "AND DATE(entrada.date_time) = DATE(salida.date_time) ";
+
+		$sql .= "WHERE 1 ";
+		$sql .= "AND DATE(entrada.date_time) = DATE(salida.date_time) ";
+		$sql .= "AND entrada.employee_id = ".$employee_id." ";
+		$sql .= "AND salida.in_out = 0 ";
+		$sql .= "AND MONTH(entrada.date_time) = ".$month." ";
+		$sql .= "AND YEAR(entrada.date_time) = ".$year." ";
+		
+		$sql .= "GROUP BY DATE(entrada.date_time)";
+		
+		$result = resultFromQuery($sql);
+
+		// mysql_num_rows($result) me muestra la cantidad de dias que se ha registrado en el mes seleccionado
+		if (mysql_num_rows($result)>0){
+			
+			for($i = date('j', strtotime($point['start'])); $i <= date('j', strtotime($point['end'])); $i++){
+				
+				$worked = employeeWorkedDay($employee_id, $year."-".$month."-".$i);
+				
+				if(isset($worked['Worked']) && $worked['Worked'] != 0){
+					
+
+					$sum = sumbolsa($carga, intHourstoNormal($worked['Worked']), $sum);
+
+					
+					$worked['Time'] = $sum->format('%r%H:%I');
+					
+					if(!$sum->invert){
+						$worked['Time'] = '+'.$worked['Time'];
+					}
+				}
+
+				
+				if(!isset($worked['Motive'])){
+
+					$return[$worked['Data']]["Entrada"] = $worked['Entrada'];
+					$return[$worked['Data']]["Intervalo"] = $worked['Intervalo'];
+					$return[$worked['Data']]["Salida"] = $worked['Salida'];
+					$return[$worked['Data']]["Trabalhado"] = intHourstoNormal($worked['Worked']);
+					$return[$worked['Data']]["Bolsa"] = $worked['Time'];
+
+				}
+				else{
+					$return[$worked['Data']]['Motive'] = $worked['Motive'];
+				}
 
 
+
+			}
+			
+			
+		}
+		else{
+
+			for($i = date('j', strtotime($point['start'])); $i <= date('j', strtotime($point['end'])); $i++){
+				
+				$worked = employeeWorkedDay($employee_id, $year."-".$month."-".$i);
+				
+				if(isset($worked['Motive'])){
+				
+					$return[$worked['Data']]['Motive'] = $worked['Motive'];
+				}
+
+			}
+			//Si no hay un resultado para el mes seleccionado
+			//Buscar si hay un registro en el punto del empleado en meses anteriores
+			
+			//Si hay, meter falta, folga, atestado o ausente hasta el ultimo dia del mes
+		}
+	
+	$code .= "</code>";
+	
+
+	return $return;
+}
+
+function daysforPoint($employee_id, $month, $year){
+
+	//PointStart
+	$sql = "SELECT admission ";
+	$sql .= "FROM employee ";
+	$sql .= "WHERE 1 ";
+	$sql .= "AND employee_id = ".$employee_id." ";
+
+	
+	$result = resultFromQuery($sql);
+	if($row = siguienteResult($result)){
+		if($row->admission <= date('Y-m-01', strtotime($year.'-'.$month))){
+			$point['start'] = $year.'-'.$month.'-01';
+		}
+		else{
+			//Buscar el momento el que el empleado comenzó a trabajar
+			$point['start'] = $row->admission;
+		}
+	}
+	
+	
+	//pointEND
+	$d1 = new DateTime($year.'-'.$month);
+	$d2 = new DateTime(date('Y-m'));
+		
+	//Buscar si el empleado tiene fecha de despido en el mes seleccionado
+	$sql = "SELECT decline ";
+	$sql .= "FROM employee ";
+	$sql .= "WHERE 1 ";
+	$sql .= "AND employee_id = ".$employee_id." ";
+
+	
+	$result = resultFromQuery($sql);
+	
+	if ($row = siguienteResult($result)){
+		if($row->decline && $row->decline < date("Y-m-d", strtotime($point['start']))){
+			$point['start'] = $row->decline;
+			$point['end'] = $row->decline;
+		}
+		elseif($row->decline && $row->decline <= date('Y-m-t', strtotime($year.'-'.$month))){
+			if($d1 < $d2){
+				$point['end'] = date("Y-m-t", strtotime($year.'-'.$month));
+			}
+			elseif ($d1 == $d2){
+				if ($row->decline && date("Y-m-d", strtotime($row->decline)) > date("Y-m-d")){
+					$point['end'] = date("Y-m-d");
+				}
+				else{
+					$point['end'] = $row->decline;
+				}
+			}
+			else{
+				$point['end'] = '1231231';
+				//si el mes es futuro, no deberia establecer un pointEnd
+			}
+			
+		}
+		else{
+			if($d1 < $d2){
+				$point['end'] = date("Y-m-t", strtotime($year.'-'.$month));
+			}
+			elseif ($d1 == $d2){
+				$point['end'] = date("Y-m-d");
+			}
+			else{
+				$point['end'] = '1231231';
+				//si el mes es futuro, no deberia establecer un pointEnd
+			}				
+		}
+		
+	}
+
+	return $point;
+}
+
+function employeeWorkedDay($employee_id, $date){
+	
+	$sql = "SELECT entrada.employee_id, ";
+    $sql .= "DATE(entrada.date_time) data, ";
+    $sql .= "MIN(entrada.point_id) identrada, ";
+    $sql .= "MAX(salida.point_id) idsalida, "; 
+    $sql .= "MIN(entrada.date_time) dtentrada, "; 
+	$sql .= "MAX(salida.date_time) dtsalida, "; 
+    $sql .= "TIME_FORMAT(TIME(MIN(entrada.date_time)), '%H:%i') entrada, ";  
+    $sql .= "TIME_FORMAT(TIME(MAX(salida.date_time)), '%H:%i') salida ";       
+    
+    $sql .= "FROM point AS entrada ";   
+    
+    $sql .= "LEFT JOIN point AS salida ";
+    $sql .= "ON entrada.employee_id = salida.employee_id ";  
+    
+    $sql .= "LEFT JOIN employee AS E ";
+    $sql .= "ON entrada.employee_id = E.employee_id ";
+    
+    $sql .= "WHERE 1 ";
+    $sql .= "AND entrada.employee_id = ".$employee_id." ";
+    $sql .= "AND salida.in_out = 0 ";
+    $sql .= "AND date(entrada.date_time) = '".$date."' ";
+    $sql .= "AND entrada.date_time > DATE_ADD(date(entrada.date_time), interval HOUR(E.fromhour) - 2 hour) ";
+    $sql .= "AND salida.date_time < DATE_ADD(DATE_ADD(date(entrada.date_time), interval 1 day), interval HOUR(E.fromhour) - 2  hour); ";
+	
+	$result = resultFromQuery($sql);
+	
+	if($row = siguienteResult($result)){
+		$return['Data'] = $date;
+		
+		if ($row->data == NULL){
+			
+			//Buscar motivo de ausencia de punto
+			$return['Worked'] = '0';
+			$return['Motive'] = employeeClearance($employee_id, $date);
+		}
+		else{
+			//Si la consulta devuelve informacion, es porque hay informacion relativa al punto
+
+			
+			/////////////////////////////
+			$sql = "SET sql_mode = 'NO_UNSIGNED_SUBTRACTION'";
+			resultFromQuery($sql);
+			
+			$sql = "SELECT SUM(UNIX_TIMESTAMP(date_time)*(1-2*in_out))/3600 AS hours_worked ";
+			$sql .= "FROM point ";
+			$sql .= "WHERE 1 AND employee_id = ".$employee_id." ";
+			$sql .= "AND date_time > '".$row->dtentrada."' ";
+			$sql .= "AND date_time < '".$row->dtsalida."'";
+
+			$result = resultFromQuery($sql);
+			$intervalo = siguienteResult($result);
+			
+			$sql = "SELECT SUM(UNIX_TIMESTAMP(date_time)*(1-2*in_out))/3600 AS hours_worked ";
+			$sql .= "FROM point ";
+			$sql .= "WHERE 1 AND employee_id = ".$employee_id." ";
+			$sql .= "AND date_time >= '".$row->dtentrada."' ";
+			$sql .= "AND date_time <= '".$row->dtsalida."'";
+			/////////////////////////////
+			$result = resultFromQuery($sql);
+			$hsworked = siguienteResult($result);
+			
+			$return['Entrada'] = $row->entrada;
+			$return['Intervalo'] = intHourstoNormal($intervalo->hours_worked);
+			$return['Salida'] = $row->salida;
+			$return['Worked'] = $hsworked->hours_worked;
+			
+			
+		}
+		
+		return $return;
+	}
+	else{
+		return '<code>AQUI NO VA NADA</code>';
+	}
+}
+
+function employeeClearance($employee_id, $date){
+	
+	$sql = "SELECT DAYNAME(valid_from) clearance, ";
+	$sql .= "DAYNAME('".$date."') todayname ";
+	$sql .= "FROM clearance ";
+	$sql .= "WHERE 1 ";
+	$sql .= "AND employee_id = ".$employee_id." ";
+	$sql .= "AND valid_from <= '".$date."' ";
+	$sql .= "ORDER BY valid_from DESC ";
+	$sql .= "LIMIT 1 ";
+	
+	$rclearance = resultFromQuery($sql);
+	
+	if ($rowclearance = siguienteResult($rclearance)){
+			
+		if($rowclearance->clearance != $rowclearance->todayname){
+			//buscar feriados
+			$sql = "SELECT * ";
+			$sql .= "FROM holiday ";
+			$sql .= "WHERE 1 ";
+			$sql .= "AND day = '".$date."'";
+			$rholiday = resultFromQuery($sql);
+			
+			if ($rowholiday = siguienteResult($rholiday)){
+				$motive = 'Feriado';
+			}
+			else{
+				$motive = 'Ausente';
+			}
+		}
+		else{
+			$motive = 'Folga';
+		}
+	}
+	else{
+		$motive = 'Ausente ou día de folga sem registrar';
+	}
+	return $motive;
+}
+
+function sumbolsa($carga, $hsworked, $prevsum=false){
+		
+	$start = DateTime::createFromFormat('H:i', $carga);
+
+	$end   = DateTime::createFromFormat('H:i', $hsworked);
+	if(isset($prevsum) && $prevsum != false){
+		$start->sub($prevsum);
+	}
+	$diff = $start->diff($end);
+	return $diff;
+	
+}
+
+function bolsatotable($bolsa){
+	$last_bolsa = '00:00';
+	
+	$table = "\n\t".'<table class="table table-bordered">';
+	$table .= "\n\t\t".'<thead>';
+	$table .= "\n\t\t\t".'<tr>';
+	$table .= "\n\t\t\t\t".'<th>Día</th>';
+	$table .= "\n\t\t\t\t".'<th>Entrada</th>';
+	$table .= "\n\t\t\t\t".'<th>Intervalo</th>';
+	$table .= "\n\t\t\t\t".'<th>Saída</th>';
+	$table .= "\n\t\t\t\t".'<th>Trabalhado</th>';
+	$table .= "\n\t\t\t\t".'<th>Bolsa de horas</th>';
+	$table .= "\n\t\t\t".'</tr>';
+	$table .= "\n\t\t".'</thead>';
+	$table .= "\n\t\t".'<tbody>';
+	
+
+
+	if(count($bolsa) > 0){
+		
+		foreach($bolsa as $data=>$details) {
+			
+			$table .= "\n\t\t\t".'<tr>';
+			
+			
+			if(isset($bolsa[$data]['Motive'])){
+				if($bolsa[$data]['Motive'] == 'Ausente'){
+					$table .= "\n\t\t\t\t".'<td><p align="center" style="color:red">'.date('d', strtotime($data)).'</p></td>';
+				}
+				elseif($bolsa[$data]['Motive'] == 'Feriado'){
+					$table .= "\n\t\t\t\t".'<td><p align="center" style="color:blue">'.date('d', strtotime($data)).'</p></td>';
+				}
+				elseif($bolsa[$data]['Motive'] == 'Ausente ou día de folga sem registrar'){
+					$table .= "\n\t\t\t\t".'<td><p align="center" style="color:orange">'.date('d', strtotime($data)).'</p></td>';
+				}
+				else{
+					$table .= "\n\t\t\t\t".'<td><p align="center" style="color:green">'.date('d', strtotime($data)).'</p></td>';
+				}
+				$table .= "\n\t\t\t\t".'<td><p align="center">'.$bolsa[$data]['Motive'].'</p></td>';
+				$table .= "\n\t\t\t\t".'<td><p align="center">'.$bolsa[$data]['Motive'].'</p></td>';
+				$table .= "\n\t\t\t\t".'<td><p align="center">'.$bolsa[$data]['Motive'].'</p></td>';
+				$table .= "\n\t\t\t\t".'<td><p align="center">--:--</p></td>';
+				$table .= "\n\t\t\t\t".'<td><p align="center">'.$last_bolsa.'</p></td>';
+				
+				
+			
+			}
+			else{
+				$table .= "\n\t\t\t\t".'<td><p align="center">'.date('d', strtotime($data)).'</p></td>';
+				$table .= "\n\t\t\t\t".'<td><p align="center">'.$bolsa[$data]['Entrada'].'</p></td>';
+				$table .= "\n\t\t\t\t".'<td><p align="center">'.$bolsa[$data]['Intervalo'].'</p></td>';
+				$table .= "\n\t\t\t\t".'<td><p align="center">'.$bolsa[$data]['Salida'].'</p></td>';
+				$table .= "\n\t\t\t\t".'<td><p align="center">'.$bolsa[$data]['Trabalhado'].'</p></td>';
+				$table .= "\n\t\t\t\t".'<td><p align="center">'.$bolsa[$data]['Bolsa'].'</p></td>';
+				$last_bolsa = $bolsa[$data]['Bolsa'];
+			}
+				
+
+			$table .= "\n\t\t\t".'</tr>';
+
+		}
+	}
+	$table .= "\n\t\t".'</tbody>';
+	$table .= "\n\t".'</table>';
+	return $table;
+}
 
 ?>	
 
 <!--main-container-part-->
+
+
+
+
 <div id="content">
 <!--breadcrumbs-->
   <div id="content-header">
@@ -733,6 +778,7 @@ function intHourstoNormal($int){
           
           <div class="widget-content nopadding">
 			  <?php echo $table; ?>
+			  
                      
           </div>
         </div>
@@ -763,19 +809,28 @@ function intHourstoNormal($int){
 			  </div>
 		  </div>
           <div class="collapse accordion-body" id="collapseGOne">
-			  <?php echo horasTrabajadas($employee_id, $month, $year);?> 
+			  <?php 
+				$bolsa = bolsadehoras($employee_id, $month, $year);
+				$tblbolsa = bolsatotable($bolsa);
+				echo $tblbolsa;
+			  
+			  
+			  
+			  //echo horasTrabajadas($employee_id, $month, $year);?> 
           </div>
-	  </div>
+	  </div>	  
   </div>
 </div>
                     
         <?php echo isset($message) ? $message : '';?>
         
-        <div id="no-print">			
+        <div id="no-print">	
+			<?php if (isset($_SESSION["idusuarios_tipos"]) && (($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 4) || ($_SESSION["idusuarios_tipos"] == 5) || ($_SESSION["idusuarios_tipos"] == 8))) {?>
         <form method="post" action="pagamentos.novo.php">
 			<input type="hidden" id="employee_id" name="employee_id" value="<?php echo isset($employee_id) ? $employee_id : '';?>" />
 			<button class="btn btn-success" type="submit">Adicionar Desconto</button>
 		</form><br>
+		<?php }?>
 		
 		<form method="post" action="funcionarios.filho.novo.php">
 			<input type="hidden" id="employee_id" name="employee_id" value="<?php echo isset($employee_id) ? $employee_id : '';?>" />
@@ -809,15 +864,10 @@ function intHourstoNormal($int){
 		</div>
 	</div>
   </div>
-  
-  
-  
-  
-  
-  
-  
-  
+
 </div>
+
+
 
 <!--end-main-container-part-->
 
