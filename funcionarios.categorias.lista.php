@@ -9,8 +9,6 @@ $sql .= "WHERE JC.jobcategory_id > 0; ";
 
 $result = resultFromQuery($sql);
 
-echo $sql;
-
 $tablacategorias = tableFromResult($result, 'jobcategory', false, false, 'posts.php', true);
 ?>	
 
