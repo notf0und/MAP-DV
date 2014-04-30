@@ -22,7 +22,7 @@ $(document).ready(function(){
 				}
 				
 				var oTable = $('#employee').dataTable();
-				var data = oTable._('td:nth-child(9)', {"filter": "applied"});
+				var data = oTable._('td:nth-child(10)', {"filter": "applied"});
 				var Total = 0;
 				
 				for ( var i = 0; i<data.length; i++)

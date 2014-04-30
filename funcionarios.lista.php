@@ -1,6 +1,8 @@
 <?php
 
 include "head.php";
+$sql = "SET lc_time_names = 'pt_BR';";
+resultFromQuery($sql);
 
 $fDeclined = '<form action="#" name="fDeclined" method="post" class="form-horizontal">';
 
@@ -17,6 +19,7 @@ $sqlQuery .= "DATE_FORMAT(FROM_DAYS(DATEDIFF(NOW(), P.birthdate)), '%Y')+0 AS Ed
 $sqlQuery .= 'CONCAT("<A HREF=funcionarios.categorias.lista.php>", JC.name, "</A>") Categoría, ';
 $sqlQuery .= "EMP.nombre Empresa, ";
 $sqlQuery .= "CONCAT(TIME_FORMAT(E.fromhour, '%H:%i'), ' - ', TIME_FORMAT(E.tohour, '%H:%i')) 'Horario', ";
+$sqlQuery .= "CONCAT('<a href=funcionarios.pontos.folgas.php?employee_id=', E.employee_id, '>', COALESCE(CONCAT(UCASE(LEFT(dayname(CL.clid), 1)), SUBSTRING(dayname(CL.clid), 2)), 'Sem Folga'), '</a>') Folga , ";
 $sqlQuery .= "CO.nombre País, ";
 $sqlQuery .= "NULL Pagamentos ";
 
@@ -30,6 +33,9 @@ $sqlQuery .= "LEFT JOIN jobcategory JC ON E.jobcategory_id = JC.jobcategory_id "
 
 //Union de employee con empresa
 $sqlQuery .= "LEFT JOIN empresa EMP ON E.idempresa = EMP.idempresa ";
+
+//Union de employee con clearance
+$sqlQuery .= "LEFT JOIN (SELECT employee_id, MAX(valid_from) clid FROM clearance GROUP BY employee_id) CL ON E.employee_id = CL.employee_id ";
 
 //Union desde profile.birth_city_id hasta paises.idpaises para obtener la nacionalidad
 $sqlQuery .= "LEFT JOIN city C ON P.birth_city_id = C.city_id ";
@@ -48,7 +54,6 @@ else{
 }
 
 $fDeclined .='</form>';
-
 
 $resultado = resultFromQuery($sqlQuery);
 $tablafuncionarios = tableFromResult($resultado, 'employee', false, true, 'posts.php', true);

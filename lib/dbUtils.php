@@ -151,8 +151,8 @@
     }
   }
   
-  function tableFromResult($result, $name = '', $deletableRows = false, $modifiableRows = false) {
-    return mysql_tableFromResult($result, $name, $deletableRows, $modifiableRows);
+  function tableFromResult($result, $name = '', $deletableRows = false, $modifiableRows = false, $searchField = true) {
+    return mysql_tableFromResult($result, $name, $deletableRows, $modifiableRows, $searchField);
   };
 
   function oci_tableFromResult($result) {
@@ -173,9 +173,16 @@
     return $table;
   };
   
-  function mysql_tableFromResult($result, $name = '', $deletableRows = false, $modifiableRows = false) {
+  function mysql_tableFromResult($result, $name = '', $deletableRows = false, $modifiableRows = false, $searchField = true) {
+
+	if(isset($searchField) && $searchField == false){
+		$table = '<TABLE class="table table-bordered" name="'.$name.'" id="'.$name.'">';
+	}
+	else{
 		$table = '<TABLE class="table table-bordered data-table" name="'.$name.'" id="'.$name.'">';
-  	//if ($deletableRows || $modifiableRows) {
+
+	}
+	  	//if ($deletableRows || $modifiableRows) {
   	//	$table .= '<form name="'.$name.'Form" method="POST">';
   	//}
  		$table .= '<thead>';
@@ -232,9 +239,14 @@
 					case 'Pagamentos':
 						$table .= '<TD>';
 						$table .= '<a href="funcionarios.pagamentos.php?employee_id='.$row->id.'">';
-						$salario = calcularSalario($row->id, date('n'), date('Y'));
-						$salario = $salario['Total'];
-						$table .= ($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 4) ? $salario : 'Balance de salario';
+						if(($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 4)){
+							$salario = calcularSalario($row->id, date('n'), date('Y'));
+							$salario = $salario['Total'];
+							$table .=  $salario;
+						}
+						else{
+							$table .=  'Balance de salario';
+						}
 						$table .= '</a>';
 						$table .= '</TD>';
 						break;					

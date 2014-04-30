@@ -7,8 +7,6 @@
 	//new dBug($_POST);
 
 
-
-
 if (isset( $_POST['accion'] )) { 
 
 /* Usuarios */
@@ -2112,7 +2110,58 @@ if (isset( $_POST['accion'] )) {
 		header('Location: funcionarios.categorias.edit.php?jobcategory_id='.$jobcategory_id);
 
 	}
+	
+	if ($_POST['accion'] == 'ClearanceNew') {
+		if((!isset($_POST['employee_id'])  || $_POST['employee_id'] == '') || (!isset($_POST['valid_from']) || $_POST['valid_from'] == '')){
+			echo 'Debe completar todos los campos!';
+		}
+		else{
+			$sql = 'INSERT clearance(employee_id, valid_from, permanent) VALUES(';
+			$sql .= $_POST['employee_id'].", '";
+			$sql .= $_POST['valid_from']."', ";
+			
+			if($_POST['mode'] == 'permanent'){
+				$sql .= '1';
+			}
+			else{
+				$sql .= '0';
+			}
+			
+			$sql .= ');';
+			
+			$result = resultFromQuery($sql);
 		
+			bitacoras($_SESSION["idusuarios"], 'Insertado dia de folga: ID '.mysql_insert_id());
+		}
+		header('Location: funcionarios.pontos.folgas.php?employee_id='.$_POST['employee_id']);
+
+	}
+	
+	if ($_POST['accion'] == 'ClearanceModify') {
+		if((!isset($_POST['employee_id'])  || $_POST['employee_id'] == '') || (!isset($_POST['valid_from']) || $_POST['valid_from'] == '') || (!isset($_POST['clearance_id']) || $_POST['clearance_id'] == '')){
+			echo 'Debe completar todos los campos!';
+		}
+		else{
+			$sql = 'UPDATE clearance SET ';
+			$sql .= "valid_from = '".$_POST['valid_from']."', ";
+			$sql .= "permanent = ";
+			$sql .= isset($_POST['mode']) && $_POST['mode'] == 'permanent' ? '1 ' : '0 ';
+
+			$sql .= 'WHERE 1 ';
+			$sql .= 'AND clearance_id = '.$_POST['clearance_id'].';';
+			
+			$result = resultFromQuery($sql);
+			
+			bitacoras($_SESSION["idusuarios"], 'Modificado dia de folga: ID '.$_POST['clearance_id']);
+			
+		}
+
+		header('Location: funcionarios.pontos.folgas.php?employee_id='.$_POST['employee_id']);
+
+	}
+
+$sql = "SET lc_time_names = 'pt_BR';";
+				setlocale(LC_ALL, 'pt_BR');
 /* Ponto */
 	if ($_POST['accion'] == 'registrarPonto') {
 			
@@ -2408,6 +2457,15 @@ if (isset( $_POST['accion'] )) {
 		header('Location: funcionarios.pontos.php');
 	}
 
+	if ($_POST['accion'] == 'PointModify') {
+		var_dump($_POST);
+	}
+	
+	if ($_POST['accion'] == 'PointDelete') {
+		echo $_POST['accion'];
+	}
+	
+		
 
 /*Procesos*/
 
@@ -2530,6 +2588,7 @@ if (isset( $_POST['accion'] )) {
 		$client->api('issue')->create('notf0und', 'MAP-DV', $params);
 		echo '<script languaje="javascript"> top.location="sigda.issues.php"</script>';
 	}
+
 
 }
 
