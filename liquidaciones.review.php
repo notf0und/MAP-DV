@@ -100,7 +100,7 @@ $nomres = $row->nombre;
 			<h2>Total : US <?php echo $total;?></h2>
 	</div>
   </div>
-  <a href="liquidaciones-xls.php?idresponsablesDepago=<?php echo $idresponsablesDePago.'&id='.$id?>"><button class="btn btn-success btn-mini">Generar archivo Excel</button></a>
+  <a href="liquidaciones-xls.php?idresponsablesDepago=<?php echo $idresponsablesDePago.'&id='.$id?>"><button class="btn btn-success">Generar archivo Excel</button></a>
 </div>
 
 <!--end-main-container-part-->

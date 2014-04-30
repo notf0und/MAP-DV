@@ -1,8 +1,8 @@
 <?PHP
 // FUENTE : http://psoug.org/snippet/Export-table-to-Excel-or-MS-Word-file_314.htm
 // EDIT YOUR MySQL Connection Info:
-$ldb = parse_ini_file("/home/sistemas/Documents/dasamericas/www/local-config.ini", true)['local_database'];
-
+$ldb = parse_ini_file("/home/sistemas/Documents/dasamericas/www/local-config.ini", true);
+$ldb = $ldb['local_database'];
 
 $DB_Server = $ldb['dbhost'];        //your MySQL Server
 $DB_Username = $ldb['user'];                 //your MySQL User Name
