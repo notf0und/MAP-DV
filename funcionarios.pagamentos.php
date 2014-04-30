@@ -297,21 +297,6 @@ function comboDetails($employee_id, $month, $year, $salario){
 	return $element;
 }
 
-
-function intHourstoNormal($int){
-	$int = abs($int);
-	$num_hours = $int; //some float
-	$hours = floor($num_hours);
-	$mins = round(($num_hours - $hours) * 60);
-	
-	if ($mins < 10){
-		$mins = '0'.$mins;
-	}
-	
-	return $hours.":".$mins;
-	
-}
-	
 function bolsadehoras($employee_id, $month, $year){
 	
 	////////////STEP - 1//////////////////
@@ -387,15 +372,15 @@ function bolsadehoras($employee_id, $month, $year){
 		if (mysql_num_rows($result)>0){
 			
 			for($i = date('j', strtotime($point['start'])); $i <= date('j', strtotime($point['end'])); $i++){
-				
+
 				$worked = employeeWorkedDay($employee_id, $year."-".$month."-".$i);
+				$worked['Time'] = '--:--';
+				//echo 'Worked: '.$worked['Worked'].'<br>';
 				
 				if(isset($worked['Worked']) && $worked['Worked'] != 0){
 					
-
 					$sum = sumbolsa($carga, intHourstoNormal($worked['Worked']), $sum);
-
-					
+					//echo 'Sum: '.var_dump($sum).'<br>';
 					$worked['Time'] = $sum->format('%r%H:%I');
 					
 					if(!$sum->invert){
@@ -447,201 +432,11 @@ function bolsadehoras($employee_id, $month, $year){
 	return $return;
 }
 
-function daysforPoint($employee_id, $month, $year){
-
-	//PointStart
-	$sql = "SELECT admission ";
-	$sql .= "FROM employee ";
-	$sql .= "WHERE 1 ";
-	$sql .= "AND employee_id = ".$employee_id." ";
-
-	
-	$result = resultFromQuery($sql);
-	if($row = siguienteResult($result)){
-		if($row->admission <= date('Y-m-01', strtotime($year.'-'.$month))){
-			$point['start'] = $year.'-'.$month.'-01';
-		}
-		else{
-			//Buscar el momento el que el empleado comenzó a trabajar
-			$point['start'] = $row->admission;
-		}
-	}
-	
-	
-	//pointEND
-	$d1 = new DateTime($year.'-'.$month);
-	$d2 = new DateTime(date('Y-m'));
-		
-	//Buscar si el empleado tiene fecha de despido en el mes seleccionado
-	$sql = "SELECT decline ";
-	$sql .= "FROM employee ";
-	$sql .= "WHERE 1 ";
-	$sql .= "AND employee_id = ".$employee_id." ";
-
-	
-	$result = resultFromQuery($sql);
-	
-	if ($row = siguienteResult($result)){
-		if($row->decline && $row->decline < date("Y-m-d", strtotime($point['start']))){
-			$point['start'] = $row->decline;
-			$point['end'] = $row->decline;
-		}
-		elseif($row->decline && $row->decline <= date('Y-m-t', strtotime($year.'-'.$month))){
-			if($d1 < $d2){
-				$point['end'] = date("Y-m-t", strtotime($year.'-'.$month));
-			}
-			elseif ($d1 == $d2){
-				if ($row->decline && date("Y-m-d", strtotime($row->decline)) > date("Y-m-d")){
-					$point['end'] = date("Y-m-d");
-				}
-				else{
-					$point['end'] = $row->decline;
-				}
-			}
-			else{
-				$point['end'] = '1231231';
-				//si el mes es futuro, no deberia establecer un pointEnd
-			}
-			
-		}
-		else{
-			if($d1 < $d2){
-				$point['end'] = date("Y-m-t", strtotime($year.'-'.$month));
-			}
-			elseif ($d1 == $d2){
-				$point['end'] = date("Y-m-d");
-			}
-			else{
-				$point['end'] = '1231231';
-				//si el mes es futuro, no deberia establecer un pointEnd
-			}				
-		}
-		
-	}
-
-	return $point;
-}
-
-function employeeWorkedDay($employee_id, $date){
-	
-	$sql = "SELECT entrada.employee_id, ";
-    $sql .= "DATE(entrada.date_time) data, ";
-    $sql .= "MIN(entrada.point_id) identrada, ";
-    $sql .= "MAX(salida.point_id) idsalida, "; 
-    $sql .= "MIN(entrada.date_time) dtentrada, "; 
-	$sql .= "MAX(salida.date_time) dtsalida, "; 
-    $sql .= "TIME_FORMAT(TIME(MIN(entrada.date_time)), '%H:%i') entrada, ";  
-    $sql .= "TIME_FORMAT(TIME(MAX(salida.date_time)), '%H:%i') salida ";       
-    
-    $sql .= "FROM point AS entrada ";   
-    
-    $sql .= "LEFT JOIN point AS salida ";
-    $sql .= "ON entrada.employee_id = salida.employee_id ";  
-    
-    $sql .= "LEFT JOIN employee AS E ";
-    $sql .= "ON entrada.employee_id = E.employee_id ";
-    
-    $sql .= "WHERE 1 ";
-    $sql .= "AND entrada.employee_id = ".$employee_id." ";
-    $sql .= "AND salida.in_out = 0 ";
-    $sql .= "AND date(entrada.date_time) = '".$date."' ";
-    $sql .= "AND entrada.date_time > DATE_ADD(date(entrada.date_time), interval HOUR(E.fromhour) - 2 hour) ";
-    $sql .= "AND salida.date_time < DATE_ADD(DATE_ADD(date(entrada.date_time), interval 1 day), interval HOUR(E.fromhour) - 2  hour); ";
-	
-	$result = resultFromQuery($sql);
-	
-	if($row = siguienteResult($result)){
-		$return['Data'] = $date;
-		
-		if ($row->data == NULL){
-			
-			//Buscar motivo de ausencia de punto
-			$return['Worked'] = '0';
-			$return['Motive'] = employeeClearance($employee_id, $date);
-		}
-		else{
-			//Si la consulta devuelve informacion, es porque hay informacion relativa al punto
-
-			
-			/////////////////////////////
-			$sql = "SET sql_mode = 'NO_UNSIGNED_SUBTRACTION'";
-			resultFromQuery($sql);
-			
-			$sql = "SELECT SUM(UNIX_TIMESTAMP(date_time)*(1-2*in_out))/3600 AS hours_worked ";
-			$sql .= "FROM point ";
-			$sql .= "WHERE 1 AND employee_id = ".$employee_id." ";
-			$sql .= "AND date_time > '".$row->dtentrada."' ";
-			$sql .= "AND date_time < '".$row->dtsalida."'";
-
-			$result = resultFromQuery($sql);
-			$intervalo = siguienteResult($result);
-			
-			$sql = "SELECT SUM(UNIX_TIMESTAMP(date_time)*(1-2*in_out))/3600 AS hours_worked ";
-			$sql .= "FROM point ";
-			$sql .= "WHERE 1 AND employee_id = ".$employee_id." ";
-			$sql .= "AND date_time >= '".$row->dtentrada."' ";
-			$sql .= "AND date_time <= '".$row->dtsalida."'";
-			/////////////////////////////
-			$result = resultFromQuery($sql);
-			$hsworked = siguienteResult($result);
-			
-			$return['Entrada'] = $row->entrada;
-			$return['Intervalo'] = intHourstoNormal($intervalo->hours_worked);
-			$return['Salida'] = $row->salida;
-			$return['Worked'] = $hsworked->hours_worked;
-			
-			
-		}
-		
-		return $return;
-	}
-	else{
-		return '<code>AQUI NO VA NADA</code>';
-	}
-}
-
-function employeeClearance($employee_id, $date){
-	
-	$sql = "SELECT DAYNAME(valid_from) clearance, ";
-	$sql .= "DAYNAME('".$date."') todayname ";
-	$sql .= "FROM clearance ";
-	$sql .= "WHERE 1 ";
-	$sql .= "AND employee_id = ".$employee_id." ";
-	$sql .= "AND valid_from <= '".$date."' ";
-	$sql .= "ORDER BY valid_from DESC ";
-	$sql .= "LIMIT 1 ";
-	
-	$rclearance = resultFromQuery($sql);
-	
-	if ($rowclearance = siguienteResult($rclearance)){
-			
-		if($rowclearance->clearance != $rowclearance->todayname){
-			//buscar feriados
-			$sql = "SELECT * ";
-			$sql .= "FROM holiday ";
-			$sql .= "WHERE 1 ";
-			$sql .= "AND day = '".$date."'";
-			$rholiday = resultFromQuery($sql);
-			
-			if ($rowholiday = siguienteResult($rholiday)){
-				$motive = 'Feriado';
-			}
-			else{
-				$motive = 'Ausente';
-			}
-		}
-		else{
-			$motive = 'Folga';
-		}
-	}
-	else{
-		$motive = 'Ausente ou día de folga sem registrar';
-	}
-	return $motive;
-}
-
 function sumbolsa($carga, $hsworked, $prevsum=false){
-		
+	//echo var_dump($carga).'<br>';
+	//echo var_dump($hsworked).'<br>';
+	//echo var_dump($prevsum).'<br><br>';
+	
 	$start = DateTime::createFromFormat('H:i', $carga);
 
 	$end   = DateTime::createFromFormat('H:i', $hsworked);
@@ -680,20 +475,30 @@ function bolsatotable($bolsa){
 			
 			if(isset($bolsa[$data]['Motive'])){
 				if($bolsa[$data]['Motive'] == 'Ausente'){
-					$table .= "\n\t\t\t\t".'<td><p align="center" style="color:red">'.date('d', strtotime($data)).'</p></td>';
-				}
+					$color = '#FF5050';				}
 				elseif($bolsa[$data]['Motive'] == 'Feriado'){
-					$table .= "\n\t\t\t\t".'<td><p align="center" style="color:blue">'.date('d', strtotime($data)).'</p></td>';
+					$color = '#009999';
 				}
+				elseif($bolsa[$data]['Motive'] == 'Folga Extra'){
+					$color = '#66CCFF';
+				}
+
 				elseif($bolsa[$data]['Motive'] == 'Ausente ou día de folga sem registrar'){
-					$table .= "\n\t\t\t\t".'<td><p align="center" style="color:orange">'.date('d', strtotime($data)).'</p></td>';
+					$color = '#CC99FF';
+				}
+				elseif($bolsa[$data]['Motive'] == 'Folga'){
+					$color = '#00CC99';
+				}
+				elseif($bolsa[$data]['Motive'] == 'Trabalhando'){
+					$color = '';
 				}
 				else{
-					$table .= "\n\t\t\t\t".'<td><p align="center" style="color:green">'.date('d', strtotime($data)).'</p></td>';
+					$color = '#CC0000';
 				}
-				$table .= "\n\t\t\t\t".'<td><p align="center">'.$bolsa[$data]['Motive'].'</p></td>';
-				$table .= "\n\t\t\t\t".'<td><p align="center">'.$bolsa[$data]['Motive'].'</p></td>';
-				$table .= "\n\t\t\t\t".'<td><p align="center">'.$bolsa[$data]['Motive'].'</p></td>';
+				$table .= "\n\t\t\t\t".'<td><a href=funcionarios.pontos.detalhes.php?employee_id='.$_GET['employee_id'].'&date='.$data.'><p align="center" style="color:'.$color.'">'.date('d', strtotime($data)).'</p></a></td>';
+				$table .= "\n\t\t\t\t".'<td><p align="center" style="color:'.$color.'">'.$bolsa[$data]['Motive'].'</p></td>';
+				$table .= "\n\t\t\t\t".'<td><b><p align="center" style="color:'.$color.'">'.$bolsa[$data]['Motive'].'</p></b></td>';
+				$table .= "\n\t\t\t\t".'<td><p align="center" style="color:'.$color.'">'.$bolsa[$data]['Motive'].'</p></td>';
 				$table .= "\n\t\t\t\t".'<td><p align="center">--:--</p></td>';
 				$table .= "\n\t\t\t\t".'<td><p align="center">'.$last_bolsa.'</p></td>';
 				
@@ -701,7 +506,7 @@ function bolsatotable($bolsa){
 			
 			}
 			else{
-				$table .= "\n\t\t\t\t".'<td><p align="center">'.date('d', strtotime($data)).'</p></td>';
+				$table .= "\n\t\t\t\t".'<td><a href=funcionarios.pontos.detalhes.php?employee_id='.$_GET['employee_id'].'&date='.$data.'><p align="center">'.date('d', strtotime($data)).'</p></a></td>';
 				$table .= "\n\t\t\t\t".'<td><p align="center">'.$bolsa[$data]['Entrada'].'</p></td>';
 				$table .= "\n\t\t\t\t".'<td><p align="center">'.$bolsa[$data]['Intervalo'].'</p></td>';
 				$table .= "\n\t\t\t\t".'<td><p align="center">'.$bolsa[$data]['Salida'].'</p></td>';
@@ -719,6 +524,10 @@ function bolsatotable($bolsa){
 	$table .= "\n\t".'</table>';
 	return $table;
 }
+
+
+$bolsa = bolsadehoras($employee_id, $month, $year);
+$tblbolsa = bolsatotable($bolsa);
 
 ?>	
 
@@ -783,18 +592,28 @@ function bolsatotable($bolsa){
           </div>
         </div>
         <div id="no-print">
-		<div class="widget-box">
-			<div class="widget-title bg_lo" data-toggle="collapse" href="#collapseG3">
-				<span class="icon">
-					<i class="icon-chevron-down"></i>
-				</span>
-				<h5>Detalhes</h5>
+			<div class="accordion" id="collapse-group">
+				<div class="accordion-group widget-box">
+					<div class="accordion-heading">
+						<div class="widget-title"> 
+							<a data-parent="#collapse-group" href="#collapseGThree" data-toggle="collapse"> 
+								<span class="icon">
+									<i class="icon-chevron-down"></i>
+								</span>
+								<h5>Detalhes</h5>
+								<div style='text-align:right'>
+									<a href="funcionarios.pagamentos.printDetails.php?employee_id=<?php echo $employee_id; ?>&month=<?php echo $month; ?>&year=<?php echo $year; ?>">
+										<i class="icon-print"></i>
+									</a>
+								</div>
+							</a>
+						</div>
+					</div>
+					<div class="collapse accordion-body" id="collapseGThree">
+						<?php echo isset($details) ? $details : ''; ?>
+					</div>
+				</div>
 			</div>
-			<div class="widget-content nopadding updates collapse" id="collapseG3">
-				<?php echo isset($details) ? $details : ''; ?>
-			</div>
-		</div>
-		
 		  <div class="accordion" id="collapse-group">
 	  <div class="accordion-group widget-box">
 		  <div class="accordion-heading">
@@ -804,19 +623,13 @@ function bolsatotable($bolsa){
 						  <i class="icon-chevron-down">
 						  </i>
 					  </span>
-					  <h5>Resumo de ponto</h5>
+					  <h5>Resumo de ponto</h5><div style='text-align:right'><a href="funcionarios.pagamentos.printPoint.php?employee_id=<?php echo $employee_id; ?>&month=<?php echo $month; ?>&year=<?php echo $year; ?>"><i class="icon-print"></i></a></div>
+					  
 				  </a>
 			  </div>
 		  </div>
           <div class="collapse accordion-body" id="collapseGOne">
-			  <?php 
-				$bolsa = bolsadehoras($employee_id, $month, $year);
-				$tblbolsa = bolsatotable($bolsa);
-				echo $tblbolsa;
-			  
-			  
-			  
-			  //echo horasTrabajadas($employee_id, $month, $year);?> 
+			  <?php echo $tblbolsa;?> 
           </div>
 	  </div>	  
   </div>
@@ -845,13 +658,13 @@ function bolsatotable($bolsa){
 			<button name='food' class="btn btn-info icon-ok-circle" type="submit" value="add">Adicionar alimentação</button>
 			<button name='food' class="btn btn-danger icon-remove-sign" type="submit" value="remove">Apagar alimentação</button>
 		</form>
-		
+		<!--
 		<form method="post" action="funcionarios.faltas.nova.php">
 			<input type="hidden" id="employee_id" name="employee_id" value="<?php echo isset($employee_id) ? $employee_id : '';?>" />
 			<br>
 			<button class="btn" type="submit" value="add">Adicionar Falta</button>
 		</form>
-		
+		-->
 		<form method="post" action="posts.php">
 			<input type="hidden" id="accion" name="accion" value="employeeSyndicate" />
 			

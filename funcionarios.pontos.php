@@ -69,7 +69,7 @@ function getPontos($idempresa){
 		$sql = "SELECT TIME(date_time) ingreso from point where date(date_time) = curdate() AND in_out = 1 AND employee_id = ".$employee_id." LIMIT 1";
 		$rentrada = resultFromQuery($sql);
 		
-		$sql = "select dayname(valid_from) clearance, DAYNAME(CURDATE()) today from clearance where employee_id = ".$employee_id." AND valid_from <= CURDATE() ORDER BY valid_from DESC LIMIT 1;";
+		$sql = "select dayname(valid_from) clearance, DAYNAME(CURDATE()) today from clearance where employee_id = ".$employee_id." AND permanent = 1 AND valid_from <= CURDATE() ORDER BY valid_from DESC LIMIT 1;";
 		$folga = resultFromQuery($sql);
 		
 		$defolga = siguienteResult($folga);

@@ -4,6 +4,7 @@ include "head.php";
 //SELECT
 $sqlQuery = "SELECT ";
 $sqlQuery .= "PAY.payment_id AS id, ";
+$sqlQuery .= "PAY.payment_id AS idewds, ";
 $sqlQuery .= "date(PAY.date) Data, ";
 $sqlQuery .= "CONCAT('<A HREF=pagamentos.lista.detalhes.php?employee_id=', E.employee_id, '>', P.firstname, ' ', P.lastname, '</A>') 'Beneficiario', ";
 $sqlQuery .= "PT.type Tipo, ";

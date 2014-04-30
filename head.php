@@ -9,39 +9,6 @@ $script_name = $_SERVER['SCRIPT_NAME'];
 if(!isset($_SESSION["login"]) || $_SESSION["login"] == 0) {
 	header('Location: start.php');
 }
-
-if (isset($_SESSION["idusuarios"]) && $_SESSION["idusuarios"] == 13) {
-	
-	//Reporte de errores PHP
-	error_reporting(E_ALL);
-	ini_set('display_errors', TRUE);
-	ini_set('display_startup_errors', TRUE);
-	
-	require_once('lib/FirePHPCore/FirePHP.class.php');
-	ob_start();
-	$firephp = FirePHP::getInstance(true);
-	
-	/* Example usage of firephp
-	if (isset($_SESSION["idusuarios"]) && $_SESSION["idusuarios"] == 13) {
-			 
-		$firephp->log('Un mensaje plano');
-		$firephp->info('Un mensaje de información');
-		$firephp->warn('Una alerta');
-		$firephp->error('Enviar un mensaje de error');
-		
-		$table   = array();
-		$table[] = array('Titulo 1','Titulo 2', 'Titulo 3');
-		$table[] = array('Col 1, fila 1','Col 2, fila 1','Col 3, fila 1');
-		$table[] = array('Col 1, fila 2','Col 2, fila 2','Col 3, fila 2');
-		$table[] = array('Col 1, fila 3','Col 2, fila 3','Col 3, fila 3');
-
-		$firephp->table('Tabla', $table);  
-
-		fb($table, 'Tabla', FirePHP::TABLE);
-	}
-	*/
-}
-
 ?>
 <head>
 <title>DaVinci MAP</title>
@@ -67,12 +34,12 @@ if (isset($_SESSION["idusuarios"]) && $_SESSION["idusuarios"] == 13) {
 
 <script type="text/javascript">
 document.onkeydown = function(event) {
-var key_press = String.fromCharCode(event.keyCode);
-var key_code = event.keyCode;
+	var key_press = String.fromCharCode(event.keyCode);
+	var key_code = event.keyCode;
 
-if(key_press == "k") {
-window.location.replace("http://davincimp.no-ip.info:8080/ponto.php");
-}
+	if(key_press == "k") {
+		window.location.replace("http://davincimp.no-ip.info:8080/ponto.php");
+	}
 }
 </script>
 
