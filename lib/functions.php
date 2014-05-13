@@ -1525,9 +1525,6 @@ function calcularSalario($employee_id, $month = false, $year = false){
 				if($dSearch == date('Y-m', strtotime($salario['employee']['Admission'])) || $dSearch == date('Y-m', strtotime($salario['employee']['Decline Date']))){
 					$salario['-']['Transporte'] = round((transportDiscount($salario)/30)*$salario['employee']['Worked Days'], 2);
 				}				
-				elseif (isset($salario['-']['Faltas ('.$salario['employee']['Non Attendance'].')'])){
-					$salario['-']['Transporte'] = round(transportDiscount($salario) - ((transportDiscount($salario)/30)*$salario['employee']['Non Attendance']), 2);
-				}
 				else{
 					$salario['-']['Transporte'] = round(transportDiscount($salario), 2);
 				}
@@ -1626,10 +1623,10 @@ function transportDiscount($salario){
 
 	$salarioneto = array_sum($salario['+']);
 
-	if ($salarioneto <= 1000){
+	if ($salarioneto < 1000){
 		$transportdiscount = 45.60;
 	}
-	elseif ($salarioneto > 1000 && $salarioneto <= 1200){
+	elseif ($salarioneto >= 1000 && $salarioneto < 1200){
 		$transportdiscount = 50;
 	}
 	else{
@@ -1828,11 +1825,9 @@ function employeeWorkedDay($employee_id, $date){
     
     $sql .= "WHERE 1 ";
     $sql .= "AND entrada.employee_id = ".$employee_id." ";
-    $sql .= "AND salida.in_out = 0 ";
     $sql .= "AND date(entrada.date_time) = '".$date."' ";
-    $sql .= "AND entrada.date_time > DATE_ADD(date(entrada.date_time), interval HOUR(E.fromhour) - 9 hour) ";
-    $sql .= "AND salida.date_time < DATE_ADD(DATE_ADD(date(entrada.date_time), interval 1 day), interval HOUR(E.fromhour) - 9  hour); ";
-	
+    $sql .= "AND entrada.date_time > DATE_ADD(date(entrada.date_time), interval HOUR(E.fromhour) - 7 hour) ";
+    $sql .= "AND salida.date_time < DATE_ADD(DATE_ADD(date(entrada.date_time), interval 1 day), interval HOUR(E.fromhour) - 7 hour); ";
 	$result = resultFromQuery($sql);
 
 	if($row = siguienteResult($result)){
@@ -1901,6 +1896,64 @@ function employeeWorkedDay($employee_id, $date){
 	}
 }
 
+
+function employeePaymentDetailsTable($employee_id, $month, $year, $salario){
+	
+	$element = '<table class="table table-striped table-bordered">';
+	$element .= '<thead>';
+	$element .= '<tr>';
+    $element .= '<th>Descrição</th>';
+    $element .= '<th>Vencimentos</th>';
+    $element .= '<th>Descontos</th>';
+    $element .= '</tr>';
+    $element .= '</thead>';
+    $element .= '<tbody>';
+	
+	
+	
+	
+	if (isset($salario['-'])){
+	
+		foreach ($salario['-'] as $i => $value) {
+			if (gettype($salario['-'][$i]) == 'array'){
+				foreach ($salario['-'][$i] as $j => $subvalue) {
+					if (gettype($salario['-'][$i]) == 'array'){
+						foreach ($salario['-'][$i][$j] as $k => $subsubvalue) {
+
+							
+							if (strpos($i,'Faltas') === false) {
+								$element .= '<tr>';
+								$element .= '<td class="taskDesc"><i class="icon-minus-sign"></i>';
+								if ($k != ''){
+									$element .='<a id="example" data-content="'.$k.'" data-placement="right" data-toggle="popover" class="taskStatus" data-original-title="'.$i.'">'.$i.'</a></td>';
+								}
+								else {
+									$element .= $i.'</td>';
+								}
+								$element .= '<td></td>';
+								$element .= '<td class="taskStatus">'.$subsubvalue.'</td>';
+								$element .= '</tr>';
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	$element .= '<tr>';
+	$element .= '<td></td>';
+	$element .= '<td></td>';
+	$element .= '<td></td>';
+	$element .= '</tr>';
+	
+	$element .= '</tbody>';
+    $element .= '</table>';
+	
+	return $element;
+}
+
+
 function employeeClearance($employee_id, $date){
 	
 	$sql = "SELECT DAYNAME(valid_from) clearance, ";
@@ -1909,6 +1962,7 @@ function employeeClearance($employee_id, $date){
 	$sql .= "WHERE 1 ";
 	$sql .= "AND employee_id = ".$employee_id." ";
 	$sql .= "AND valid_from <= '".$date."' ";
+	$sql .= "AND permanent = 1 ";
 	$sql .= "ORDER BY valid_from DESC ";
 	$sql .= "LIMIT 1 ";
 	
@@ -1928,11 +1982,25 @@ function employeeClearance($employee_id, $date){
 				$motive = 'Feriado';
 			}
 			
-			//buscar folgas extra
+			//buscar folga unica
+			$sql = "SELECT * ";
+			$sql .= "FROM clearance ";
+			$sql .= "WHERE 1 ";
+			$sql .= "AND employee_id = '".$employee_id."' ";
+			$sql .= "AND valid_from = '".$date."' ";
+			$sql .= "AND permanent = 0";
+
+			$rholiday = resultFromQuery($sql);
+			
+			if ($rowholiday = siguienteResult($rholiday)){
+				$motive = 'Folga Temporal';
+			}
+			
+			//buscar folga extra
 			$sql = "SELECT * ";
 			$sql .= "FROM extraclearance ";
 			$sql .= "WHERE 1 ";
-			$sql .= "AND employee_id = '".$employee_id."'";
+			$sql .= "AND employee_id = '".$employee_id."' ";
 			$sql .= "AND date = '".$date."' ";
 
 			$rholiday = resultFromQuery($sql);

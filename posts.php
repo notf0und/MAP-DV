@@ -2458,11 +2458,78 @@ $sql = "SET lc_time_names = 'pt_BR';";
 	}
 
 	if ($_POST['accion'] == 'PointModify') {
-		var_dump($_POST);
+
+		$date = $_POST['date'];
+		$point_id = $_POST['point_id'];
+		$employee_id = $_POST['employee_id'];
+		$hour = $_POST['hour'];
+		$event = $_POST['event'];
+		$timestr = $date.' '.$hour.":00";
+		
+		$sql = 'UPDATE point ';
+		$sql .= "SET date_time = '".$timestr."', ";
+		$sql .= 'in_out = '.$event.' ';
+		$sql .= 'WHERE 1 ';
+		$sql .= 'AND point_id = '.$point_id;
+		
+		$result = resultFromQuery($sql);		
+
+		bitacoras($_SESSION["idusuarios"], 'Atualizado registro de ponto: id '.$point_id);
+		header('Location: '.$_SERVER['HTTP_REFERER']);
 	}
 	
 	if ($_POST['accion'] == 'PointDelete') {
-		echo $_POST['accion'];
+		$sql = 'DELETE FROM point WHERE 1 AND point_id = '.key($_POST['deleteRow']['id']);
+		$result = resultFromQuery($sql);		
+		
+		bitacoras($_SESSION["idusuarios"], 'Apagado registro de ponto: id '.key($_POST['deleteRow']['id']));
+		header('Location: '.$_SERVER['HTTP_REFERER']);
+	}
+	
+	if ($_POST['accion'] == 'PointNew') {
+		
+		$date = $_POST['date'];
+		$employee_id = $_POST['employee_id'];
+		$hour = $_POST['hour'];
+		$event = $_POST['event'];
+		$timestr = $date.' '.$hour.":00";
+		$time = strtotime($timestr);
+		
+		$sql = "SELECT ";
+		$sql .= "DATE_ADD(date(P.date_time), interval HOUR(E.fromhour) - 7 hour) min, ";
+		$sql .= "DATE_ADD(date(P.date_time) + interval 1 day, interval HOUR(E.fromhour) - 7 hour) max ";
+		$sql .= "FROM point P ";
+		$sql .= "LEFT JOIN employee E ";
+		$sql .= "ON P.employee_id = E.employee_id ";
+		$sql .= "WHERE 1 ";
+		$sql .= "AND P.employee_id = ".$employee_id." ";
+		$sql .= "AND date(P.date_time) = '".$date."' ";
+		$sql .= "LIMIT 1;";
+	
+		$result = resultFromQuery($sql);
+		
+		$row = siguienteResult($result);
+		$bstart = strtotime($row->min);
+		$bend = strtotime($row->max);
+		
+		if ($time < $bstart){
+			$time = $time = strtotime($timestr.' + 1 days');
+		}
+
+		
+		
+		$sql = 'INSERT point(employee_id, date_time, in_out) VALUES(';
+		$sql .= $employee_id.', ';
+		$sql .= "'".date("Y-m-d H:i:s",$time)."', ";
+		$sql .= $event;
+		$sql .= ');';
+		
+		$resultadoStringSQL = resultFromQuery($sql);
+		
+		bitacoras($_SESSION["idusuarios"], 'Ingresado ponto manual: ID '.mysql_insert_id());
+				
+		header('Location: funcionarios.pontos.detalhes.php?employee_id='.$employee_id.'&date='.$date);
+
 	}
 	
 		
