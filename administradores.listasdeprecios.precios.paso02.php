@@ -79,67 +79,69 @@ if (isset($_GET['id'])){
 							}
 							?> 
 						</div>
-							<?php
+						<?php
 							$i = 1;
 							if ($idresponsablesDePago==1){
-							$sqlQueryPosadas = " SELECT * FROM posadas WHERE idposadas > 0 and idposadas < 5";
-							$resultadoPosadas = mysql_query ($sqlQueryPosadas);
-							while ($lineaPosadas=mysql_fetch_row($resultadoPosadas)) {
-								$i++;
-							?>
-						<div id="form-wizard-<?php echo $i;?>" class="step">
-							<h4>&nbsp;&nbsp;- <?php echo $lineaPosadas[1] ?> - </h4>
-							<?php
-							$sqlQueryServicios = " SELECT * FROM servicios WHERE idservicios > 5";
-							$resultadoServicios = mysql_query ($sqlQueryServicios);
-							while ($lineaServicios=mysql_fetch_row($resultadoServicios)) {
-								$precio = precioListasdeprecios($lineaPosadas[0].'_'.$lineaServicios[0], $idlistasdeprecios);
-								
-								$precios[$lineaServicios[1]] = $precio;
-								
-								if (strpos($lineaServicios[1], " C/Bebida")){
-									
-									$reference = rtrim($lineaServicios[1], " C/Bebida");
-									
-									$unit = 2;
-									
-									
-									if (strpos($reference, "FAP")){						
-										$unit *= 2;
-									}
-									
-									if (strpos($reference, "DBL ") === 0){
-										$unit *= 2;
-									}
-									elseif (strpos($reference, "TPL") === 0){
-										$unit *= 3;
-									}
-									elseif (strpos($reference, "CPL") === 0){
-										$unit *= 4;
-									}
-									
-									
-									$precio = $precios[$reference] + $unit;
-									
-									
-									//var_dump($precios);
-								}
-								//echo $lineaPosadas[0].'_'.$lineaServicios[0].'!!!'. $idlistasdeprecios
-							?>
-								<div class="control-group">
-									<label class="control-label"><?php echo $lineaServicios[1] ?></label>
-									<div class="controls">
-										<input type="text" class="span6" placeholder="0.00" id="<?php echo $lineaPosadas[0].'_'.$lineaServicios[0] ?>" name="<?php echo $lineaPosadas[0].'_'.$lineaServicios[0] ?>" value="<?php echo $precio;?>" />
-									</div>
-								</div>
-							<?php
-							}
-							?> 
-						</div>
+								$sqlQueryPosadas = " SELECT * FROM posadas WHERE posada_interna = 1 AND habilitado = 1";
+								$resultadoPosadas = mysql_query ($sqlQueryPosadas);
+								while ($lineaPosadas=mysql_fetch_row($resultadoPosadas)) {
+									$i++;
 
-						<?php
-						}
-						}
+									
+							?>
+								<div id="form-wizard-<?php echo $i;?>" class="step">
+									<h4> - <?php echo $lineaPosadas[1] . ' - ' . $lineaPosadas[0] ?> - </h4>
+									<?php
+									$sqlQueryServicios = " SELECT * FROM servicios WHERE idservicios > 5";
+									$resultadoServicios = mysql_query ($sqlQueryServicios);
+									while ($lineaServicios=mysql_fetch_row($resultadoServicios)) {
+										$precio = precioListasdeprecios($lineaPosadas[0].'_'.$lineaServicios[0], $idlistasdeprecios);
+										
+										$precios[$lineaServicios[1]] = $precio;
+										
+										if (strpos($lineaServicios[1], " C/Bebida")){
+											
+											$reference = rtrim($lineaServicios[1], " C/Bebida");
+											
+											$unit = 2;
+											
+											
+											if (strpos($reference, "FAP")){						
+												$unit *= 2;
+											}
+											
+											if (strpos($reference, "DBL ") === 0){
+												$unit *= 2;
+											}
+											elseif (strpos($reference, "TPL") === 0){
+												$unit *= 3;
+											}
+											elseif (strpos($reference, "CPL") === 0){
+												$unit *= 4;
+											}
+											
+											
+											$precio = $precios[$reference] + $unit;
+											
+											
+											//var_dump($precios);
+										}
+										//echo $lineaPosadas[0].'_'.$lineaServicios[0].'!!!'. $idlistasdeprecios
+									?>
+										<div class="control-group">
+											<label class="control-label"><?php echo $lineaServicios[1] ?></label>
+											<div class="controls">
+												<input type="text" class="span6" placeholder="0.00" id="<?php echo $lineaPosadas[0].'_'.$lineaServicios[0] ?>" name="<?php echo $lineaPosadas[0].'_'.$lineaServicios[0] ?>" value="<?php echo $precio;?>" />
+											</div>
+										</div>
+									<?php
+									}
+									?> 
+								</div>
+
+							<?php
+								}
+							}
 						?> 
 						<div class="form-actions">
 							<input id="back" class="btn btn-primary" type="reset" value="Back" />

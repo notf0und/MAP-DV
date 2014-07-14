@@ -1,5 +1,5 @@
 <?php
-$url = 'http://davincimp.no-ip.info:8080/ponto.php';
+$url = 'http://grupodasamericas.com/ponto.php';
 
 $options['http'] = array(
     'method' => "HEAD",

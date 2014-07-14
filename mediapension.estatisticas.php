@@ -32,7 +32,7 @@
 				$sqlQuery .= "AND MP.dataOUT>=CURDATE() ";
 				$sqlQuery .= "AND MP.habilitado = 1;";
 				$sqlResult = resultFromQuery($sqlQuery);
-				
+
 				while ($row = mysql_fetch_row($sqlResult))
 				{
 					echo "$row[0]";

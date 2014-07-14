@@ -6,7 +6,7 @@ $lock = '<form action="#" name="fLock" method="post" class="form-horizontal">';
 
 $sqlQuery = "SELECT MP.idmediapension id, H.titular 'Nome PAX', MP.numeroexterno '# Voucher', ";
 
-if ($_SESSION["idusuarios"] == 13){
+if ($_SESSION["idusuarios"] == 143){
 	$sqlQuery .= "MP.data 'Ingresado', ";
 }
 
@@ -16,8 +16,8 @@ if ($_SESSION["idusuarios_tipos"] == 1){
 }
 
 $sqlQuery .= "MP.qtdedepax 'Qtde de PAX', MP.dataIN, MP.dataOUT, ";
-$sqlQuery .= " P.nombre 'Posada', O.nombre 'Operador', A.nombre 'Agencia'  ";
-$sqlQuery .= " , RDP.nombre 'Responsable', SS.nombre 'Serviço', NULL 'Detalles' ";
+$sqlQuery .= " P.nombre 'Posada', O.nombre 'Operador', A.nombre 'Agencia',  ";
+$sqlQuery .= " RDP.nombre 'Responsable', SS.nombre 'Serviço', NULL 'Detalles' ";
 $sqlQuery .= " FROM `mediapension` MP ";
 $sqlQuery .= " LEFT JOIN huespedes H ON MP.idhuespedes = H.idhuespedes ";
 $sqlQuery .= " LEFT JOIN posadas P ON MP.idposadas = P.idposadas ";

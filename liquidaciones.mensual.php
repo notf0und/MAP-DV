@@ -46,7 +46,7 @@ if (isset($_POST['accion']) && $_POST['accion'] == 'liquidacion'){
 		$sqlResponsable .= 'WHERE 1 ';
 		$sqlResponsable .= 'AND idresponsablesDePago = '.$idresponsablesDePago.' ';
 		$sqlResponsable .= 'AND idliquidaciones = 0 ';
-		$sqlResponsable .= 'AND habilitado = 1 ';
+		$sqlResponsable .= 'AND MP.habilitado = 1 ';
 		//condition
 		if (isset($_POST['desde']) || isset($_POST['ate'])){
 	
@@ -74,7 +74,7 @@ if (isset($_POST['accion']) && $_POST['accion'] == 'liquidacion'){
 		$sqlResponsable .= 'WHERE 1 ';
 		$sqlResponsable .= 'AND idresponsablesDePago = '.$idresponsablesDePago.' ';
 		$sqlResponsable .= 'AND idliquidaciones = 0 ';
-		$sqlResponsable .= 'AND habilitado = 1 ';
+		$sqlResponsable .= 'AND HTL.habilitado = 1 ';
 		
 		//condition
 		if (isset($_POST['desde']) || isset($_POST['ate'])){

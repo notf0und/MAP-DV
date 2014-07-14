@@ -150,7 +150,7 @@ $string .= '</div>';
   <div id="content-header">
     <div id="breadcrumb"> 
 		<a href="index.php" title="Home" class="tip-bottom"><i class="icon-home"></i> Home</a> 
-		<a href="salarios.php" title="Área Contable" class="tip-bottom">Área Contable</a>
+		<a href="salarios.php" title="Área Contable" class="tip-bottom">Área Contábil</a>
 		<a href="funcionarios.php" title="Funcionarios" class="tip-bottom">Funcionarios</a>
 		<a href="#" class="current">Pontos</a>
 	</div>
@@ -170,7 +170,7 @@ $string .= '</div>';
 			  <input type="hidden" id="accion" name="accion" value="<?php echo isset($_POST['accion']) && $_POST['accion'] == 'PointModify' ? 'PointModify' : 'PointNew'; ?>" />
 			  <input type="hidden" id="date" name="date" value="<?php echo isset($_GET['date']) ? $_GET['date'] : ''; ?>" />
 			  <input type="hidden" id="point_id" name="point_id" value="<?php echo isset($point_id) ? $point_id : ''; ?>" />
-			  <input type="hidden" id="employee_id" name="employee_id" value="<?php echo isset($employee_id) ? $employee_id : '';?>" />
+			  <input type="hidden" id="employee_id" name="employee_id" value="<?php echo isset($_GET['employee_id']) ? $_GET['employee_id'] : '';?>" />
 			  <!--Work Hours-->
 			  <div class="control-group">
 				  <label class="control-label">Hora: </label>

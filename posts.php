@@ -389,7 +389,7 @@ if (isset( $_POST['accion'] )) {
 
 		$idlistasdeprecios = $_POST['idlistasdeprecios'];
 		$iditem = $_POST['iditem'];
-
+		
 		if ($idlistasdeprecios > -1) {
 			
 			$sql = "SELECT * FROM listasdeprecios WHERE idlistasdeprecios = ".$idlistasdeprecios;
@@ -397,32 +397,42 @@ if (isset( $_POST['accion'] )) {
 			
 			if ($row = mysql_fetch_object($result)){
 				
-				if($row->idresponsablesDePago == 2){
-					
-					for($i=1;$i<6;$i++){
-						$precio = $_POST['0_'.$i];
-						$idservicios = $i;
-						$idposadas_internas = 0;
-						$resultado = guardarPrecio($idlistasdeprecios, $idservicios, $precio, $idposadas_internas);
-					}
-					echo 'POSADA ';
-				
+				for($i=1;$i<6;$i++){
+					$precio = $_POST['0_'.$i];
+					$idservicios = $i;
+					$idposadas_internas = 0;
+					$resultado = guardarPrecio($idlistasdeprecios, $idservicios, $precio, $idposadas_internas);
 				}
-				else{
+				
+				
+				
+				if($row->idresponsablesDePago != 2){
+					
 					$sql = "SELECT * FROM servicios";
 					$result = resultFromQuery($sql);
-					
 					$totalservicios = mysql_num_rows($result);
 					
-					for($i=1;$i<$totalservicios;$i++){
+					
+					$sql = "select * from posadas where posada_interna = 1 and habilitado = 1";
+					$result = resultFromQuery($sql);
+					
+					while($pinterna = mysql_fetch_object($result)){
 						
-						$precio = $_POST[$row->idposadas.'_'.$i];
-						$idservicios = $i;
-						$idposadas_internas = $row->idposadas;
-						$resultado = guardarPrecio($idlistasdeprecios, $idservicios, $precio, $idposadas_internas);
+						
+						for($i=6;$i<$totalservicios;$i++){
+						
+							$precio = $_POST[$pinterna->idposadas.'_'.$i];
+							$idservicios = $i;
+							$idposadas_internas = $pinterna->idposadas;
+							$resultado = guardarPrecio($idlistasdeprecios, $idservicios, $precio, $idposadas_internas);
+						}
+						
 					}
-					echo 'NO POSADA: '.$totalservicios;
-
+					
+					//echo 'NO POSADA: '.$totalservicios;
+				}
+				else{
+					//echo 'POSADA ';
 				}
 				
 			}
@@ -1921,7 +1931,7 @@ if (isset( $_POST['accion'] )) {
 		if ($_POST['accept'] == 'continue') {
 			echo '<script languaje="javascript"> self.location="pagamentos.novo.php?employee_id='.$_POST['employee_id'].'"</script>';
 		}
-		elseif ($_SESSION["idusuarios_tipos"] == 1 || $_SESSION["idusuarios_tipos"] == 4 || $_SESSION["idusuarios_tipos"] == 8){
+		elseif ($_SESSION["idusuarios_tipos"] == 1 || $_SESSION["idusuarios_tipos"] == 4 || $_SESSION["idusuarios_tipos"] == 8 || $_SESSION["idusuarios"] == 20){
 			echo '<script languaje="javascript"> self.location="pagamentos.php"</script>';
 		}
 		else{
@@ -2160,8 +2170,90 @@ if (isset( $_POST['accion'] )) {
 
 	}
 
-$sql = "SET lc_time_names = 'pt_BR';";
-				setlocale(LC_ALL, 'pt_BR');
+	if ($_POST['accion'] == 'nonworkperiodNew') {
+		if((!isset($_POST['employee_id'])  || $_POST['employee_id'] == '') || (!isset($_POST['from']) || $_POST['from'] == '') || (!isset($_POST['to']) || $_POST['to'] == '')){
+			echo 'Debe completar todos los campos!';
+		}
+		else{
+			$sql = 'INSERT nonwork_period(employee_id, nonwork_period.from, nonwork_period.to, motive) VALUES(';
+			$sql .= $_POST['employee_id'].", ";
+			$sql .= "'".$_POST['from']."', ";
+			$sql .= "'".$_POST['to']."', ";
+			$sql .= $_POST['motive'].");";
+			
+
+			
+			$result = resultFromQuery($sql);
+		
+			bitacoras($_SESSION["idusuarios"], 'Insertado periodo sem trabalhar: ID '.mysql_insert_id());
+		}
+		header('Location: funcionarios.pontos.periodosemtrabalhar.php?employee_id='.$_POST['employee_id']);
+
+	}
+
+	if ($_POST['accion'] == 'nonworkperiodModify') {
+
+		if((!isset($_POST['employee_id'])  || $_POST['employee_id'] == '') || (!isset($_POST['from']) || $_POST['from'] == '') || (!isset($_POST['to']) || $_POST['to'] == '') || (!isset($_POST['nonworkperiod_id']) || $_POST['nonworkperiod_id'] == '')){
+			echo 'Debe completar todos los campos!';
+		}
+		else{
+			$sql = 'UPDATE nonwork_period SET ';
+			$sql .= "nonwork_period.from = '".$_POST['from']."', ";
+			$sql .= "nonwork_period.to = '".$_POST['to']."', ";
+			$sql .= "motive = ".$_POST['motive']." ";
+
+			$sql .= 'WHERE 1 ';
+			$sql .= 'AND nonwork_period_id = '.$_POST['nonworkperiod_id'].';';
+
+			
+			$result = resultFromQuery($sql);
+			
+			bitacoras($_SESSION["idusuarios"], 'Modificado periodo sem trabalhar: ID '.$_POST['nonwork_period_id']);
+			
+		}
+
+		header('Location: funcionarios.pontos.periodosemtrabalhar.php?employee_id='.$_POST['employee_id']);
+
+	}
+
+	if ($_POST['accion'] == 'massEmployeeCorporate') {
+
+		reset($_POST);
+		while (list($key, $value) = each($_POST)) {
+			if($key != 'accion'){
+				$sql = 'SELECT * FROM employee_corporate WHERE employee_id = '.$key.' ';
+				$sql .= 'ORDER BY employee_corporate_id DESC LIMIT 1;';
+				$result = resultFromQuery($sql);
+				
+				if($row = siguienteResult($result)){
+					if($value == $row->corporate_id){
+						echo 'Igual: '.$key.':'.$value;
+					}
+					else{
+						$sql = 'INSERT employee_corporate(employee_id, corporate_id) VALUES(';
+						$sql .= $key.', ';
+						$sql .= $value;
+						$sql .= ')';
+						$result = resultFromQuery($sql);
+					}
+				}
+				else{
+					$sql = 'INSERT employee_corporate(employee_id, corporate_id) VALUES(';
+					$sql .= $key.', ';
+					$sql .= $value;
+					$sql .= ')';
+					$result = resultFromQuery($sql);
+				}
+				
+				
+			}
+		}
+		
+		header('Location: funcionarios.empresa.php');
+
+	}
+
+
 /* Ponto */
 	if ($_POST['accion'] == 'registrarPonto') {
 			
@@ -2332,7 +2424,7 @@ $sql = "SET lc_time_names = 'pt_BR';";
 		else{
 			
 			//Obtiene el último punto ingresado por el empleado, como su horario de salida
-			$sql = "SELECT P.date_time, P.in_out, E.tohour ";
+			$sql = "SELECT P.date_time, P.in_out, E.tohour, E.locked ";
 			$sql .= "FROM point P ";
 			$sql .= "left join employee E ON P.employee_id = E.employee_id ";
 			$sql .= "WHERE 1 ";
@@ -2351,69 +2443,76 @@ $sql = "SET lc_time_names = 'pt_BR';";
 				$last_date_time = $row['date_time'];
 				$last_in_out = $row['in_out'];
 				$tohour = $row['tohour'];
+				$locked = $row['locked'];
 				
-				//Si la ultima acción corresponde a dias anteriores
-				if(date('Y-m-d H:i', strtotime($last_date_time)) < date("Y-m-d H:i", strtotime("now - 10 hours"))){
-					//Y su ultimo registro es una entrada
-					if ($last_in_out = $row['in_out']){
-						//marcar salida
-						$sql = "INSERT point(employee_id, date_time, in_out, updated) ";		
-						$sql .= "VALUES(LPAD(".$senha.", 5, '0'), '".date("Y-m-d ", strtotime($last_date_time)).date("H:i:s", strtotime($tohour))."', 0, 1)";
+				if ($locked == 0){
+				
+					//Si la ultima acción corresponde a dias anteriores
+					if(date('Y-m-d H:i', strtotime($last_date_time)) < date("Y-m-d H:i", strtotime("now - 10 hours"))){
+						//Y su ultimo registro es una entrada
+						if ($last_in_out = $row['in_out']){
+							//marcar salida
+							$sql = "INSERT point(employee_id, date_time, in_out, updated) ";		
+							$sql .= "VALUES(LPAD(".$senha.", 5, '0'), '".date("Y-m-d ", strtotime($last_date_time)).date("H:i:s", strtotime($tohour))."', 0, 1)";
+							
+							if (!$result = mysqli_query($dblocal, $sql)){
+								die('Error al marcar la salida previa en la base de datos local con la sentencia:<br> '.$sql.'<br>'. mysqli_error($dblocal));
+							}
+							
+							//Registra el punto
+							$sql = "INSERT point(employee_id, date_time, in_out, updated) ";		
+							$sql .= "VALUES(LPAD(".$senha.", 5, '0'), NOW(), 1, 1)";
 						
-						if (!$result = mysqli_query($dblocal, $sql)){
-							die('Error al marcar la salida previa en la base de datos local con la sentencia:<br> '.$sql.'<br>'. mysqli_error($dblocal));
+							
+							if (!$result = mysqli_query($dblocal, $sql)){
+								die('Error al registrar el punto en la base de datos local con la sentencia:<br> '.$sql.'<br>'. mysqli_error($dblocal));
+							}
+							
+							mysqli_close($dblocal);
+							header('Location: ponto.php');
+							
 						}
+					}
+					
+					//Si la ultima accion es distinta de la ingresda
+					if ($last_in_out != $in_out){
 						
 						//Registra el punto
 						$sql = "INSERT point(employee_id, date_time, in_out, updated) ";		
-						$sql .= "VALUES(LPAD(".$senha.", 5, '0'), NOW(), 1, 1)";
+						$sql .= "VALUES(LPAD(".$senha.", 5, '0'), NOW(), ".$in_out.", 1)";
 					
 						
 						if (!$result = mysqli_query($dblocal, $sql)){
-							die('Error al registrar el punto en la base de datos local con la sentencia:<br> '.$sql.'<br>'. mysqli_error($dblocal));
+							die('Error al insertar su punto en la base de datos local con la sentencia:<br> '.$sql.'<br>'. mysqli_error($dblocal));
 						}
-						
 						mysqli_close($dblocal);
 						header('Location: ponto.php');
 						
+						
 					}
-				}
-				
-				//Si la ultima accion es distinta de la ingresda
-				if ($last_in_out != $in_out){
-					
-					//Registra el punto
-					$sql = "INSERT point(employee_id, date_time, in_out, updated) ";		
-					$sql .= "VALUES(LPAD(".$senha.", 5, '0'), NOW(), ".$in_out.", 1)";
-				
-					
-					if (!$result = mysqli_query($dblocal, $sql)){
-						die('Error al insertar su punto en la base de datos local con la sentencia:<br> '.$sql.'<br>'. mysqli_error($dblocal));
+					else if ($in_out == 0){
+						
+						$trying = 'salida';
+						$nottrying = 'entrada';
+								
+						echo 'Su ultimo registro indica una '.$trying.', no puede registrar otra '.$trying.' sin generar una '.$nottrying.' primero.';
+						echo '<br><br>';
+						echo 'Aguarde unos segundos mientras lo redireccionamos a la pagina anterior';
+						mysqli_close($dblocal);
+						header('Refresh: 5; URL=ponto.php');
 					}
-					mysqli_close($dblocal);
-					header('Location: ponto.php');
-					
-					
-				}
-				else if ($in_out == 0){
-					
-					$trying = 'salida';
-					$nottrying = 'entrada';
-							
-					echo 'Su ultimo registro indica una '.$trying.', no puede registrar otra '.$trying.' sin generar una '.$nottrying.' primero.';
-					echo '<br><br>';
-					echo 'Aguarde unos segundos mientras lo redireccionamos a la pagina anterior';
-					mysqli_close($dblocal);
-					header('Refresh: 5; URL=ponto.php');
+					else{
+						$trying = 'entrada';
+						$nottrying = 'saída';
+						echo 'Seu ultimo registro indica uma '.$trying.', não pode registrar uma '.$trying.' sem gerar uma '.$nottrying.' primero.';
+						echo '<br><br>';
+						echo 'Aguarde unos segundos mientras lo redireccionamos a la pagina anterior<br>';
+						mysqli_close($dblocal);
+						header('Refresh: 5; URL=ponto.php');
+					}
 				}
 				else{
-					$trying = 'entrada';
-					$nottrying = 'saída';
-					echo 'Seu ultimo registro indica uma '.$trying.', não pode registrar uma '.$trying.' sem gerar uma '.$nottrying.' primero.';
-					echo '<br><br>';
-					echo 'Aguarde unos segundos mientras lo redireccionamos a la pagina anterior<br>';
-					mysqli_close($dblocal);
-					header('Refresh: 5; URL=ponto.php');
+					header('Location: ponto.locked.php');
 				}
 			}
 			else{
@@ -2532,7 +2631,266 @@ $sql = "SET lc_time_names = 'pt_BR';";
 
 	}
 	
+	if ($_POST['accion'] == 'RequestPayment') {
+		//array(4) { ["accion"]=> string(14) "RequestPayment" ["senharequest"]=> string(1) "1" ["senha2request"]=> string(1) "1" ["ammount"]=> string(3) "200" } 
+		$senha = $_POST['senharequest'];
+		$senha2 = $_POST['senha2request'];
+		$amount = $_POST['ammount'];
 		
+		$sql = 'INSERT requestpayment(employee_id, amountrequest, created) VALUES(';
+		$sql .= $senha.', ';
+		$sql .= $amount.', ';
+		$sql .= "'".date('Y-m-d H:i:s')."'";
+		$sql .= ');';
+		$result = resultFromQuery($sql);		
+		$id = mysql_insert_id();
+		
+		bitacoras($_SESSION["idusuarios"], 'Insertar solicitud de vale:'.$id);
+		header('Location: ponto.php');
+	}
+
+	if ($_POST['accion'] == 'AprovarVale') {
+
+		$sql = "UPDATE requestpayment SET ";
+		$sql .= "status = 1, ";
+		$sql .= "data = '".$_POST['data']."', ";
+		$sql .= "amountaproved = ".$_POST['amountaproved'].", ";
+		$sql .= "discountdate = '".$_POST['discountdate']."' ";
+		$sql .= "WHERE requestpayment_id = ".$_POST['requestpayment_id'].";";
+		
+		$result = resultFromQuery($sql);	
+			
+		bitacoras($_SESSION["idusuarios"], 'Aprovar solicitud de vale:'.$_POST['requestpayment_id']);
+		echo '<script languaje="javascript"> top.location="pagamentos.vales.php"</script>';
+	}
+
+	if ($_POST['accion'] == 'PagarVale') {
+		
+		$sql = "INSERT payment(employee_id, paymenttype_id, paymentmethod_id, ammount,  details, date) ";
+		$sql .= "VALUES(";
+		$sql .= $_POST['employee_id'].", ";
+		$sql .= "1, ";//paymenttype_id
+		$sql .= "1, ";//paymentmethod_id
+		$sql .= $_POST['amountaproved'].", ";//ammount
+		$sql .= "'Pagamento de vale solicitado na data: ".date('H:i:s d/m/Y', strtotime($_POST['created']))." e pagado na data ".date('d/m/Y')."', ";//details
+		$sql .= "'".$_POST['discountdate']."');";//date
+		
+		$result = resultFromQuery($sql);
+		
+		$payment_id = mysql_insert_id();
+		bitacoras($_SESSION["idusuarios"], 'Insertar Pagamento: '.$payment_id);
+
+
+		$sql = "UPDATE requestpayment SET ";
+		$sql .= "status = 2, ";
+		$sql .= "payment_id = ".$payment_id." ";
+		$sql .= "WHERE requestpayment_id = ".$_POST['requestpayment_id'].";";
+		$result = resultFromQuery($sql);	
+			
+		bitacoras($_SESSION["idusuarios"], 'Pagado vale:'.$_POST['requestpayment_id']);
+		echo '<script languaje="javascript"> top.location="pagamentos.vales.php"</script>';
+	}
+
+
+
+/* Booking */
+	if ($_POST['accion'] == 'bookingNew') {
+		
+		$english = array('January','February','March','April','May','June','July','August','September','October','November','December');
+        $portuguese = array('Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro');
+
+        $period = explode(" - ", $_POST['periodSelected']);
+		$period = str_replace($portuguese, $english, $period);
+		
+		$in = DateTime::createFromFormat('d F Y', $period[0]);
+		$out = DateTime::createFromFormat('d F Y', $period[1]);
+		
+		$sql = "SELECT * FROM booking ";
+		$sql .= "WHERE room_id = " . $_POST['room'] . " ";
+		$sql .= "AND (('" . $in->format('Y-m-d') . "' BETWEEN dataIN AND dataOUT) ";
+		$sql .= "OR ('" . $out->format('Y-m-d') . "' between dataIN AND dataOUT))";
+		
+		$result = resultFromQuery($sql);
+		
+		if($row = siguienteResult($result)){
+			echo "Over";
+			header("Refresh: 5; url=reservas.mapa.php?pousada=" . $_POST['idposadas']);
+			
+		}
+		elseif(isset($_POST['name'])){
+			$sql = "INSERT huespedes(titular, ";
+			$sql .= isset($_POST['country']) && $_POST['country'] != "" ? 'idpaises, ' : '';
+			$sql .= isset($_POST['email']) && $_POST['email'] != "" ? 'email' : '';
+			
+			$sql = rtrim ($sql, ', ');
+
+			
+			$sql .= ") VALUES(";
+			
+			$sql .= "'" . htmlspecialchars($_POST['name']) . "', ";
+			$sql .= isset($_POST['country']) && $_POST['country'] != "" ? htmlentities($_POST['country']) : '';
+			$sql .= isset($_POST['email']) && $_POST['email'] != "" ? "'" . htmlentities($_POST['email']) . "'" : '';
+			
+			$sql = rtrim ($sql, ', ');
+			
+			$sql .= ")";
+			
+			$result = resultFromQuery($sql);
+			$insertedhuesped = mysql_insert_id();
+			bitacoras($_SESSION["idusuarios"], 'Insertado Huesped: ' . $insertedhuesped);
+
+					
+			//insert booking
+			$sql = "INSERT booking(room_id, idhuespedes, ";
+			$sql .= isset($_POST['label']) && $_POST['label'] != "" ? 'label, ' : '';
+			$sql .= isset($_POST['quantity']) && $_POST['quantity'] != "" && $_POST['quantity'] != 0 ? 'quantity, ' : '';
+			$sql .= "dataIN, dataOUT, idservicios, ";
+			$sql .= isset($_POST['operador']) && $_POST['operador'] != "" && $_POST['responsable'] = 1 ? 'idoperadoresturisticos, ' : '';
+			$sql .= 'idresponsablesDepago, ';
+			$sql .= isset($_POST['price']) && $_POST['price'] > 0 ? 'price, ' : '';
+			$sql .= isset($_POST['pay']) && $_POST['pay'] > 0 ? 'pay, ' : '';
+			$sql .= isset($_POST['currency']) && $_POST['currency'] > 0 ? 'idcurrency, ' : '';
+			
+			
+			$sql .= isset($_POST['notes']) && $_POST['notes'] != "" ? 'note, ' : '';
+			$sql .= "color) ";
+			
+			$sql .= "VALUES(";
+			$sql .= $_POST['room'] . ", ";
+			$sql .= $insertedhuesped . ", ";
+			$sql .= isset($_POST['label']) && $_POST['label'] != "" ? " '" . htmlspecialchars($_POST['label']) . "', " : '';
+			$sql .= isset($_POST['quantity']) && $_POST['quantity'] != "" && $_POST['quantity'] != 0 ? "'" .htmlentities($_POST['quantity']) . "', " : '';
+			$sql .= "'" . $in->format('Y-m-d') . "', ";
+			$sql .= "'" . $out->format('Y-m-d') . "', ";
+			$sql .= $_POST['idservicios'] . ", ";
+			$sql .= isset($_POST['operador']) && $_POST['operador'] != "" && $_POST['responsable'] = 1 ? htmlentities($_POST['operador']) . ", " : '';
+			
+			$sql .= htmlentities($_POST['responsable']) . ", " ;
+			$sql .= isset($_POST['price']) && $_POST['price'] > 0 ? htmlentities($_POST['price']) . ", " : '';
+			$sql .= isset($_POST['pay']) && $_POST['pay'] > 0 ? htmlentities($_POST['pay']) . ", " : '';
+			$sql .= isset($_POST['currency']) && $_POST['currency'] > 0 ? htmlentities($_POST['currency']) . ", " : '';
+			$sql .= isset($_POST['notes']) && $_POST['notes'] != "" ? "'" . htmlspecialchars($_POST['notes']) . "', " : '';
+			
+			$sql .= "'" . htmlentities($_POST['color']) . "'";
+			$sql .= ");";
+
+
+			$result = resultFromQuery($sql);
+
+			bitacoras($_SESSION["idusuarios"], 'Insertada Reserva: ' . mysql_insert_id());
+			header('Location: reservas.mapa.php?pousada='.$_POST['idposadas']);
+			
+		}
+	
+	}
+
+	if ($_POST['accion'] == 'bookingModify') {
+				
+		$english = array('January','February','March','April','May','June','July','August','September','October','November','December');
+        $portuguese = array('Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro');
+
+        $period = explode(" - ", $_POST['periodSelected']);
+		$period = str_replace($portuguese, $english, $period);
+		
+		$in = DateTime::createFromFormat('d F Y', $period[0]);
+		$out = DateTime::createFromFormat('d F Y', $period[1]);
+		
+		$sql = "SELECT * FROM booking ";
+		$sql .= "WHERE room_id = " . $_POST['room'] . " ";
+		$sql .= "AND (('" . $in->format('Y-m-d') . "' BETWEEN dataIN AND dataOUT) ";
+		$sql .= "OR ('" . $out->format('Y-m-d') . "' between dataIN AND dataOUT))";
+		
+		$result = resultFromQuery($sql);
+		
+		if($row = siguienteResult($result)){
+			echo "Over";
+			header("Refresh: 5; url=reservas.mapa.php?pousada=" . $_POST['idposadas']);
+			
+		}
+		elseif(isset($_POST['name'])){
+			$sql = "UPDATE huespedes SET ";
+			$sql .= "titular = '" . htmlspecialchars($_POST['name']) . "', ";
+			$sql .= isset($_POST['country']) && $_POST['country'] != "" ? 'idpaises = ' . htmlentities($_POST['country']) . ", "  : '';
+			$sql .= isset($_POST['email']) && $_POST['email'] != "" ? 'email = ' . htmlentities($_POST['email']) . " " : '';
+			
+			
+			$sql = rtrim ($sql, ', ');
+
+			
+			$sql .= " WHERE 1 ";
+			$sql .= "AND idhuespedes = " . htmlentities($_POST['idhuespedes']);
+
+			
+			$result = resultFromQuery($sql);
+			bitacoras($_SESSION["idusuarios"], 'Modificado huesped: ' . $_POST['idhuespedes']);
+
+					
+			//insert booking
+			$sql = "UPDATE booking SET ";
+			$sql .= "room_id = " . htmlentities($_POST['room']) . ", ";
+			$sql .= "idhuespedes = " . htmlentities($_POST['idhuespedes']) . ", ";
+			$sql .= isset($_POST['label']) && $_POST['label'] != "" ? "label = '"  . htmlspecialchars($_POST['label']) . "', " : '';
+			$sql .= isset($_POST['quantity']) && $_POST['quantity'] != "" && $_POST['quantity'] != 0 ? 'quantity = '  . htmlentities($_POST['quantity']) . ", " : '';
+			$sql .= "dataIN = '" . $in->format('Y-m-d') . "', ";
+			$sql .= "dataOUT = '" . $out->format('Y-m-d') . "', ";
+			$sql .= "idservicios = " . htmlentities($_POST['idservicios']) . ", ";
+			
+			$sql .= isset($_POST['operador']) && $_POST['operador'] != "" && $_POST['responsable'] = 1 ? "idoperadoresturisticos = " . htmlentities($_POST['operador']) . ", " : '';
+			$sql .= "idresponsablesDepago = " . htmlentities($_POST['responsable']) . ", ";
+			$sql .= isset($_POST['price']) && $_POST['price'] > 0 ? "price = " . htmlentities($_POST['price']) . ", " : '';
+			$sql .= isset($_POST['pay']) && $_POST['pay'] > 0 ? "pay = " . htmlentities($_POST['pay']) . ", " : '';
+			$sql .= isset($_POST['currency']) && $_POST['currency'] > 0 ? "idcurrency = " . htmlentities($_POST['currency']) . ", " : '';
+			$sql .= isset($_POST['notes']) && $_POST['notes'] != "" ? "note = '" . htmlspecialchars($_POST['notes']) . "', " : '';
+			$sql .= "color = '" . htmlentities($_POST['color']) . "' ";
+
+			$sql = rtrim ($sql, ', ');
+			$sql .= " WHERE 1 ";
+			$sql .= "AND booking_id = " . htmlentities($_POST['booking_id']);
+			$result = resultFromQuery($sql);
+
+			bitacoras($_SESSION["idusuarios"], 'Atualizada Reserva: ' . htmlentities($_POST['booking_id']));
+			header('Location: reservas.mapa.php?pousada='.$_POST['idposadas']);
+			
+		}
+	
+	}
+
+	if ($_POST['accion'] == 'RoomNew') {
+
+		if($_POST['label'] != '' && isset($_POST['idposadas'])){
+			
+			$sql = 'INSERT room (idposadas, label) VALUES (';
+			$sql .= $_POST['idposadas'] . ', ';
+			$sql .= "'" . $_POST['label'] . "'";
+			$sql .= ");";
+			
+			$result = resultFromQuery($sql);
+			
+			$room_id = mysql_insert_id();
+			
+			bitacoras($_SESSION["idusuarios"], 'Insertado Quarto: ID '.$room_id);
+			
+			header('Location: pousadas.quartos.php?pousada='.$_POST['idposadas']);
+			
+		
+		}
+	}
+	
+	if ($_POST['accion'] == 'RoomModify') {
+		if($_POST['label'] != ''){
+			$sql = 'UPDATE room SET ';
+			$sql .= 'label = ' . $_POST['label'] . " "; 
+			$sql .= 'WHERE 1 ';
+			$sql .= 'AND room_id = ' . $_POST['room_id'];
+			
+			$result = resultFromQuery($sql);
+					
+			bitacoras($_SESSION["idusuarios"], 'Atualizado Quarto: ID '.$_POST['room_id']);
+			
+			header('Location: pousadas.quartos.php?pousada='.$_POST['idposadas']);
+		
+		}
+	}
 
 /*Procesos*/
 

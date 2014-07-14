@@ -424,7 +424,7 @@ $dropdown = dayDropdown('clearance', $day);
 	<div id="content-header">
     <div id="breadcrumb"> 
 		<a href="index.php" title="Home" class="tip-bottom"><i class="icon-home"></i> Home</a> 
-		<a href="salarios.php" title="Área Contable" class="tip-bottom">Área Contable</a>
+		<a href="salarios.php" title="Área Contable" class="tip-bottom">Área Contábil</a>
 		<a href="funcionarios.php" title="Funcionarios" class="tip-bottom">Funcionarios</a>
 		<a href="#" class="current">Registro de Funcionarios</a>
 	</div>
@@ -831,7 +831,7 @@ $dropdown = dayDropdown('clearance', $day);
 										<!--Bonus Salary-->
 										<div class="input-prepend"> <span class="add-on">R$</span>
 										  <!--Si el usuario esta autorizado coloca el campo como visible y si contiene algun valor -->
-										  <input id="bonussalary" name="bonussalary" placeholder="Abono" class="span4 m-wrap" <?php echo $_SESSION["idusuarios_tipos"] == 1 || $_SESSION["idusuarios_tipos"] == 4 ? 'type="number"'.(isset($bonussalary) ? ' value="'.$bonussalary.'"' : '') : ' type="hidden"' ?>>
+										  <input id="bonussalary" name="bonussalary" placeholder="Abono" class="span4 m-wrap" <?php echo $_SESSION["idusuarios_tipos"] == 1 || $_SESSION["idusuarios_tipos"] == 4 || $_SESSION["idusuarios_tipos"] == 8 ? 'type="number"'.(isset($bonussalary) ? ' value="'.$bonussalary.'"' : '') : ' type="hidden"' ?>>
 										</div><br>
 
 										<label><input type="checkbox" name="unhealthy" id="unhealthy" <?php echo isset($unhealthy) && $unhealthy != 0 ? 'checked' : ''?>/>Insalubre</label>

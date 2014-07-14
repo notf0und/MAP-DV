@@ -2,6 +2,15 @@
 
 include "head.php"; 
 
+if(isset($_POST['accion']) && $_POST['accion'] == 'ClearanceDelete'){
+
+	$sql='DELETE FROM clearance WHERE clearance_id = '.key($_POST['deleteRow']['id']);
+	$result = resultFromQuery($sql);
+	
+	bitacoras($_SESSION["idusuarios"], 'Apagada folga: '.$_POST['deleteRow']['id']);
+	header('Location: funcionarios.pontos.folgas.php?employee_id='.$_POST['employee_id']);
+}
+
 if(isset($_POST['accion']) && $_POST['accion'] == 'ClearanceModify'){
 	$employee_id = $_POST['employee_id'];
 	$clearance_id = $_POST['id'];
@@ -20,12 +29,13 @@ elseif(isset($_GET['employee_id'])){
 $sql = "SET lc_time_names = 'pt_BR';";
 resultFromQuery($sql);
 
-$sql = "SELECT clearance_id id, CONCAT(UCASE(LEFT(dayname(valid_from), 1)), SUBSTRING(dayname(valid_from), 2)) Día, valid_from Desde ";
+$sql = "SELECT clearance_id id, CONCAT(UCASE(LEFT(dayname(valid_from), 1)), SUBSTRING(dayname(valid_from), 2)) Día, valid_from Desde, permanent Permanente ";
 $sql .= 'FROM clearance ';
 $sql .= 'WHERE 1 ';
-$sql .= 'AND employee_id = '.$employee_id;
+$sql .= 'AND employee_id = '.$employee_id.' ';
+$sql .= 'ORDER BY valid_from DESC';
 
-$tabla = tableFromResult(resultFromQuery($sql), 'Clearance', false, true, false, false); 
+$tabla = tableFromResult(resultFromQuery($sql), 'Clearance', true, true, false, false); 
 
 
 $sql = "SELECT CONCAT(P.firstname, ' ', P.lastname) Funcionario ";
@@ -46,7 +56,7 @@ $funcionario = $row->Funcionario;
   <div id="content-header">
     <div id="breadcrumb"> 
 		<a href="index.php" title="Home" class="tip-bottom"><i class="icon-home"></i> Home</a> 
-		<a href="salarios.php" title="Área Contable" class="tip-bottom">Área Contable</a>
+		<a href="salarios.php" title="Área Contable" class="tip-bottom">Área Contábil</a>
 		<a href="funcionarios.php" title="Funcionarios" class="tip-bottom">Funcionarios</a>
 		<a href="funcionarios.lista.php" title="Lista de Funcionarios" class="tip-bottom">Lista de Funcionarios</a>
 		<a href="#" class="current">Dias de folga de <?php echo $funcionario; ?></a>
@@ -114,6 +124,7 @@ $funcionario = $row->Funcionario;
         </div>
       </div>
     </div>
+    <a href="funcionarios.pagamentos.printPoint.php?employee_id=<?php echo isset($employee_id) ? $employee_id : '';?>"><button class="btn btn-primary">Ver Ponto</button></a>
   </div>
 </div>
 <!--main-container-part-->

@@ -90,11 +90,15 @@ function bolsadehoras($employee_id, $month, $year){
 				if(isset($worked['Worked']) && $worked['Worked'] != 0){
 					
 					$sum = sumbolsa($carga, intHourstoNormal($worked['Worked']), $sum);
-					//echo 'Sum: '.var_dump($sum).'<br>';
-					$worked['Time'] = $sum->format('%r%H:%I');
+					$dias = $sum->format('%r%d') * 24;
+					$horas = $sum->format('%H') + $dias;
+					$worked['Time'] = $horas.$sum->format(':%I');
 					
 					if(!$sum->invert){
 						$worked['Time'] = '+'.$worked['Time'];
+					}
+					else{
+						$worked['Time'] = '-'.$worked['Time'];
 					}
 				}
 
@@ -214,6 +218,9 @@ function bolsatotable($bolsa){
 				elseif($bolsa[$data]['Motive'] == 'Trabalhando'){
 					$color = '';
 				}
+				elseif($bolsa[$data]['Motive'] == 'Ferias'){
+					$color = '#71C6E2';
+				}
 				else{
 					$color = '#CC0000';
 				}
@@ -251,16 +258,60 @@ function bolsatotable($bolsa){
 $bolsa = bolsadehoras($employee_id, $month, $year);
 $tblbolsa = bolsatotable($bolsa);
 
-$sql = "SELECT CONCAT(P.firstname, ' ', P.lastname) Funcionario ";
+$sql = "SELECT CONCAT(P.firstname, ' ', P.lastname) Funcionario, ";
+$sql .= 'C.name cname, ';
+$sql .= 'C.cnpj cnpj, ';
+$sql .= 'A.street street, ';
+$sql .= 'A.number number, ';
+$sql .= 'A.block block, ';
+$sql .= 'A.batch batch, ';
+$sql .= 'A.neightborhood neightborhood ';
+
+
+
 $sql .= 'FROM employee E ';
+
 $sql .= 'LEFT JOIN profile P ';
 $sql .= 'ON E.profile_id = P.profile_id ';
+
+$sql .= 'LEFT JOIN employee_corporate EC ';
+$sql .= 'ON E.employee_id = EC.employee_id ';
+
+$sql .= 'LEFT JOIN corporate C ';
+$sql .= 'ON EC.corporate_id = C.corporate_id ';
+
+$sql .= 'LEFT JOIN address A ';
+$sql .= 'ON C.address_id = A.address_id ';
+
+
 $sql .= 'WHERE 1 ';
-$sql .= 'AND E.employee_id = '.$employee_id;
+$sql .= 'AND E.employee_id = '.$employee_id.' ';
+
+$sql .= 'ORDER BY EC.employee_corporate_id DESC ';
+$sql .= 'LIMIT 1;';
 $result = resultFromQuery($sql);
 $row = siguienteResult($result);
 
 $funcionario = $row->Funcionario;
+$cname = $row->cname;
+$cnpj = $row->cnpj;
+$street = $row->street;
+$number = $row->number;
+$block = $row->block;
+$batch = $row->batch;
+$batch = $row->batch;
+$neightborhood = $row->neightborhood;
+
+
+$firstline ='Razão Social: '.$cname;
+$cnpj != '' ? $firstline .= " -- CNPJ: ".$cnpj : '';
+
+$secondline = 'Endereço: '.$street;
+$secondline .= $street != '' ? ($number != '' ?  ' Nº '.$number : ' S/N') : '';
+$block != '' ? $secondline .= ' Quadra: '.$block: '';
+$batch != '' ? $secondline .= ' Lote: '.$batch: '';
+$neightborhood != '' ? $secondline .= ' - '.$neightborhood: '';
+
 
 
 ?>	
@@ -271,7 +322,7 @@ $funcionario = $row->Funcionario;
     <div id="breadcrumb"> 
 		 
 		<a href="index.php" title="Home" class="tip-bottom"><i class="icon-home"></i> Home</a> 
-		<a href="salarios.php" title="Área Contable" class="tip-bottom">Área Contable</a>
+		<a href="salarios.php" title="Área Contable" class="tip-bottom">Área Contábil</a>
 		<a href="funcionarios.php" title="Funcionarios" class="tip-bottom">Funcionarios</a>
 		<a href="funcionarios.lista.php" title="Lista de funcionarios" class="tip-bottom">Lista de funcionarios</a>
 		<a href="funcionarios.pagamentos?employee_id=<?php echo $employee_id; ?>" title="Balance de Salario" class="tip-bottom">Balance de Salario</a>
@@ -282,19 +333,25 @@ $funcionario = $row->Funcionario;
   <div class="container-fluid">
     <div class="row-fluid">
       <div class="span12">
-        <div class="widget-box">
-          <div class="widget-title"> <span class="icon"> <i class="icon-time"></i> </span>
-            <h5>Registro de ponto de <?php echo $funcionario.' no período '.$month.'/'.$year?> </h5>
-          </div>
+		  <h5> <?php echo $firstline;?></h5>
+		  <h5> <?php echo $secondline;?></h5>
+		  <h5> <?php echo 'Funcionario: '.$funcionario.' - Período '.$month.'/'.$year?></h5>
+		  
+		  <div class="widget-box">
+
 
 			  <?php echo $tblbolsa?>
 
         </div>
       </div>
     </div>
+    <br>
+    <p>Observações:________________________________________________________________________________________________________________________________________________________________________________________________</p>
+    <p>_______________________________________________________________________________________________________________________________________________________________________________________________________________</p>
   </div>
-<br><p align="center">_______________________________</p><br>
-<p align="center">Asignatura</p>
+  <br>
+<p align="center">_______________________________</p>
+<h5><p align="center"><?php echo $funcionario?></p></h5>
 </div>
 
 <!--Footer-part-->

@@ -37,7 +37,7 @@ $tablapagamentos = tableFromResult(resultFromQuery($sqlQuery), 'payment', true, 
   <div id="content-header">
     <div id="breadcrumb"> 
 		<a href="index.php" title="Home" class="tip-bottom"><i class="icon-home"></i> Home</a> 
-		<a href="salarios.php" title="Área Contable" class="tip-bottom">Área Contable</a>
+		<a href="salarios.php" title="Área Contable" class="tip-bottom">Área Contábil</a>
 		<a href="pagamentos.php" title="Pagamentos" class="tip-bottom">Pagamentos</a>
 		<a href="#" class="current">Lista de Pagamentos</a>
 	</div>

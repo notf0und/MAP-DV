@@ -1511,12 +1511,7 @@ function calcularSalario($employee_id, $month = false, $year = false){
 		
 			//INSS
 			if ($salario['employee']['Contract'] || $salario['employee']['Experience Contract'] != 0){
-				if (isset($salario['-']['Faltas ('.$salario['employee']['Non Attendance'].')'])){
-					$salario['-']['INSS'] = round(($salario['+']['Salario Base'] -  round(($row->base / 30) * $salario['employee']['Non Attendance'], 2)) * 0.08, 2);
-				}
-				else{
-					$salario['-']['INSS'] = round($salario['+']['Salario Base'] * 0.08, 2);
-				}
+				$salario['-']['INSS'] = round($salario['+']['Salario Base'] * 0.08, 2);
 			}
 			
 			//Descuentos por Transporte
@@ -1623,10 +1618,7 @@ function transportDiscount($salario){
 
 	$salarioneto = array_sum($salario['+']);
 
-	if ($salarioneto < 1000){
-		$transportdiscount = 45.60;
-	}
-	elseif ($salarioneto >= 1000 && $salarioneto < 1200){
+	if ($salarioneto <= 1000){
 		$transportdiscount = 50;
 	}
 	else{
@@ -1691,7 +1683,7 @@ function nextDay($dayname, $date){
 
 function checkConnection(){
     //Initiates a socket connection
-    $conn = @fsockopen("davincimp.no-ip.info", 8080, $errno, $errstr, 30);
+    $conn = @fsockopen("grupodasamericas.com", 80, $errno, $errstr, 30);
     if ($conn)
     {
         $status = 1; 
@@ -1971,6 +1963,34 @@ function employeeClearance($employee_id, $date){
 	if ($rowclearance = siguienteResult($rclearance)){
 			
 		if($rowclearance->clearance != $rowclearance->todayname){
+			
+			//Buscar 1 atestados, 2 ferias, 3 maternidade, 4 licensa premium
+
+			$sql = "SELECT * ";
+			$sql .= "FROM nonwork_period P ";
+			$sql .= "WHERE 1 ";
+			$sql .= "AND employee_id =  ".$employee_id." ";
+			$sql .= "AND '".$date."' BETWEEN P.from AND P.to";
+			$rholiday = resultFromQuery($sql);
+			
+			if ($rowholiday = siguienteResult($rholiday)){
+				if($rowholiday->motive == 0){
+					$motive = 'Atestado';
+				}
+				elseif($rowholiday->motive == 1){
+					$motive = 'Ferias';
+				}
+				elseif($rowholiday->motive == 2){
+					$motive = 'Maternidade';
+				}
+				else{
+					$motive = 'Licensa Premium';
+				}
+
+			}
+			
+
+			
 			//buscar feriados
 			$sql = "SELECT * ";
 			$sql .= "FROM holiday ";

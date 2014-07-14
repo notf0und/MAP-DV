@@ -3,7 +3,7 @@
 include "head.php"; 
 
 $brisas = getPontos(1);
-$colinas = getPontos(2);
+
 $dasamericas = getPontos(3);
 $dvcentro = getPontos(4);
 $dvjoao = getPontos(5);
@@ -16,6 +16,7 @@ function getPontos($idempresa){
 	$sql .= "temp.employee_id, ";
 	$sql .= "CONCAT(P.firstname, ' ', P.lastname) Funcionario, ";
 	$sql .= "date_time Hora, ";
+	$sql .= "E.locked, ";
 	$sql .= "in_out Status ";
 	$sql .= " FROM ";
 	$sql .= "(SELECT  point_id, employee_id, date_time, in_out ";
@@ -38,6 +39,7 @@ function getPontos($idempresa){
 		$hora = $row->Hora;
 		$status = $row->Status;
 		$date = new DateTime($hora);
+		$locked = $row->locked;
 		
 		if ($status == 1){
 			$string .= "<div class='alert alert-success'> <i class='icon-chevron-right'></i> ";
@@ -46,13 +48,25 @@ function getPontos($idempresa){
 		}
 		
 		$string .= "<strong>".$date->format('H:i')."</strong> ";
-		$string .= $funcionario." <a href='funcionarios.messagem.php?employee_id=".$employee_id."' class='tip-top' data-original-title='Enviar messagem'><i class='icon-envelope'></i></a></div>";
+		$string .= $funcionario." <a href='funcionarios.messagem.php?employee_id=".$employee_id."' class='tip-top' data-original-title='Enviar messagem'><i class='icon-envelope'></i></a>";
+		
+		$string .= " <a href='funcionarios.lock.php?employee_id=".$employee_id."&locked=";
+		if($locked == 0){
+			$string .= "1' class='tip-top' data-original-title='Bloquear Funcionario'><i class='icon-lock'>";
+		}
+		else{
+			$string .= "0' class='tip-top' data-original-title='Desbloquear Funcionario'><i class='icon-unlock'>";
+		}
+		
+		$string .= "</i></a></div>";
+		
+			
 	}
 	$string .= "<h3>Tarde ou ausente</h3><hr>";
 
 
 	//SELECT
-	$sql = "SELECT employee_id, CONCAT(P.firstname, ' ', P.lastname) Funcionario, fromhour, TIME(NOW()) hora FROM employee E LEFT JOIN profile P ON E.profile_id = P.profile_id WHERE E.decline IS NULL AND E.idempresa = ".$idempresa;
+	$sql = "SELECT employee_id, CONCAT(P.firstname, ' ', P.lastname) Funcionario, locked, fromhour, TIME(NOW()) hora FROM employee E LEFT JOIN profile P ON E.profile_id = P.profile_id WHERE E.decline IS NULL AND E.idempresa = ".$idempresa;
 	$result = resultFromQuery($sql);
 
 	$tarde ='';
@@ -65,6 +79,7 @@ function getPontos($idempresa){
 		$funcionario = $row->Funcionario;
 		$fromhour = $row->fromhour;
 		$hora = $row->hora;
+		$locked = $row->locked;
 		
 		$sql = "SELECT TIME(date_time) ingreso from point where date(date_time) = curdate() AND in_out = 1 AND employee_id = ".$employee_id." LIMIT 1";
 		$rentrada = resultFromQuery($sql);
@@ -106,7 +121,17 @@ function getPontos($idempresa){
 					
 					$tarde .= "<div class='alert alert-warning'> <i class='icon-time'></i> ";
 					$tarde .= "<strong>".$sReturn."</strong> ";
-					$tarde .= $funcionario." <a href='funcionarios.messagem.php?employee_id=".$employee_id."' class='tip-top' data-original-title='Enviar messagem'><i class='icon-envelope'></i></a></div>";
+					$tarde .= $funcionario." <a href='funcionarios.messagem.php?employee_id=".$employee_id."' class='tip-top' data-original-title='Enviar messagem'><i class='icon-envelope'></i></a> ";
+					
+					$tarde .= " <a href='funcionarios.lock.php?employee_id=".$employee_id."&locked=";
+					if($locked == 0){
+						$tarde .= "1' class='tip-top' data-original-title='Bloquear Funcionario'><i class='icon-lock'>";
+					}
+					else{
+						$tarde .= "0' class='tip-top' data-original-title='Desbloquear Funcionario'><i class='icon-unlock'>";
+					}
+					
+					$tarde .= "</i></a></div>";
 
 				}
 			}				
@@ -115,7 +140,18 @@ function getPontos($idempresa){
 			
 			$disconnect .= "<div class='alert alert-grey'> <i class='icon-unlock'></i> ";
 			$disconnect .= "<strong>Folga</strong> ";
-			$disconnect .= $funcionario." <a href='funcionarios.messagem.php?employee_id=".$employee_id."' class='tip-top' data-original-title='Enviar messagem'><i class='icon-envelope'></i></a></div>";
+			$disconnect .= $funcionario." <a href='funcionarios.messagem.php?employee_id=".$employee_id."' class='tip-top' data-original-title='Enviar messagem'><i class='icon-envelope'></i></a>";
+							
+			$disconnect .= " <a href='funcionarios.lock.php?employee_id=".$employee_id."&locked=";
+			if($locked == 0){
+				$disconnect .= "1' class='tip-top' data-original-title='Bloquear Funcionario'><i class='icon-lock'>";
+			}
+			else{
+				$disconnect .= "0' class='tip-top' data-original-title='Desbloquear Funcionario'><i class='icon-unlock'>";
+			}
+			
+			$disconnect .= "</i></a></div>";
+		
 		
 		}
 		
@@ -123,12 +159,35 @@ function getPontos($idempresa){
 			
 			$ausente .= "<div class='alert alert-error'> <i class='icon-ban-circle'></i> ";
 			$ausente .= "<strong>Ausente: </strong> ";
-			$ausente .= $funcionario." <a href='funcionarios.messagem.php?employee_id=".$employee_id."' class='tip-top' data-original-title='Enviar messagem'><i class='icon-envelope'></i></a></div>";
+			$ausente .= $funcionario." <a href='funcionarios.messagem.php?employee_id=".$employee_id."' class='tip-top' data-original-title='Enviar messagem'><i class='icon-envelope'></i></a>";
+			
+			$ausente .= " <a href='funcionarios.lock.php?employee_id=".$employee_id."&locked=";
+			if($locked == 0){
+				$ausente .= "1' class='tip-top' data-original-title='Bloquear Funcionario'><i class='icon-lock'>";
+			}
+			else{
+				$ausente .= "0' class='tip-top' data-original-title='Desbloquear Funcionario'><i class='icon-unlock'>";
+			}
+			
+			$ausente .= "</i></a></div>";
+		
+		
 		}
 		elseif ($fromhour > $hora){
-			$disconnect .= "<div class='alert alert-grey'> <i class='icon-unlock'></i> ";
+			$disconnect .= "<div class='alert alert-grey'> <i class='icon-leaf'></i> ";
 			$disconnect .= "<strong>".date('H:i',strtotime($fromhour))." </strong> ";
-			$disconnect .= $funcionario." <a href='funcionarios.messagem.php?employee_id=".$employee_id."' class='tip-top' data-original-title='Enviar messagem'><i class='icon-envelope'></i></a></div>";
+			$disconnect .= $funcionario." <a href='funcionarios.messagem.php?employee_id=".$employee_id."' class='tip-top' data-original-title='Enviar messagem'><i class='icon-envelope'></i></a>";
+		
+			$disconnect .= " <a href='funcionarios.lock.php?employee_id=".$employee_id."&locked=";
+			if($locked == 0){
+				$disconnect .= "1' class='tip-top' data-original-title='Bloquear Funcionario'><i class='icon-lock'>";
+			}
+			else{
+				$disconnect .= "0' class='tip-top' data-original-title='Desbloquear Funcionario'><i class='icon-unlock'>";
+			}
+			
+			$disconnect .= "</i></a></div>";
+		
 		}
 
 	}
@@ -152,7 +211,7 @@ function getPontos($idempresa){
   <div id="content-header">
     <div id="breadcrumb"> 
 		<a href="index.php" title="Home" class="tip-bottom"><i class="icon-home"></i> Home</a> 
-		<a href="salarios.php" title="Área Contable" class="tip-bottom">Área Contable</a>
+		<a href="salarios.php" title="Área Contable" class="tip-bottom">Área Contábil</a>
 		<a href="funcionarios.php" title="Funcionarios" class="tip-bottom">Funcionarios</a>
 		<a href="#" class="current">Pontos</a>
 	</div>
@@ -166,12 +225,11 @@ function getPontos($idempresa){
           <div class="widget-title">
             <ul class="nav nav-tabs">
               <li class="active"><a data-toggle="tab" href="#tab1">Brisas de Buzios</a></li>
-              <li><a data-toggle="tab" href="#tab2">Buzios Colinas</a></li>
-              <li><a data-toggle="tab" href="#tab3">Das Americas</a></li>
-              <li><a data-toggle="tab" href="#tab4">New Paradise</a></li>
-              <li><a data-toggle="tab" href="#tab5">Da Vinci Centro</a></li>
-              <li><a data-toggle="tab" href="#tab6">Da Vinci João Fernandez</a></li>
-              <li><a data-toggle="tab" href="#tab7">Geral</a></li>
+              <li><a data-toggle="tab" href="#tab2">Das Americas</a></li>
+              <li><a data-toggle="tab" href="#tab3">New Paradise</a></li>
+              <li><a data-toggle="tab" href="#tab4">Da Vinci Centro</a></li>
+              <li><a data-toggle="tab" href="#tab5">Da Vinci João Fernandez</a></li>
+              <li><a data-toggle="tab" href="#tab6">Geral</a></li>
             </ul>
           </div>
           <div class="widget-content tab-content">
@@ -179,21 +237,18 @@ function getPontos($idempresa){
 				<?php echo $brisas;?>
             </div>
             <div id="tab2" class="tab-pane">
-				<?php echo $colinas;?>
-			</div>
-            <div id="tab3" class="tab-pane">
 				<?php echo $dasamericas;?>
             </div>
-            <div id="tab4" class="tab-pane">
+            <div id="tab3" class="tab-pane">
 				<?php echo $paradise;?>
             </div>
-            <div id="tab5" class="tab-pane">
+            <div id="tab4" class="tab-pane">
 				<?php echo $dvcentro;?>
             </div>
-            <div id="tab6" class="tab-pane">
+            <div id="tab5" class="tab-pane">
 				<?php echo $dvjoao;?>
             </div>
-            <div id="tab7" class="tab-pane">
+            <div id="tab6" class="tab-pane">
             </div>
         </div>
 		

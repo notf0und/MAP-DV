@@ -39,7 +39,7 @@
 				$sqlQuery .= "LEFT JOIN servicios S ON MP.idservicios = S.idservicios ";
 				$sqlQuery .= "LEFT JOIN posadas P ON MP.idposadas = P.idposadas ";
 				$sqlQuery .= "WHERE 1 ";
-				$sqlQuery .= "AND habilitado = 1 ";
+				$sqlQuery .= "AND MP.habilitado = 1 ";
 				$sqlQuery .= "AND CURRENT_DATE BETWEEN MP.DataIN AND MP.DataOUT ";
 				echo tableFromResultGDA(resultFromQuery($sqlQuery), 'mediapension', false, false, 'posts.php', true);
 			?>		  

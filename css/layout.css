@@ -1,0 +1,83 @@
+
+input.inputDate {
+	border: 1px solid #999;
+	padding: 4px;
+	border-bottom-color: #ddd;
+	border-right-color: #ddd;
+	width: 65px;
+}
+#period {
+	position: relative;
+}
+#periodField {
+	width: 290px;
+	height: 26px;
+	background: url(../images/field.png);
+	overflow: hidden;
+	position: relative;
+}
+#periodField a 	{
+	display: block;
+	position: absolute;
+	width: 26px;
+	height: 26px;
+	top: 0;
+	right: 0;
+	text-decoration: none;
+	text-indent: -3000px;
+}
+#periodField span	{
+	font-size: 12px;
+	font-weight: bold;
+	color: #000;
+	position: absolute;
+	top: 0;
+	height: 26px;
+	line-height: 26px;
+	left: 5px;
+	width: 250px;
+	text-align: center;
+}
+#periodCalendar {
+	position: absolute;
+	top: 26px;
+	left: 0;
+	height: 0px;
+	overflow: hidden;
+	width: 588px;
+	background: #B9B9B9;
+	z-index:1;
+}
+#periodCalendar .datepicker {
+	position: absolute;
+	bottom: 0;
+	top: auto;
+}
+#periodCalendar .datepickerContainer,
+#periodCalendar .datepickerBorderT,
+#periodCalendar .datepickerBorderB,
+#periodCalendar .datepickerBorderL,
+#periodCalendar .datepickerBorderR,
+#periodCalendar .datepickerBorderTL,
+#periodCalendar .datepickerBorderTR,
+#periodCalendar .datepickerBorderBL,
+#periodCalendar .datepickerBorderBR {
+	background: transparent !important;
+}
+#periodCalendar .datepicker a:hover{
+	color: #b6f063;
+}
+tr:hover{ background: #B9B9B9;}
+.greenText{ background:#70bb70; }
+.blueText{ background:#268bd2; }
+.blueText{ background:#268bd2; }
+.roseText{ background:#FF0066; }
+.brownText{ background: #964B00; }
+.orangeText{ background: #dd6600; }
+.redText{ background: #FF0000; }
+
+.yellowText{ background: #dddd66; }
+  
+.grayText{ background: #aaaaaa; }
+
+.blackText { background: #333333; }

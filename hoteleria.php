@@ -16,11 +16,11 @@
   <div class="container-fluid">
     <div class="quick-actions_homepage">
       <ul class="quick-actions">
-  		<?php if (($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 2) || ($_SESSION["idusuarios_tipos"] == 3)  || ($_SESSION["idusuarios_tipos"] == 6)) {?>
+  		<?php if (($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 2) || ($_SESSION["idusuarios_tipos"] == 3)  || ($_SESSION["idusuarios_tipos"] == 4) || ($_SESSION["idusuarios_tipos"] == 6)) {?>
 <!--
         <li class="bg_lr span2"> <a href="hoteleria.novo.php"> <i class="icon-plus"></i> Novo... </a> </li>
 -->
-			<?php if (($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 3)  || ($_SESSION["idusuarios_tipos"] == 6)) {?>
+			<?php if (($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 3) || ($_SESSION["idusuarios_tipos"] == 4) || ($_SESSION["idusuarios_tipos"] == 6)) {?>
         <li class="bg_lb span2"> <a href="hoteleria.vouchers.php"> <i class="icon-list-ul"></i> Vouchers</a> </li>
 			<?php } ?>
   		<?php } ?>

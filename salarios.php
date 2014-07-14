@@ -6,9 +6,9 @@
   <div id="content-header">
     <div id="breadcrumb">
 		<a href="index.php" title="ir para Início" class="tip-bottom"><i class="icon-home"></i> Início</a>
-		<a href="#" class="current">Área Contable</a>
+		<a href="#" class="current">Área Contábil</a>
 	</div>
-	<h1>Área Contable - Menú de Opções</h1><hr>
+	<h1>Área Contábil - Menú de Opções</h1><hr>
   </div>
   
 <!--End-breadcrumbs-->
@@ -18,7 +18,7 @@
     <div class="quick-actions_homepage">
       <ul class="quick-actions">
 		  
-		<?php if (($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 4) || ($_SESSION["idusuarios_tipos"] == 5) || ($_SESSION["idusuarios_tipos"] == 9)) {?>
+		<?php if (($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 4) || ($_SESSION["idusuarios_tipos"] == 5) || ($_SESSION["idusuarios_tipos"] == 8) || ($_SESSION["idusuarios_tipos"] == 9)) {?>
         <li class="bg_lb span2"> <a href="funcionarios.php"> <i class="icon-group"></i> Funcionarios </a> </li>
   		<?php } ?>
   		

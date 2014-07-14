@@ -38,7 +38,7 @@ document.onkeydown = function(event) {
 	var key_code = event.keyCode;
 
 	if(key_press == "k") {
-		window.location.replace("http://davincimp.no-ip.info:8080/ponto.php");
+		window.location.replace("ponto.php");
 	}
 }
 </script>

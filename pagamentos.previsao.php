@@ -140,14 +140,16 @@ function previsionTable($mes, $ano){
   <div id="content-header">
     <div id="breadcrumb"> 
 		<a href="index.php" title="Home" class="tip-bottom"><i class="icon-home"></i> Home</a> 
-		<a href="salarios.php" title="Área Contable" class="tip-bottom">Área Contable</a>
+		<a href="salarios.php" title="Área Contable" class="tip-bottom">Área Contábil</a>
 		<a href="pagamentos.php" title="Pagamentos" class="tip-bottom">Pagamentos</a>
 		<a href="#" class="current">Previsão</a>
 	</div>
   </div>
 <!--End-breadcrumbs-->
   <div class="container-fluid">
-	<div class="row-fluid">
+	<div class="row-fluid span2">
+		<div id="no-print">	
+
 		<form method="post" action="pagamentos.previsao.php">
 			<div class="control-group span1">
 				Mes
@@ -167,7 +169,7 @@ function previsionTable($mes, $ano){
 				<button class="btn btn-success" type="submit">Ver</button>
 			</div>
 		</form>
-		
+		</div>
 		<?php echo ($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 4) ? '<h2><b><div id="totalSalarios">
 			Previsão: R$</div></b></h2>' : '';?>
 
@@ -178,6 +180,7 @@ function previsionTable($mes, $ano){
 	</div>
     <hr/>
   </div>
+
 </div>
 
 <!--end-main-container-part-->

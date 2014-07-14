@@ -30,7 +30,7 @@ if (isset($jobcategory_id)){
   <div id="content-header">
     <div id="breadcrumb"> 
 		<a href="index.php" title="Home" class="tip-bottom"><i class="icon-home"></i> Home</a> 
-		<a href="salarios.php" title="Área Contable" class="tip-bottom">Área Contable</a>
+		<a href="salarios.php" title="Área Contable" class="tip-bottom">Área Contábil</a>
 		<a href="funcionarios.php" title="Pagamentos" class="tip-bottom">Funcionarios</a>
 		<a href="funcionarios.categorias.lista.php" title="Pagamentos" class="tip-bottom">Categorías</a>
 		<a href="#" class="current"><?php echo isset($name) ? $name : ''?></a>

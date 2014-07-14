@@ -32,8 +32,10 @@ $sqlQuery = "SELECT E.employee_id, ";
 $sqlQuery .= "CONCAT(P.firstname, ' ', P.lastname) ";
 $sqlQuery .= "FROM employee E ";
 $sqlQuery .= "LEFT JOIN profile P ON E.profile_id = P.profile_id ";
+$sqlQuery .= "WHERE E.decline IS NULL OR DATE(E.decline) >= CURDATE() ";
 $resultado = resultFromQuery($sqlQuery);
 $comboemployee = comboFromArray('employee_id', $resultado, isset($employee_id) ? $employee_id : '', '', '', false, 'span4 m-wrap');
+
 
 //PAYMENT TYPE COMBO
 $sqlQuery = "SELECT paymenttype_id, ";
@@ -125,7 +127,7 @@ $combopaymentmethod = comboFromArray('paymentmethod_id', $resultado, isset($paym
   <div id="content-header">
     <div id="breadcrumb"> 
 		<a href="index.php" title="Home" class="tip-bottom"><i class="icon-home"></i> Home</a> 
-		<a href="salarios.php" title="Área Contable" class="tip-bottom">Área Contable</a>
+		<a href="salarios.php" title="Área Contable" class="tip-bottom">Área Contábil</a>
 		<a href="salarios.php" title="Pagamentos" class="tip-bottom">Pagamentos</a>
 		<a href="#" class="current">Registrar Pagamento</a>
 	</div>

@@ -6,7 +6,7 @@
   <div id="content-header">
     <div id="breadcrumb"> 
 		<a href="index.php" title="Home" class="tip-bottom"><i class="icon-home"></i> Home</a> 
-		<a href="salarios.php" title="Área Contable" class="tip-bottom">Área Contable</a>
+		<a href="salarios.php" title="Área Contable" class="tip-bottom">Área Contábil</a>
 		<a href="#" class="current">Pagamentos</a>
 	</div>
 	<h1>Pagamentos - Menú de Opções</h1><hr>
@@ -25,6 +25,7 @@
   		<?php } ?>
   		
   		<?php if (($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 4)) {?>
+			<li class="bg_lg span2"> <a href="pagamentos.vales.php"> <i class="icon-money"></i> Vales </a> </li>
 			<li class="bg_lb span2"> <a href="pagamentos.previsao.php"> <i class="icon-eye-open"></i> Previsão </a> </li>
   		<?php } ?>
       </ul>
