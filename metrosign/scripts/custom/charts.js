@@ -174,6 +174,172 @@ var Charts = function () {
             chart1();
 
         },
+
+        initHTL: function (date) {
+
+
+            if (!jQuery.plot) {
+                return;
+            }
+
+            var data = [];
+            var totalPoints = 250;
+
+            //Basic Chart
+
+            //Interactive Chart
+
+            function chart1() {
+                
+                function getHoteleria(){
+                    $.ajaxSetup({async:false});  //execute synchronously
+
+                    $.ajax({
+                        type: "post", 
+                        url: 'getHTL.php',
+                        data: {
+                            date: date
+                        }, 
+                        dataType: 'json',
+                        success: function(data){
+                            returnData =  data;
+                        }
+                    });
+
+                    $.ajaxSetup({async:true});  //return to default setting
+                    
+                    return returnData;
+                }
+
+                function getBooking(){
+                    $.ajaxSetup({async:false});  //execute synchronously
+
+                    $.ajax({
+                        type: "post", 
+                        url: 'getBookingChart.php',
+                        data: {
+                            date: date
+                        }, 
+                        dataType: 'json',
+                        success: function(data){
+                            returnData =  data;
+                        }
+                    });
+
+                    $.ajaxSetup({async:true});  //return to default setting
+                    
+                    return returnData;
+                }
+
+
+
+                
+                var mediapension = getHoteleria();
+                var booking = getBooking();
+
+
+
+                var plot = $.plot($("#chartHTL"), [{
+                            data: mediapension,
+                            label: "Vouchers Hotelaria",
+                            lines: {
+                                lineWidth: 1,
+                            },
+                            shadowSize: 0
+
+                        }, {
+                            data: booking,
+                            label: "Reservas",
+                            lines: {
+                                lineWidth: 1,
+                            },
+                            shadowSize: 0
+                        }
+                        ], {
+                        series: {
+                            lines: {
+                                show: true,
+                                lineWidth: 2,
+                                fill: true,
+                                fillColor: {
+                                    colors: [{
+                                            opacity: 0.05
+                                        }, {
+                                            opacity: 0.01
+                                        }
+                                    ]
+                                }
+                            },
+                            points: {
+                                show: true,
+                                radius: 3,
+                                lineWidth: 1
+                            },
+                            shadowSize: 2
+                        },
+                        grid: {
+                            hoverable: true,
+                            clickable: true,
+                            tickColor: "#eee",
+                            borderColor: "#eee",
+                            borderWidth: 1
+                        },
+                        colors: ["#88F", "#d12610", "#52e136"],
+                        xaxis: {
+                            ticks: 11,
+                            tickDecimals: 0,
+                            tickColor: "#eee",
+                        },
+                        yaxis: {
+                            ticks: 11,
+                            tickDecimals: 0,
+                            tickColor: "#eee",
+                        }
+                    });
+
+
+                function showTooltip(x, y, contents) {
+                    $('<div id="tooltip">' + contents + '</div>').css({
+                            position: 'absolute',
+                            display: 'none',
+                            top: y + 5,
+                            left: x + 15,
+                            border: '1px solid #333',
+                            padding: '4px',
+                            color: '#fff',
+                            'border-radius': '3px',
+                            'background-color': '#333',
+                            opacity: 0.80
+                        }).appendTo("body").fadeIn(200);
+                }
+
+                var previousPoint = null;
+                $("#chartHTL").bind("plothover", function (event, pos, item) {
+                    $("#x").text(pos.x.toFixed(2));
+                    $("#y").text(pos.y.toFixed(2));
+
+                    if (item) {
+                        if (previousPoint != item.dataIndex) {
+                            previousPoint = item.dataIndex;
+
+                            $("#tooltip").remove();
+                            var x = item.datapoint[0],
+                                y = item.datapoint[1];
+
+                            showTooltip(item.pageX, item.pageY, item.series.label + " no día " + x + " = " + y);
+                        }
+                    } else {
+                        $("#tooltip").remove();
+                        previousPoint = null;
+                    }
+                });
+            }
+
+            //graph
+            
+            chart1();
+
+        },
 		
 		initPaisesCharts: function (date) {
 			
@@ -425,7 +591,16 @@ var Charts = function () {
 			
 			
             var data = getAgencias();
-			console.log(data);
+
+            
+
+            if(data == null){
+
+
+
+                data = [{"label":"Sem informação disponivel","data":100}];
+
+            }
            // INTERACTIVE
             $.plot($("#MediaPensionAgencias"), data, {
                     series: {
@@ -457,6 +632,46 @@ var Charts = function () {
             }
 
         },
+
+        initOccupation: function(date){
+
+            function getOccupation(posada){
+                returnData = '';
+                $.ajaxSetup({async:false});  //execute synchronously
+                $.ajax({
+                    type: "post", 
+                    url: "getOccupation.php", 
+                    data: {
+                        date: date,
+                        posada: posada
+                    },
+                    dataType: 'json',
+                    success: function(data){
+                        returnData =  data;
+
+                    }
+                });
+                
+                $.ajaxSetup({async:true});  //return to default setting
+                return returnData;
+            }
+
+            var brisas = getOccupation(1);
+            var paradise = getOccupation(2);
+            var americas = getOccupation(4);
+
+
+            $('#brisas').attr( 'data-percent', brisas);
+            $('#brisas').html('<span>' + brisas + '</span>%');
+
+            $('#paradise').attr( 'data-percent', paradise);
+            $('#paradise').html('<span>' + paradise + '</span>%');
+
+            $('#americas').attr( 'data-percent', americas);
+            $('#americas').html('<span>' + americas + '</span>%');
+
+        },
+
                         
         initCharts: function () {
 
@@ -1048,221 +1263,7 @@ var Charts = function () {
                     data: Math.floor(Math.random() * 100) + 1
                 }
             }
-/*
-            // DEFAULT
-            $.plot($("#pie_chart"), data, {
-                    series: {
-                        pie: {
-                            show: true
-                        }
-                    }
-                });
 
-            // GRAPH 1
-            $.plot($("#pie_chart_1"), data, {
-                    series: {
-                        pie: {
-                            show: true
-                        }
-                    },
-                    legend: {
-                        show: false
-                    }
-                });
-*/
-
-/*
-            // GRAPH 2
-            $.plot($("#pie_chart_2"), data, {
-                    series: {
-                        pie: {
-                            show: true,
-                            radius: 1,
-                            label: {
-                                show: true,
-                                radius: 1,
-                                formatter: function (label, series) {
-                                    return '<div style="font-size:8pt;text-align:center;padding:2px;color:white;">' + label + '<br/>' + Math.round(series.percent) + '%</div>';
-                                },
-                                background: {
-                                    opacity: 0.8
-                                }
-                            }
-                        }
-                    },
-                    legend: {
-                        show: false
-                    }
-                });
-*/
-/*
-            // GRAPH 3
-            $.plot($("#pie_chart_3"), data, {
-                    series: {
-                        pie: {
-                            show: true,
-                            radius: 1,
-                            label: {
-                                show: true,
-                                radius: 3 / 4,
-                                formatter: function (label, series) {
-                                    return '<div style="font-size:8pt;text-align:center;padding:2px;color:white;">' + label + '<br/>' + Math.round(series.percent) + '%</div>';
-                                },
-                                background: {
-                                    opacity: 0.5
-                                }
-                            }
-                        }
-                    },
-                    legend: {
-                        show: false
-                    }
-                });
-*/
-/*
-            // GRAPH 4
-            $.plot($("#pie_chart_4"), data, {
-                    series: {
-                        pie: {
-                            show: true,
-                            radius: 1,
-                            label: {
-                                show: true,
-                                radius: 3 / 4,
-                                formatter: function (label, series) {
-                                    return '<div style="font-size:8pt;text-align:center;padding:2px;color:white;">' + label + '<br/>' + Math.round(series.percent) + '%</div>';
-                                },
-                                background: {
-                                    opacity: 0.5,
-                                    color: '#000'
-                                }
-                            }
-                        }
-                    },
-                    legend: {
-                        show: false
-                    }
-                });
-
-            // GRAPH 5
-            $.plot($("#pie_chart_5"), data, {
-                    series: {
-                        pie: {
-                            show: true,
-                            radius: 3 / 4,
-                            label: {
-                                show: true,
-                                radius: 3 / 4,
-                                formatter: function (label, series) {
-                                    return '<div style="font-size:8pt;text-align:center;padding:2px;color:white;">' + label + '<br/>' + Math.round(series.percent) + '%</div>';
-                                },
-                                background: {
-                                    opacity: 0.5,
-                                    color: '#000'
-                                }
-                            }
-                        }
-                    },
-                    legend: {
-                        show: false
-                    }
-                });
-
-            // GRAPH 6
-            $.plot($("#pie_chart_6"), data, {
-                    series: {
-                        pie: {
-                            show: true,
-                            radius: 1,
-                            label: {
-                                show: true,
-                                radius: 2 / 3,
-                                formatter: function (label, series) {
-                                    return '<div style="font-size:8pt;text-align:center;padding:2px;color:white;">' + label + '<br/>' + Math.round(series.percent) + '%</div>';
-                                },
-                                threshold: 0.1
-                            }
-                        }
-                    },
-                    legend: {
-                        show: false
-                    }
-                });
-
-            // GRAPH 7
-            $.plot($("#pie_chart_7"), data, {
-                    series: {
-                        pie: {
-                            show: true,
-                            combine: {
-                                color: '#999',
-                                threshold: 0.1
-                            }
-                        }
-                    },
-                    legend: {
-                        show: false
-                    }
-                });
-
-            // GRAPH 8
-            $.plot($("#pie_chart_8"), data, {
-                    series: {
-                        pie: {
-                            show: true,
-                            radius: 300,
-                            label: {
-                                show: true,
-                                formatter: function (label, series) {
-                                    return '<div style="font-size:8pt;text-align:center;padding:2px;color:white;">' + label + '<br/>' + Math.round(series.percent) + '%</div>';
-                                },
-                                threshold: 0.1
-                            }
-                        }
-                    },
-                    legend: {
-                        show: false
-                    }
-                });
-
-            // GRAPH 9
-            $.plot($("#pie_chart_9"), data, {
-                    series: {
-                        pie: {
-                            show: true,
-                            radius: 1,
-                            tilt: 0.5,
-                            label: {
-                                show: true,
-                                radius: 1,
-                                formatter: function (label, series) {
-                                    return '<div style="font-size:8pt;text-align:center;padding:2px;color:white;">' + label + '<br/>' + Math.round(series.percent) + '%</div>';
-                                },
-                                background: {
-                                    opacity: 0.8
-                                }
-                            },
-                            combine: {
-                                color: '#999',
-                                threshold: 0.1
-                            }
-                        }
-                    },
-                    legend: {
-                        show: false
-                    }
-                });
-
-            // DONUT
-            $.plot($("#donut"), data, {
-                    series: {
-                        pie: {
-                            innerRadius: 0.5,
-                            show: true
-                        }
-                    }
-                });
-*/
             // INTERACTIVE
             $.plot($("#interactive"), data, {
                     series: {

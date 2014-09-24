@@ -76,6 +76,7 @@ if ($row = mysqli_fetch_array($result)){
 
 		if (!$result = mysqli_query($database, $sql)){
 			die('Error al verificar mensajes en la base de datos:<br> ' . mysqli_error($database));
+			mysqli_close($database);
 		}
 		
 		$i = 1;
@@ -96,6 +97,7 @@ if ($row = mysqli_fetch_array($result)){
 		$sql .= "AND employee_id = ".$employee_id;
 		
 		if (!$result = mysqli_query($database, $sql)){
+			mysqli_close($database);
 			die('Error al verificar solicitud de vales en la base de datos:<br> ' . mysqli_error($database));
 		}
 		
@@ -115,7 +117,7 @@ if ($row = mysqli_fetch_array($result)){
 	
 
 }
-$database->close();
+mysqli_close($database);
 ?>
 
 

@@ -28,8 +28,7 @@
 				$sqlQuery .= "FROM   mediapension MP ";
 				$sqlQuery .= "LEFT JOIN servicios SS on MP.idservicios = SS.idservicios ";
 				$sqlQuery .= "WHERE 1 ";
-				$sqlQuery .= "AND MP.dataIN<=CURDATE() ";
-				$sqlQuery .= "AND MP.dataOUT>=CURDATE() ";
+				$sqlQuery .= "AND CURDATE() BETWEEN MP.dataIN AND MP.dataOUT - interval 1 day ";
 				$sqlQuery .= "AND MP.habilitado = 1;";
 				$sqlResult = resultFromQuery($sqlQuery);
 

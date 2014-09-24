@@ -8,20 +8,32 @@ if(isset($_GET['state'])){
 	$result = resultFromQuery($sql);
 }
 
-$sql = "SELECT requestpayment_id id, CONCAT(P.firstname, ' ', P.lastname) Funcionario, amountrequest Solicitado, status Estado, amountaproved Aprovado, last_update Atualizado ";
-$sql .= 'FROM requestpayment RP ';
 
-$sql .= 'LEFT JOIN employee E ON RP.employee_id = E.employee_id ';
-
-$sql .= 'LEFT JOIN profile P ON E.profile_id = P.profile_id ';
-
-$sql .= 'WHERE status < 2';
+$tableEsperandoRevisao = tableRequestPayment(0);
+$tableAprovados = tableRequestPayment(1);
+$tablePagados = tableRequestPayment(2);
+$tableCancelados = tableRequestPayment(3);
 
 
-$result = resultFromQuery($sql);
 
 
-function tableRequestPayment($result, $sql){
+
+function tableRequestPayment($status){
+	//Esperando Revisão
+	$sql = "SELECT requestpayment_id id, CONCAT(P.firstname, ' ', P.lastname) Funcionario, amountrequest Solicitado, status Estado, amountaproved Aprovado, last_update Atualizado ";
+	$sql .= 'FROM requestpayment RP ';
+	$sql .= 'LEFT JOIN employee E ON RP.employee_id = E.employee_id ';
+	$sql .= 'LEFT JOIN profile P ON E.profile_id = P.profile_id ';
+	$sql .= 'WHERE status = '.$status . ' ';
+	
+	if($status >= 2){
+		$sql .= 'ORDER BY last_update DESC';
+	}
+	
+	$result = resultFromQuery($sql);
+	
+	
+	
 	$table = '';
 	if($row = siguienteResult($result)){
 		$result = resultFromQuery($sql);
@@ -31,9 +43,15 @@ function tableRequestPayment($result, $sql){
 		$table .= '<th>Atualizado</th>';
 		$table .= '<th>Funcionario</th>';
 		$table .= '<th>Solicitado</th>';
-		$table .= '<th>Estado</th>';
-		$table .= '<th>Aprovado</th>';
-		$table .= '<th>Ações</th>';
+		
+		if($status == 1 || $status == 2){
+			$table .= '<th>Aprovado</th>';
+		}
+		
+		if($status < 2){
+			$table .= '<th>Ações</th>';
+		}
+		
 		$table .= '</tr>';
 		$table .= '</thead>';
 		$table .= '<tbody>';
@@ -44,16 +62,12 @@ function tableRequestPayment($result, $sql){
 			$table .= '<td style="text-align:center">'.date('d/m', strtotime($row->Atualizado)).'</td>';
 			$table .= '<td style="text-align:center">'.$row->Funcionario.'</td>';
 			$table .= '<td style="text-align:center">R$ '.$row->Solicitado.'</td>';
-			$table .= '<td class="taskStatus">';
-			if($row->Estado == 0){
-				$table .= '<span class="pending">Esperando revisão</span>';
-			}
-			elseif($row->Estado == 1){
-				$table .= '<span class="done">Aprovado</span>';
-			}
 			
-			$table .= '</td>';
-			$table .= '<td style="text-align:center">'.(isset($row->Aprovado) ? 'R$ '.$row->Aprovado : '' ).'</td>';
+			if($status == 1 || $status == 2){
+				$table .= '<td style="text-align:center">'.(isset($row->Aprovado) ? 'R$ '.$row->Aprovado : '' ).'</td>';
+			}
+
+			
 			
 			
 			
@@ -76,7 +90,7 @@ function tableRequestPayment($result, $sql){
 	return $table;
 
 }
-$tableRequestPayment = tableRequestPayment($result, $sql);
+
 
 	
 ?>	
@@ -102,13 +116,38 @@ $tableRequestPayment = tableRequestPayment($result, $sql);
 		  
 
         <div class="widget-box">
-          <div class="widget-title"> <span class="icon"> <i class="icon-th"></i> </span>
-            <h5>Vales</h5>
-          </div>
           <div class="widget-content nopadding">
 			  
+			  <div class="widget-title">
+            <ul class="nav nav-tabs">
+              <li class="active"><a data-toggle="tab" href="#tab1">Esperando Revisão</a></li>
+              <li><a data-toggle="tab" href="#tab2">Aprovados</a></li>
+              <li><a data-toggle="tab" href="#tab3">Pagados</a></li>
+              <li><a data-toggle="tab" href="#tab4">Cancelados</a></li>
+            </ul>
+          </div>
+          <div class="widget-content tab-content">
+            <div id="tab1" class="tab-pane active">
+				<?php echo $tableEsperandoRevisao?>
+            </div>
+            <div id="tab2" class="tab-pane">
+				<?php echo $tableAprovados?>
+            </div>
+            <div id="tab3" class="tab-pane">
+				<?php echo $tablePagados?>
+            </div>
+            <div id="tab4" class="tab-pane">
+				<?php echo $tableCancelados?>
+            </div>
+        </div>
 			  
-			  <?php echo $tableRequestPayment?>
+			  
+			  
+			  
+			  
+			  
+			  
+			  
 
 				  <div id="Aprovar" class="modal hide">
 					  <div class="modal-header">

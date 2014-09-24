@@ -326,7 +326,7 @@ function insertoBloqueDeMediapension($idresponsablesDePago, $id, $dataIN, $dataO
 		while ($rowLine = siguienteResult($resultadoDISTINCT)) {
 			$sql = " INSERT INTO _temp_liquidaciones_mp (idmediapension, Titular, Q, Agencia, Posada, DataIN, DataOUT, numeroexterno, N, M, Servicio, USD, Tarifa) VALUES (";
 			$sql .= " ".$row->idmediapension.",";
-			$sql .= " '".$row->Titular."',";
+			$sql .= " '".mysql_escape_string($row->Titular)."',";
 			$sql .= " ".$row->Q.",";
 			$sql .= " '".$row->Agencia."',";
 			$sql .= " '".$row->Posada."',";
@@ -1905,15 +1905,16 @@ function employeePaymentDetailsTable($employee_id, $month, $year, $salario){
 	
 	
 	if (isset($salario['-'])){
-	
+		$total = 0;
 		foreach ($salario['-'] as $i => $value) {
 			if (gettype($salario['-'][$i]) == 'array'){
 				foreach ($salario['-'][$i] as $j => $subvalue) {
 					if (gettype($salario['-'][$i]) == 'array'){
+						
 						foreach ($salario['-'][$i][$j] as $k => $subsubvalue) {
-
 							
 							if (strpos($i,'Faltas') === false) {
+								$total += $subsubvalue;
 								$element .= '<tr>';
 								$element .= '<td class="taskDesc"><i class="icon-minus-sign"></i>';
 								if ($k != ''){
@@ -1925,12 +1926,14 @@ function employeePaymentDetailsTable($employee_id, $month, $year, $salario){
 								$element .= '<td></td>';
 								$element .= '<td class="taskStatus">'.$subsubvalue.'</td>';
 								$element .= '</tr>';
+								
 							}
 						}
 					}
 				}
 			}
 		}
+		echo $total;
 	}
 	
 	$element .= '<tr>';
@@ -1938,6 +1941,8 @@ function employeePaymentDetailsTable($employee_id, $month, $year, $salario){
 	$element .= '<td></td>';
 	$element .= '<td></td>';
 	$element .= '</tr>';
+	
+	$element .= '<tr><td class="taskDesc"><b>TOTAL</b></td><td></td><td class="taskStatus"> <b> ' . $total . '</b></td></tr>';
 	
 	$element .= '</tbody>';
     $element .= '</table>';

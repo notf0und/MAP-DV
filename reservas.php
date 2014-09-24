@@ -16,9 +16,35 @@
 	<!--Action boxes-->
     <div class="quick-actions_homepage">
       <ul class="quick-actions">
-        <li class="bg_lg span2"> <a href="reservas.nova.php"> <i class="icon-plus"></i> Nova... </a> </li>
-        <li class="bg_lg span2"> <a href="reservas.mapa.php"> <i class="icon-list-ul"></i> Exibir o mapa</a> </li>
-        <li class="bg_lg span2"> <a href="index.php"> <i class="icon-share-alt"></i> Sair </a> </li>
+		  
+	  
+		  <?php 
+			if (isset($_SESSION["idusuarios_tipos"]) && ($_SESSION["idusuarios_tipos"] == 1 || $_SESSION["idusuarios_tipos"] == 10)) {?>
+				<li class="bg_lg span2"> <a href="reservas.mapa.php"> <i class="icon-list-ul"></i> Exibir o mapa</a> </li>
+		  <?php }
+			elseif(isset($_SESSION["idusuarios_tipos"]) && ($_SESSION["idusuarios_tipos"] == 11)){
+				$sql = 'SELECT P.idposadas ';
+				$sql .= 'FROM usuarios U ';
+				
+				$sql .= 'LEFT JOIN employee E ';
+				$sql .= 'ON U.employee_id = E.employee_id ';
+				
+				$sql .= 'LEFT JOIN empresa B ';
+				$sql .= 'ON E.idempresa = B.idempresa ';
+				
+				$sql .= 'LEFT JOIN posadas P ';
+				$sql .= 'ON P.nombre LIKE B.nombre ';
+				
+				$sql .= 'WHERE idusuarios = ' . $_SESSION["idusuarios"];
+				$result = resultFromQuery($sql);
+				$row = siguienteResult($result);
+				$idposadas = $row->idposadas;
+			?>
+				<li class="bg_lg span2"> <a href="reservas.mapa.php?pousada=<?=$idposadas?>"> <i class="icon-list-ul"></i> Exibir o mapa</a> </li>
+
+		  <?php } ?>
+		  
+
       </ul>
     </div>
 	<!--End-Action boxes-->    

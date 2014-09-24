@@ -26,10 +26,7 @@
 				$sqlQuery .= "S.Nombre 'Servicio', ";
 				$sqlQuery .= "MP.qtdedepax 'Pax', ";
 				
-				// Solo para camila mostrar el nombre de la posada, para los demas es irrelevante
-				if ($_SESSION["idusuarios_tipos"] == 2) {
-					$sqlQuery .= "P.nombre 'Pousada', ";
-				}
+				$sqlQuery .= "P.nombre 'Pousada', ";
 				
 				
 				$sqlQuery .= "qtdedecomidas 'Dias', ";

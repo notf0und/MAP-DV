@@ -22,7 +22,7 @@ $sql .= "WHERE 1 ";
 $sql .= "AND MP.habilitado = 1 ";
 $sql .= "AND selected_date BETWEEN '".$dateStart."' AND '".$dateEnd."' ";
 $sql .= "GROUP BY selected_date; ";
-
+echo $sql;
 $result = resultFromQuery($sql); 
 
 $dump = '[';

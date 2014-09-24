@@ -100,7 +100,7 @@ if (isset($_SESSION['idmediapension'])){
 							<label class="control-label">Serviço</label>
 							<div class="controls">
 								<?php
-									$sqlQuery = " SELECT idservicios, nombre FROM servicios ";
+									$sqlQuery = " SELECT idservicios, nombre FROM servicios WHERE idservicios < 6 ";
 									$resultado = resultFromQuery($sqlQuery);
 									echo comboFromArray('idservicios', $resultado, isset($idservicios) ? $idservicios : '', '', '', 'true');
 								?>								

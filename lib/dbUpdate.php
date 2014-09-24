@@ -19,14 +19,17 @@
   };
   
   function mysql_dbConnect($host, $database, $user, $pass) {
-//    $dbConn = ocilogon($user, $pass, $host);
-    $dbConn = mysql_connect($host, $user, $pass);
-		mysql_select_db($database, $dbConn);
-    
-    if (!$dbConn) {
-      die('Could not connect to database: ' . mysql_error());
-    }
-    return $dbConn;
+	  
+	  $dbConn = new mysqli($host, $user, $pass, $database);
+	  
+	  // check connection
+	  if ($dbConn->connect_error) {
+		  trigger_error('Database connection failed: '  . $dbConn->connect_error, E_USER_ERROR);
+	  }
+	  
+
+	  
+	  return $dbConn;
   };
   
   function oci_dbConnect($host, $database, $user, $pass) {
@@ -47,10 +50,10 @@
     
     $dbConn = dbConnect();
     
-    mysql_query("SET NAMES 'utf8'");
-	mysql_query('SET character_set_connection=utf8');
-	mysql_query('SET character_set_client=utf8');
-	mysql_query('SET character_set_results=utf8');
+    mysqli_query("SET NAMES 'utf8'");
+	mysqli_query('SET character_set_connection=utf8');
+	mysqli_query('SET character_set_client=utf8');
+	mysqli_query('SET character_set_results=utf8');
     
     return mysql_resultFromQuery($sqlQuery, $dbConn);
   };
@@ -68,12 +71,19 @@
   };
   
   function mysql_resultFromQuery($sqlQuery, &$dbConn) {
-    $result = mysql_query($sqlQuery, $dbConn);
-    if (!$result) {
-      die('Error ejecutando el query: ' . $sqlQuery . '<BR>' . mysql_error());
-    }
+    
+    if($rs = $dbConn->query($sqlQuery)) 
+    {
+		trigger_error('Wrong SQL: ' . $sqlQuery . ' Error: ' . $dbConn->error, E_USER_ERROR);
+	} 
+	else 
+	{
+		$rs->data_seek(0);
+		return $rs;
+	}
 
-    return $result;
+
+    
   };
   
   function siguienteResult($result) {
@@ -81,7 +91,7 @@
   }
   
   function mysql_siguienteResult($result) {
-    return mysql_fetch_object($result);
+    return $result->fetch_assoc();
   }
   
   function oci_siguienteResult($result) {

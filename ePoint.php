@@ -37,7 +37,12 @@ else{
 	$sql = "SELECT * FROM point WHERE updated = 0";
 
 	if (!$result = mysqli_query($dblocal, $sql)){
-		die('Error al verificar si existen actualizaciones en la base de datos:<br> ' . mysqli_error($dblocal));
+		$error = mysqli_error($dblocal);
+		mysqli_close($dblocal);
+		//Redirect to online point
+		die('Error al verificar si existen actualizaciones en la base de datos:<br> ' . $error);
+		exit();
+		
 	}
 	
 	if ($row = mysqli_fetch_array($result)){
@@ -49,7 +54,11 @@ else{
 		$sql = "SELECT * FROM point WHERE updated = 0";					
 
 		if (!$result = mysqli_query($dblocal, $sql)){
-			die('Error al verificar si existen actualizaciones en la base de datos:<br> ' . mysqli_error($dblocal));
+			$error = mysqli_error($dblocal);
+			mysqli_close($dblocal);
+			mysqli_close($dbremote);
+			//Redirect to online point
+			die('Error al verificar si existen actualizaciones en la base de datos:<br> ' . $error);
 		}
 
 		//Prepara la cadena de inserción
@@ -71,10 +80,11 @@ else{
 					
 		//Insert de puntos sin actualizar
 		if (!mysqli_query($dbremote, $sql)){
-			die('Error al insertar los puntos sin actualizar en la base de datos remota:<br> '.$sql.'<br>'. mysqli_error($dbremote));
+			$error = mysqli_error($dbremote);
+			mysqli_close($dblocal);
+			mysqli_close($dbremote);
+			die('Error al insertar los puntos sin actualizar en la base de datos remota:<br> '.$sql.'<br>'. $error);
 		}
-		
-		mysqli_close($dbremote);
 				
 		//Establece los puntos de la base de datos local como actualizados
 		$sql = "UPDATE point SET updated = 1";
@@ -83,7 +93,7 @@ else{
 	}
 	
 	mysqli_close($dblocal);
-
+	mysqli_close($dbremote);
 	//Redirect to online point
 	header('Location: '.$url);
 	exit();

@@ -22,6 +22,7 @@
 -->
 			<?php if (($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 3) || ($_SESSION["idusuarios_tipos"] == 4) || ($_SESSION["idusuarios_tipos"] == 6)) {?>
         <li class="bg_lb span2"> <a href="hoteleria.vouchers.php"> <i class="icon-list-ul"></i> Vouchers</a> </li>
+        <li class="bg_lg span2"> <a href="hoteleria.reservas.php"> <i class="icon-list-ul"></i> Reservas</a> </li>
 			<?php } ?>
   		<?php } ?>
       </ul>

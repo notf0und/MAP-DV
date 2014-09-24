@@ -62,11 +62,9 @@ class Gantti {
 				  );
 				  break;
 			  }
-		  }
-		
-
-      if(!$this->first || $this->first > $start) $this->first = $start;
-      if(!$this->last  || $this->last  < $end)   $this->last  = $end;
+			  if(!$this->first || $this->first > $start) $this->first = $start;
+			  if(!$this->last  || $this->last  < $end)   $this->last  = $end;
+		  } 
           
     }
     
@@ -97,7 +95,7 @@ class Gantti {
     $wrapstyle  = 'style="width: ' . $this->options['cellwidth'] . 'px"';
     $totalstyle = 'style="width: ' . (count($this->days)*$this->options['cellwidth']) . 'px"';
     // start the diagram    
-    $html[] = '<figure class="gantt">';    
+    $html[] = '<figure class="gantt" id="gantt">';    
 
     // set a title if available
     if($this->options['title']) {
@@ -125,7 +123,7 @@ class Gantti {
     $html[] = '</aside>';
 
     // data section
-    $html[] = '<section class="gantt-data">';
+    $html[] = '<section class="gantt-data" id="gantt-data">';
         
     // data header section
     $html[] = '<header>';
@@ -133,7 +131,7 @@ class Gantti {
     // months headers
     $html[] = '<ul class="gantt-months" ' . $totalstyle . '>';
     foreach($this->months as $month) {
-      $html[] = '<li class="gantt-month" style="width: ' . ($this->options['cellwidth'] * $month->countDays()) . 'px"><strong ' . $cellstyle . '>' . utf8_encode($month->name()) . '</strong></li>';
+      $html[] = '<li class="gantt-month" style="width: ' . ($this->options['cellwidth'] * $month->countDays()) . 'px"><strong ' . $cellstyle . '>' . ucfirst(utf8_encode($month->name())) . '</strong></li>';
     }                      
     $html[] = '</ul>';    
 

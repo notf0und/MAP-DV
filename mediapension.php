@@ -22,8 +22,12 @@
         <li class="bg_ly span2"> <a href="mediapension.lista.php"> <i class="icon-list-alt"></i> Veja a lista</a> </li>
         <?php } ?>
         
-        <?php if (($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 3) || ($_SESSION["idusuarios_tipos"] == 4) || ($_SESSION["idusuarios_tipos"] == 6)) {?>
+        <?php if (($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 3) || ($_SESSION["idusuarios_tipos"] == 6)) {?>
         <li class="bg_lb span2"> <a href="mediapension.vouchers.php"> <i class="icon-tags"></i> Vouchers</a> </li>
+        <?php } ?>
+        
+        <?php if (($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 3) || ($_SESSION["idusuarios_tipos"] == 6) || ($_SESSION["idusuarios_tipos"] == 8)) {?>
+        <li class="bg_ls span2"> <a href="mediapension.tickets.php"> <i class="icon-columns"></i> Tickets</a> </li>
 		<?php } ?>
         
         <?php if (($_SESSION["idusuarios_tipos"] == 1) || ($_SESSION["idusuarios_tipos"] == 3) || ($_SESSION["idusuarios_tipos"] == 4)) {?>

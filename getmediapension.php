@@ -2,7 +2,7 @@
 
 include_once 'lib/sessionLib.php';
 
-$date = strtotime($_POST['date']);
+$date = strtotime($_REQUEST['date']);
 $dateStart = date('Y-m-01', $date);
 $dateEnd = date('Y-m-t', $date);
 
@@ -16,12 +16,13 @@ $sql .= "(select 0 t3 union select 1 union select 2 union select 3 union select 
 $sql .= "(select 0 t4 union select 1 union select 2 union select 3 union select 4 union select 5 union select 6 union select 7 union select 8 union select 9) t4) v ";
 
 $sql .= "LEFT JOIN mediapension MP ";
-$sql .= "ON selected_date BETWEEN MP.dataIN AND MP.dataOUT ";
+$sql .= "ON selected_date BETWEEN MP.dataIN AND MP.dataOUT - interval 1 day ";
 $sql .= "LEFT JOIN servicios SS  ON MP.idservicios = SS.idservicios ";
 $sql .= "WHERE 1 ";
 $sql .= "AND MP.habilitado = 1 ";
 $sql .= "AND selected_date BETWEEN '".$dateStart."' AND '".$dateEnd."' ";
 $sql .= "GROUP BY selected_date; ";
+
 
 $result = resultFromQuery($sql); 
 

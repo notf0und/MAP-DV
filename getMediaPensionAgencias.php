@@ -2,7 +2,7 @@
 
 include_once 'lib/sessionLib.php';
 
-$date = strtotime($_POST['date']);
+$date = strtotime($_REQUEST['date']);
 $dateStart = date('Y-m-01', $date);
 $dateEnd = date('Y-m-t', $date);
 
@@ -25,7 +25,7 @@ $sql .= "LEFT JOIN agencias A ON MP.idagencias = A.idagencias ";
 
 $sql .= "WHERE 1 ";
 $sql .= "AND MP.habilitado = 1 ";
-$sql .= "AND MP.idResponsablesDePago = 3 ";
+$sql .= "AND MP.idResponsablesDePago = 1 ";
 $sql .= "AND selected_date BETWEEN '".$dateStart."' AND '".$dateEnd."' ";
 $sql .= "GROUP BY A.idagencias; ";
 

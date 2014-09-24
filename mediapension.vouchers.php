@@ -6,7 +6,7 @@ $lock = '<form action="#" name="fLock" method="post" class="form-horizontal">';
 
 $sqlQuery = "SELECT MP.idmediapension id, H.titular 'Nome PAX', MP.numeroexterno '# Voucher', ";
 
-if ($_SESSION["idusuarios"] == 143){
+if ($_SESSION["idusuarios"] == 13){
 	$sqlQuery .= "MP.data 'Ingresado', ";
 }
 
